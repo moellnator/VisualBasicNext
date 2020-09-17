@@ -4,7 +4,7 @@
         Public Shared Function FromCST(node As CST.Node) As Node
             Dim retval As Node = Nothing
             Select Case node.NodeType
-                Case CST.NodeTypes.Expression
+                Case CST.NodeTypes.Expression, CST.NodeTypes.Atom
                     retval = FromCST(node.Children.First)
                 Case CST.NodeTypes.Literal
                     retval = New Literal(node)
@@ -14,6 +14,12 @@
                     retval = New Identifier(node)
                 Case CST.NodeTypes.Array
                     retval = New ExprArray(node)
+                Case CST.NodeTypes.TypeName
+                    retval = New TypeName(node)
+                Case CST.NodeTypes.AtomAccess
+                    retval = New AtomAccess(node)
+                Case CST.NodeTypes.Member
+                    retval = New Member(node)
                 Case Else
                     Throw New ParserException($"Unknown cst node '{node.NodeType}' at {node.Origin}", node.Origin)
             End Select

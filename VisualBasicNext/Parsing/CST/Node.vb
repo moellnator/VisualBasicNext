@@ -13,6 +13,9 @@ Namespace Parsing.CST
         Block
         Identifier
         [Array]
+        Atom
+        AtomAccess
+        Member
         Script
     End Enum
 

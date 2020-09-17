@@ -10,7 +10,7 @@ Namespace Parsing.Scripting
         End Sub
 
         Protected Overrides Function _MakeParser() As Parser
-            Return _GetInstance(Of Literal)() Or _GetInstance(Of Identifier)() Or _GetInstance(Of Block)() Or _GetInstance(Of Array)()
+            Return _GetInstance(Of Member)()
         End Function
 
         'expression = bin | new | lambda | ternary | addressof | gettype
@@ -33,12 +33,64 @@ Namespace Parsing.Scripting
         '                                        unary = [+-]* power
         '                                            power = access ('^' access)*
 
+        Public Class Member : Inherits Wrapper
 
-        '                                                member = expraccess ('.' identifier (access)?)*
-        '                                                    expraccess = atom (access)?
-        '                                                        access = ('(' 'of' typename (',' typename)*')')? ('(' (expression (',' expression)*)? ')' )*
-        '                                                        atom = literal | variable | typename | block | array
-        '                                                            array = '{' (expression  (',' expression)*)? '}'
+            Private Sub New()
+                MyBase.New(CST.NodeTypes.Member)
+            End Sub
+
+            Protected Overrides Function _MakeParser() As Parser
+                Return _GetInstance(Of AtomAccess)() And
+                       Many(
+                          Match(Tokenizing.TokenTypes.Operator, "\.") And
+                          Require(Match(Tokenizing.TokenTypes.Identifier)) And
+                          OneOrNone(
+                            Match(Tokenizing.TokenTypes.BlockOpen, "\(") And
+                            Match(Tokenizing.TokenTypes.Keyword, "[Oo]f") And
+                            Require(_GetInstance(Of TypeName)) And
+                            Many(Match(Tokenizing.TokenTypes.Separator) And Require(_GetInstance(Of TypeName))) And
+                            Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
+                          ) And
+                          Many(AtomAccess.Access)
+                       )
+            End Function
+
+        End Class
+
+        Public Class AtomAccess : Inherits Wrapper
+
+            Public Shared ReadOnly Property Access As Parser =
+                Match(Tokenizing.TokenTypes.BlockOpen, "\(") And
+                OneOrNone(
+                    _GetInstance(Of Expression)() And
+                    Many(
+                        Match(Tokenizing.TokenTypes.Separator) And
+                        Require(_GetInstance(Of Expression)())
+                    )
+                ) And
+                Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
+
+            Private Sub New()
+                MyBase.New(CST.NodeTypes.AtomAccess)
+            End Sub
+
+            Protected Overrides Function _MakeParser() As Parser
+                Return _GetInstance(Of Atom)() And Many(Access)
+            End Function
+
+        End Class
+
+        Public Class Atom : Inherits Wrapper
+
+            Private Sub New()
+                MyBase.New(CST.NodeTypes.Atom)
+            End Sub
+
+            Protected Overrides Function _MakeParser() As Parser
+                Return _GetInstance(Of Literal)() Or _GetInstance(Of Identifier)() Or _GetInstance(Of Block)() Or _GetInstance(Of Array)()
+            End Function
+
+        End Class
 
         Public Class Literal : Inherits Wrapper
 
@@ -77,17 +129,21 @@ Namespace Parsing.Scripting
             End Sub
 
             Protected Overrides Function _MakeParser() As Parser
-                Return Match(Tokenizing.TokenTypes.Identifier) And
-                       Many(
-                            Match(Tokenizing.TokenTypes.Operator, "\.") And
-                            Require(Match(Tokenizing.TokenTypes.Identifier))
-                       )
+                Dim atom As Parser =
+                    Match(Tokenizing.TokenTypes.Identifier) And
+                    OneOrNone(
+                        Match(Tokenizing.TokenTypes.BlockOpen, "\(") And
+                        Match(Tokenizing.TokenTypes.Keyword, "[Oo]f") And
+                        Require(_GetInstance(Of TypeName)) And
+                        Many(Match(Tokenizing.TokenTypes.Separator) And Require(_GetInstance(Of TypeName))) And
+                        Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
+                    )
+                Return atom And Many(Match(Tokenizing.TokenTypes.Operator, "\.") And Require(atom))
             End Function
 
         End Class
 
         Public Class [Array] : Inherits Wrapper
-
 
             Private Sub New()
                 MyBase.New(CST.NodeTypes.Array)

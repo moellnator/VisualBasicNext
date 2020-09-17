@@ -15,9 +15,31 @@ Imports VisualBasicNext.Parsing.Tokenizing
 
     <TestMethod> Public Sub TestQualifier()
         Dim vm As New Virtual.Machine
-        vm.CurrentState.DeclareLocal("test", 15)
-        Dim retval As Object = vm.Evaluate("test")
-        Stop
+        vm.CurrentState.Import("System")
+        vm.CurrentState.Import("VisualBasicNext.Test")
+        Dim retval As Object = vm.Evaluate("SubClass(Of System.Int32).NestedSubClass.Member.Generic(Of System.Int32())({0,1,2})(1).ToString().ToString()")
+        Debug.Print(retval.ToString)
     End Sub
+
+End Class
+
+
+Public Class SubClass(Of T)
+
+    Public Class NestedSubClass
+
+        Public Shared Member As NestedSubClass = Test()
+
+        Public Property Self As NestedSubClass = Me
+
+        Public Function Generic(Of U)(argument As U) As U
+            Return argument
+        End Function
+
+        Public Shared Function Test() As NestedSubClass
+            Return New NestedSubClass
+        End Function
+
+    End Class
 
 End Class

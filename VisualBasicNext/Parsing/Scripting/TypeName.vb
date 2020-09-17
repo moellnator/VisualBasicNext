@@ -15,6 +15,7 @@ Namespace Parsing.Scripting
                         Match(Tokenizing.TokenTypes.BlockOpen, "\(") And
                         Match(Tokenizing.TokenTypes.Keyword, "[Oo]f") And
                         Require(Me) And
+                        Many(Match(Tokenizing.TokenTypes.Separator) And Require(Me)) And
                         Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
                     )
             Dim retval As Parser =
@@ -23,8 +24,9 @@ Namespace Parsing.Scripting
                         Match(Tokenizing.TokenTypes.Operator, "\.") And
                         Require(atom)
                     ) And
-                    OneOrNone(
+                    Many(
                         Match(Tokenizing.TokenTypes.BlockOpen, "\(") And
+                        Many(Match(Tokenizing.TokenTypes.Separator)) And
                         Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
                     )
             Return retval
