@@ -17,8 +17,8 @@ Imports VisualBasicNext.Parsing.Tokenizing
         Dim vm As New Virtual.Machine
         vm.CurrentState.Import("System")
         vm.CurrentState.Import("VisualBasicNext.Test")
-        Dim retval As Object = vm.Evaluate("SubClass(Of System.Int32).NestedSubClass.Member.Generic(Of System.Int32())({0,1,2})(1).ToString().ToString()")
-        Debug.Print(retval.ToString)
+        Dim retval As Object = vm.Evaluate("Diagnostics.Debug.Print(""test"" & "", world!"")")
+        If Not retval Is Nothing Then Debug.Print(retval.ToString)
     End Sub
 
 End Class

@@ -31,11 +31,21 @@ Namespace Parsing.AST
         Private ReadOnly _atom As Expression
         Private ReadOnly _members As _MemberAccess() = {}
 
-        Public Sub New(cst As CST.Node)
+        Private Sub New(cst As CST.Node)
             Me._atom = FromCST(cst.First.First)
             Dim membernodes As CST.Node() = cst.First.Last.ToArray
             If membernodes.Count <> 0 Then Me._members = membernodes.Select(Function(m) New _MemberAccess(m)).ToArray
         End Sub
+
+        Public Shared Function BuildNode(cst As CST.Node) As Expression
+            Dim retval As Expression = Nothing
+            If cst.First.Last.Count = 0 Then
+                retval = FromCST(cst.First.First)
+            Else
+                retval = New Member(cst)
+            End If
+            Return retval
+        End Function
 
         Public Overrides Function Evaluate(target As State) As Object
             Dim retval As Object = Me._atom.Evaluate(target)

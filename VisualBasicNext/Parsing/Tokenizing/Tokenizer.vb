@@ -187,7 +187,7 @@
                         "throw", "try", "catch", "when", "finally", "readonly", "class", "enum", "new", "property", "get", "set",
                         "raiseevent", "event", "delegate", "addhandler", "removehandler", "handles",
                         "public", "private", "shared", "protected", "select", "case",
-                        "inherits", "implements", "overrides", "mustoverride", "mustinherit"
+                        "inherits", "implements", "overrides", "mustoverride", "mustinherit", "true", "false"
                     retval = TokenTypes.Keyword
                 Case Else
                     retval = TokenTypes.Identifier

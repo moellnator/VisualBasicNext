@@ -13,9 +13,12 @@ Namespace Parsing.CST
         Block
         Identifier
         [Array]
+        TypeIdentifier
+        Ternary
         Atom
         AtomAccess
         Member
+        Operators
         Script
     End Enum
 

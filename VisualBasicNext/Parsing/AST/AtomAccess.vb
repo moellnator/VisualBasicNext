@@ -7,11 +7,21 @@ Namespace Parsing.AST
         Private ReadOnly _atom As Expression
         Private ReadOnly _arguments As Expression()()
 
-        Public Sub New(cst As CST.Node)
+        Private Sub New(cst As CST.Node)
             Me._atom = FromCST(cst.First.First)
             Dim arglists As CST.Node = cst.First.Last
             Me._arguments = arglists.Select(Function(a) _GetArgList(a)).ToArray
         End Sub
+
+        Public Shared Function BuildNode(cst As CST.Node) As Expression
+            Dim retval As Expression = Nothing
+            If cst.First.Last.Count = 0 Then
+                retval = FromCST(cst.First.First)
+            Else
+                retval = New AtomAccess(cst)
+            End If
+            Return retval
+        End Function
 
         Private Shared Function _GetArgList(cst As CST.Node) As Expression()
             If cst(1).Count = 0 Then Return {}

@@ -17,9 +17,15 @@
                 Case CST.NodeTypes.TypeName
                     retval = New TypeName(node)
                 Case CST.NodeTypes.AtomAccess
-                    retval = New AtomAccess(node)
+                    retval = AtomAccess.BuildNode(node)
                 Case CST.NodeTypes.Member
-                    retval = New Member(node)
+                    retval = Member.BuildNode(node)
+                Case CST.NodeTypes.TypeIdentifier
+                    retval = New TypeIdentifier(node)
+                Case CST.NodeTypes.Ternary
+                    retval = New Ternary(node)
+                Case CST.NodeTypes.Operators
+                    retval = Operators.BuildNode(node)
                 Case Else
                     Throw New ParserException($"Unknown cst node '{node.NodeType}' at {node.Origin}", node.Origin)
             End Select
