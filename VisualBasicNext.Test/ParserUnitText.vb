@@ -16,10 +16,9 @@ Imports VisualBasicNext.Parsing.Tokenizing
     <TestMethod> Public Sub TestQualifier()
         Dim vm As New Virtual.Machine
         vm.CurrentState.Import("System")
+        vm.CurrentState.Import("VisualBasicNext")
         vm.CurrentState.Import("VisualBasicNext.Test")
-        'Dim retval As Object = vm.Evaluate("SubClass(Of System.Int32).NestedSubClass.Member.Generic(Of System.Int32())({1,2,3})(2).ToString()")
-        vm.CurrentState.DeclareLocal("a", 12)
-        Dim retval As Object = vm.Evaluate("a")
+        Dim retval As Object = vm.Evaluate("Test.SubClass(Of System.Int32).NestedSubClass.Member.Generic(Of System.Int32())({1,2,3})(2).ToString")
         If Not retval Is Nothing Then Debug.Print(retval.ToString)
     End Sub
 

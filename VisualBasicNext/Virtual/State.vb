@@ -3,7 +3,7 @@
 Namespace Virtual
     Public Class State
 
-        Private ReadOnly _variables As New Dictionary(Of String, Object)
+        Private ReadOnly _variables As New Dictionary(Of String, LocalVariable)
         Private ReadOnly _imports As New List(Of String)
         Private _types As Type()
         Private _namespaces As String()
@@ -32,20 +32,16 @@ Namespace Virtual
             ).Distinct.ToArray
         End Function
 
-        Public Sub DeclareLocal(name As String, Optional value As Object = Nothing)
+        Public Sub DeclareLocal(name As String, type As Type, Optional value As Object = Nothing)
             If Me._variables.ContainsKey(name) Then Throw New Exception("Cannot declare variable '{name}': Variable already exists.")
-            Me._variables.Add(name, value)
+            Me._variables.Add(name, New LocalVariable(name, type, value))
         End Sub
 
-        Public Property Variable(name As String) As Object
+        Public ReadOnly Property Variable(name As String) As LocalVariable
             Get
                 If Not Me._variables.ContainsKey(name) Then Throw New Exception($"Variable '{name}' is not declared.")
                 Return Me._variables(name)
             End Get
-            Set(value As Object)
-                If Me._variables.ContainsKey(name) Then Me._variables.Remove(name)
-                DeclareLocal(name, value)
-            End Set
         End Property
 
         Public Function IsDeclared(name As String) As Boolean
@@ -53,13 +49,10 @@ Namespace Virtual
         End Function
 
         Public Sub Import(name As String)
-            If Not Me._namespaces.Contains(name) Then Throw New ArgumentException($"Name is not a valid namespace '{name}'.")
+            If Not Me._namespaces.Contains(name) AndAlso Not Me._namespaces.Any(Function(ns) ns.StartsWith(name & ".")) Then _
+                Throw New ArgumentException($"Name is not a valid namespace '{name}'.")
             If Not Me._imports.Contains(name) Then Me._imports.Add(name)
         End Sub
-
-        Public Function IsNamespace(name As String) As Boolean
-            Return Me._namespaces.Contains(name)
-        End Function
 
         Public Overloads Function [GetType](name As String) As Type
             Dim retval As Type = Nothing
@@ -71,6 +64,26 @@ Namespace Virtual
                 If types.Count = 1 Then
                     retval = types.First
                 End If
+            End If
+            Return retval
+        End Function
+
+        Public Function GetNamespace(name As String) As String
+            Dim retval As String = ""
+            If Me._namespaces.Contains(name) Then Return name
+            Dim parts As String() = name.Split("."c)
+            Dim matches As New List(Of String)
+            Dim current As String = ""
+            For Each part As String In parts
+                current &= If(current = "", part, "." & part)
+                matches.AddRange(Me._imports.Where(Function(imp) Me._namespaces.Contains(imp & "." & current)).Select(Function(imp) imp & "|" & current).ToArray)
+            Next
+            If Not matches.Count > 0 Then
+                Dim tn As String = parts.First
+                matches = Me._imports.Where(Function(imp) Me._types.Any(Function(t) t.FullName.Equals(imp & "." & tn) Or t.FullName.StartsWith(imp & "." & tn & "`"))).ToList
+                If Not matches.Count = 0 Then retval = matches.OrderByDescending(Function(m) m.Count).First & "|"
+            Else
+                retval = matches.OrderByDescending(Function(m) m.Count).First
             End If
             Return retval
         End Function
