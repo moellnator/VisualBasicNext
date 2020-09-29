@@ -170,9 +170,9 @@
 
         Private Shared Function _BuildIdentifierToken(text As String, start As Integer, current As TextLocation, Optional append As Integer = 0)
             Dim retval As New TextLocation(text, start)
-            Dim ident As String = retval.GetText(current.Position - start).ToLower
+            Dim ident As String = retval.GetText(current.Position - start + append).ToLower
             Dim tokentype As TokenTypes = _TokenTypeFromIdentifier(ident)
-            If tokentype = TokenTypes.Identifier AndAlso retval.GetText(current.Position - start).ToLower.All(Function(c) c = "_") Then _
+            If tokentype = TokenTypes.Identifier AndAlso retval.GetText(current.Position - start + append).ToLower.All(Function(c) c = "_") Then _
                 Throw New ParserException($"Invalid identifier {ident} at {current.Position.ToString}.", current)
             Return New Token(tokentype, retval, current.Position - start + append)
         End Function

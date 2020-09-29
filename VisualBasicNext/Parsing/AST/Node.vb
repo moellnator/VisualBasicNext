@@ -16,10 +16,6 @@
                     retval = New ExprArray(node)
                 Case CST.NodeTypes.TypeName
                     retval = New TypeName(node)
-                Case CST.NodeTypes.AtomAccess
-                    retval = AtomAccess.BuildNode(node)
-                Case CST.NodeTypes.Member
-                    retval = Member.BuildNode(node)
                 Case CST.NodeTypes.TypeIdentifier
                     retval = New TypeIdentifier(node)
                 Case CST.NodeTypes.Ternary

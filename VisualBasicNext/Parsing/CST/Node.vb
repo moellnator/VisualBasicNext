@@ -16,8 +16,6 @@ Namespace Parsing.CST
         TypeIdentifier
         Ternary
         Atom
-        AtomAccess
-        Member
         Operators
         Script
     End Enum

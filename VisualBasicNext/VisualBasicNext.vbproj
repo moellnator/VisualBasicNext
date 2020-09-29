@@ -80,13 +80,11 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Parsing\AST\AtomAccess.vb" />
     <Compile Include="Parsing\AST\Block.vb" />
     <Compile Include="Parsing\AST\ExprArray.vb" />
     <Compile Include="Parsing\AST\Expression.vb" />
     <Compile Include="Parsing\AST\Identifier.vb" />
     <Compile Include="Parsing\AST\Literal.vb" />
-    <Compile Include="Parsing\AST\Member.vb" />
     <Compile Include="Parsing\AST\Node.vb" />
     <Compile Include="Parsing\AST\Operators.vb" />
     <Compile Include="Parsing\AST\Ternary.vb" />
