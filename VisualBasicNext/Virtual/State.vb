@@ -3,6 +3,24 @@
 Namespace Virtual
     Public Class State
 
+        Private Shared ReadOnly _VB_TYPE_MAP As New Dictionary(Of String, String) From {
+            {"integer", "System.Int32"},
+            {"uinteger", "System.UInt32"},
+            {"long", "System.Int64"},
+            {"ulong", "System.UInt64"},
+            {"short", "System.Int16"},
+            {"ushort", "System.UInt16"},
+            {"byte", "System.Byte"},
+            {"sbyte", "System.SByte"},
+            {"string", "System.String"},
+            {"char", "Syste.Char"},
+            {"date", "System.DateTime"},
+            {"decimal", "System.Decimal"},
+            {"single", "System.Single"},
+            {"double", "System.Double"},
+            {"boolean", "System.Boolean"}
+        }
+
         Private ReadOnly _variables As New Dictionary(Of String, LocalVariable)
         Private ReadOnly _imports As New List(Of String)
         Private _types As Type()
@@ -56,13 +74,17 @@ Namespace Virtual
 
         Public Overloads Function [GetType](name As String) As Type
             Dim retval As Type = Nothing
-            Dim types As IEnumerable(Of Type) = Me._types.Where(Function(t) t.FullName.EndsWith(name))
-            If types.Count = 1 AndAlso types.First.FullName.Equals(name) Then
-                retval = types.First
+            If _VB_TYPE_MAP.ContainsKey(name.ToLower) Then
+                retval = Me._types.First(Function(t) t.FullName.Equals(_VB_TYPE_MAP(name.ToLower)))
             Else
-                types = Me._imports.Select(Function(i) i & "." & name).SelectMany(Function(n) Me._types.Where(Function(t) t.FullName.Equals(n)))
-                If types.Count = 1 Then
+                Dim types As IEnumerable(Of Type) = Me._types.Where(Function(t) t.FullName.EndsWith(name))
+                If types.Count = 1 AndAlso types.First.FullName.Equals(name) Then
                     retval = types.First
+                Else
+                    types = Me._imports.Select(Function(i) i & "." & name).SelectMany(Function(n) Me._types.Where(Function(t) t.FullName.Equals(n)))
+                    If types.Count = 1 Then
+                        retval = types.First
+                    End If
                 End If
             End If
             Return retval

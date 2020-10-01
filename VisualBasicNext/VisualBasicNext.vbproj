@@ -81,13 +81,17 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Parsing\AST\Block.vb" />
+    <Compile Include="Parsing\AST\Ctor.vb" />
     <Compile Include="Parsing\AST\ExprArray.vb" />
     <Compile Include="Parsing\AST\Expression.vb" />
     <Compile Include="Parsing\AST\Identifier.vb" />
+    <Compile Include="Parsing\AST\Inline.vb" />
     <Compile Include="Parsing\AST\Literal.vb" />
     <Compile Include="Parsing\AST\Node.vb" />
     <Compile Include="Parsing\AST\Operators.vb" />
     <Compile Include="Parsing\AST\Ternary.vb" />
+    <Compile Include="Parsing\AST\TypeCast.vb" />
+    <Compile Include="Parsing\AST\TypeComp.vb" />
     <Compile Include="Parsing\AST\TypeIdentifier.vb" />
     <Compile Include="Parsing\AST\TypeName.vb" />
     <Compile Include="Parsing\CST\Node.vb" />

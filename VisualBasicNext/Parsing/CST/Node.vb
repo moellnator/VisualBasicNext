@@ -15,8 +15,12 @@ Namespace Parsing.CST
         [Array]
         TypeIdentifier
         Ternary
+        Cast
         Atom
         Operators
+        TypeComp
+        Ctor
+        Inline
         Script
     End Enum
 

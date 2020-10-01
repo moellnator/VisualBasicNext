@@ -22,6 +22,30 @@ Imports VisualBasicNext.Parsing.Tokenizing
         If Not retval Is Nothing Then Debug.Print(retval.ToString)
     End Sub
 
+    <TestMethod> Public Sub TestCast()
+        Dim vm As New Virtual.Machine
+        vm.CurrentState.Import("System")
+        Dim retval As Object = vm.Evaluate("CType(123, System.String)")
+        If Not retval Is Nothing Then Debug.Print(retval.ToString)
+    End Sub
+
+    <TestMethod> Public Sub TestTypeComp()
+        Dim vm As New Virtual.Machine
+        vm.CurrentState.Import("System")
+        Dim retval As Object = vm.Evaluate("TypeOf 123 Is Integer")
+        If Not retval Is Nothing Then Debug.Print(retval.ToString)
+    End Sub
+
+
+    <TestMethod> Public Sub TestNew()
+        Dim vm As New Virtual.Machine
+        vm.CurrentState.Import("System")
+        Dim retval As Object = vm.Evaluate("TypeOf (New String(""c""c, 1)) Is String")
+        If Not retval Is Nothing Then Debug.Print(retval.ToString)
+    End Sub
+
+
+
 End Class
 
 

@@ -22,6 +22,14 @@
                     retval = New Ternary(node)
                 Case CST.NodeTypes.Operators
                     retval = Operators.BuildNode(node)
+                Case CST.NodeTypes.Cast
+                    retval = New TypeCast(node)
+                Case CST.NodeTypes.TypeComp
+                    retval = New TypeComp(node)
+                Case CST.NodeTypes.Ctor
+                    retval = New Ctor(node)
+                Case CST.NodeTypes.Inline
+                    retval = New Inline(node)
                 Case Else
                     Throw New ParserException($"Unknown cst node '{node.NodeType}' at {node.Origin}", node.Origin)
             End Select

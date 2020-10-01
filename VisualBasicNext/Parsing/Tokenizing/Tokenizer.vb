@@ -82,7 +82,7 @@
                         If current.GetChar = """" Then
                             If current.GetNextChar <> """" Then
                                 If Char.ToLower(current.GetNextChar) = "c"c Then
-                                    If current.Position - start + 1 <> 4 Then Throw New ParserException($"Invalid character format at {current.ToString}.", current)
+                                    If current.Position - start + 1 <> 3 Then Throw New ParserException($"Invalid character format at {current.ToString}.", current)
                                     Yield New Token(TokenTypes.Character, New TextLocation(text, start), current.Position - start + 1)
                                     state = _TokenStates.Idle
                                     skip = 2
@@ -187,7 +187,7 @@
                         "throw", "try", "catch", "when", "finally", "readonly", "class", "enum", "new", "property", "get", "set",
                         "raiseevent", "event", "delegate", "addhandler", "removehandler", "handles",
                         "public", "private", "shared", "protected", "select", "case",
-                        "inherits", "implements", "overrides", "mustoverride", "mustinherit", "true", "false"
+                        "inherits", "implements", "overrides", "mustoverride", "mustinherit", "true", "false", "ctype"
                     retval = TokenTypes.Keyword
                 Case Else
                     retval = TokenTypes.Identifier

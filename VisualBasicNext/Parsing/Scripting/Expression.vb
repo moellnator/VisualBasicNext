@@ -7,24 +7,106 @@ Namespace Parsing.Scripting
         Public Shared ReadOnly Property Instance As Parser = New Expression
 
         Private Sub New()
-            MyBase.New(CST.NodeTypes.Expression)
+            MyBase.New(NodeTypes.Expression)
         End Sub
 
         Protected Overrides Function _MakeParser() As Parser
-            Return _GetInstance(Of Operators)()
+            Return _GetInstance(Of Lambda)() Or _GetInstance(Of TypeComp)() Or _GetInstance(Of Ctor)() Or _GetInstance(Of Operators)()
         End Function
 
-        'expression = new | lambda | addressof | typeof | operators
+        'TODO
+        '   ?. operator
+        '   From ctor for list and dict
+        '   Inline sub -> statement
 
-        'new = 'new' typename '(' (expression (',' expression)*)? ')' array?
-        'lambda = 'function' '(' (Identifier 'as' typename) (',' Identifier 'as' typename)* ')' expression
-        'addressof = 'addressof' atom
-        'typeof = TypeOf atom Is typename
+        Public Class Lambda : Inherits Wrapper
 
-        'Atomic -> Ctype(expression, typename)
-        'Atomic Keywords Integer, Short, Long, U..., String, Boolean, Date, Single, Double, Decimal
+            Private Sub New()
+                MyBase.New(NodeTypes.Inline)
+            End Sub
 
-        'Remove: Identifier, AtomAccess, Member -> (atom|identifier)access? and many("." identifier access? )
+            Protected Overrides Function _MakeParser() As Parser
+                Dim arg As Parser =
+                    Match(Tokenizing.TokenTypes.Identifier) And
+                    Require(Match(Tokenizing.TokenTypes.Keyword, "[Aa]s")) And
+                    Require(_GetInstance(Of TypeName))
+                Dim arglist As Parser =
+                    Match(Tokenizing.TokenTypes.BlockOpen, "\(") And
+                    OneOrNone(
+                        arg And
+                        Many(
+                            Match(Tokenizing.TokenTypes.Separator) And
+                            Require(arg)
+                        )
+                    ) And
+                    Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
+                Return Match(Tokenizing.TokenTypes.Keyword, "[Ff]unction") And
+                    Require(arglist) And
+                    Require(Match(Tokenizing.TokenTypes.Keyword, "[Aa]s")) And
+                    Require(_GetInstance(Of TypeName)()) And
+                    _GetInstance(Of Expression)()
+            End Function
+
+        End Class
+
+        Public Class Ctor : Inherits Wrapper
+
+            Private Sub New()
+                MyBase.New(NodeTypes.Ctor)
+            End Sub
+
+            Protected Overrides Function _MakeParser() As Parser
+                Dim typeatom As Parser =
+                    Match(Tokenizing.TokenTypes.Identifier) And
+                    OneOrNone(
+                        Match(Tokenizing.TokenTypes.BlockOpen, "\(") And
+                        Match(Tokenizing.TokenTypes.Keyword, "[Oo]f") And
+                        Require(_GetInstance(Of TypeName)()) And
+                        Many(
+                            Match(Tokenizing.TokenTypes.Separator) And
+                            Require(_GetInstance(Of TypeName)())
+                        ) And
+                        Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
+                    )
+                Dim typename As Parser = typeatom And Many(Match(Tokenizing.TokenTypes.Operator, "\.") And Require(typeatom))
+                Dim parameters As Parser =
+                    Match(Tokenizing.TokenTypes.BlockOpen, "\(") And
+                    OneOrNone(
+                        _GetInstance(Of Expression)() And
+                        Many(
+                            Match(Tokenizing.TokenTypes.Separator) And
+                            Require(_GetInstance(Of Expression))
+                        )
+                    ) And
+                    Match(Tokenizing.TokenTypes.BlockClose, "\)")
+                Dim rank As Parser =
+                    Match(Tokenizing.TokenTypes.BlockOpen, "\(") And
+                    Many(Match(Tokenizing.TokenTypes.Separator)) And
+                    Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
+                Return Match(Tokenizing.TokenTypes.Keyword, "[Nn]ew") And
+                    Require(typename) And
+                    Require(
+                        (((parameters And Many(rank)) Or OneOrMore(rank)) And _GetInstance(Of Array)()) Or
+                        OneOrNone(parameters)
+                    )
+            End Function
+
+        End Class
+
+        Public Class TypeComp : Inherits Wrapper
+
+            Private Sub New()
+                MyBase.New(NodeTypes.TypeComp)
+            End Sub
+
+            Protected Overrides Function _MakeParser() As Parser
+                Return Match(Tokenizing.TokenTypes.Operator, "[Tt]ype[Oo]f") And
+                    Require(_GetInstance(Of Atom)()) And
+                    Require(Match(Tokenizing.TokenTypes.Operator, "[Ii]s")) And
+                    Require(_GetInstance(Of TypeName))
+            End Function
+
+        End Class
 
         Public Class Operators : Inherits Wrapper
 
@@ -110,7 +192,8 @@ Namespace Parsing.Scripting
             End Sub
 
             Protected Overrides Function _MakeParser() As Parser
-                Return _GetInstance(Of Literal)() Or
+                Return _GetInstance(Of TypeCast)() Or
+                    _GetInstance(Of Literal)() Or
                     _GetInstance(Of TypeIdentifier)() Or
                     _GetInstance(Of Ternary)() Or
                     _GetInstance(Of Block)() Or
@@ -201,6 +284,23 @@ Namespace Parsing.Scripting
                             Require(_GetInstance(Of Expression)())
                        ) And
                        Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
+            End Function
+
+        End Class
+
+        Public Class TypeCast : Inherits Wrapper
+
+            Private Sub New()
+                MyBase.New(CST.NodeTypes.Cast)
+            End Sub
+
+            Protected Overrides Function _MakeParser() As Parser
+                Return Match(Tokenizing.TokenTypes.Keyword, "[Cc][Tt]ype") And
+                    Require(Match(Tokenizing.TokenTypes.BlockOpen, "\(")) And
+                    Require(_GetInstance(Of Expression)()) And
+                    Require(Match(Tokenizing.TokenTypes.Separator)) And
+                    Require(_GetInstance(Of TypeName)()) And
+                    Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
             End Function
 
         End Class
