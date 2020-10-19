@@ -178,7 +178,7 @@ Namespace Parsing.Scripting
                         Require(_GetInstance(Of TypeName))
                     ) And
                     Require(Match(Tokenizing.TokenTypes.BlockClose, "\)"))
-                Dim base As Parser = Match(Tokenizing.TokenTypes.Identifier) And OneOrNone(generic) And Many(access)
+                Dim base As Parser = (Match(Tokenizing.TokenTypes.Identifier) Or Match(Tokenizing.TokenTypes.Keyword)) And OneOrNone(generic) And Many(access)
                 Return ((_GetInstance(Of Atom)() And Many(access)) Or base) And Many(Match(Tokenizing.TokenTypes.Operator, "\.") And Require(base))
             End Function
 

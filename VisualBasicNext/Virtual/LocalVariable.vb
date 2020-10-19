@@ -2,21 +2,21 @@
     Public Class LocalVariable
 
         Private _internal As Object
-        Private ReadOnly _type As Type
-        Private ReadOnly _name As String
+        Public ReadOnly Property Type As Type
+        Public ReadOnly Property Name As String
 
-        Public Property Value As Object
+        Public Overridable Property Value As Object
             Get
                 Return Me._internal
             End Get
             Set(value As Object)
-                Me._internal = CTypeDynamic(value, Me._type)
+                Me._internal = CTypeDynamic(value, Me.Type)
             End Set
         End Property
 
         Public Sub New(name As String, type As Type, Optional value As Object = Nothing)
-            Me._name = name
-            Me._type = type
+            Me.Name = name
+            Me.Type = type
             Me.Value = value
         End Sub
 

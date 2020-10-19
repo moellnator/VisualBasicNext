@@ -113,6 +113,8 @@
     <Compile Include="Parsing\TextLocation.vb" />
     <Compile Include="Parsing\Tokenizing\Token.vb" />
     <Compile Include="Parsing\Tokenizing\Tokenizer.vb" />
+    <Compile Include="Virtual\Context.vb" />
+    <Compile Include="Virtual\DynamicVariable.vb" />
     <Compile Include="Virtual\LocalVariable.vb" />
     <Compile Include="Virtual\Machine.vb" />
     <Compile Include="Virtual\State.vb" />

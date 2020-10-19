@@ -1,4 +1,5 @@
 ﻿Imports System.Reflection
+Imports System.Runtime.CompilerServices
 
 Namespace Virtual
     Public Class State
@@ -25,6 +26,8 @@ Namespace Virtual
         Private ReadOnly _imports As New List(Of String)
         Private _types As Type()
         Private _namespaces As String()
+        Private _current_context As Context
+        Private _extensions As MethodInfo()
 
         Public Sub New()
             Me._update_types()
@@ -33,11 +36,35 @@ Namespace Virtual
         Private Sub _update_types()
             Me._types = _GetAllTypes()
             Me._namespaces = _ExtractNameSpaces(Me._types)
+            Me._extensions = _GetAllExtensions()
         End Sub
 
         Private Shared Function _GetAllTypes() As Type()
             Dim asm As Assembly() = AppDomain.CurrentDomain.GetAssemblies
             Return asm.SelectMany(Function(a) a.GetTypes).ToArray
+        End Function
+
+        Private Shared Function _GetAllExtensions() As MethodInfo()
+            Dim binding As BindingFlags = BindingFlags.Public Or BindingFlags.Static Or BindingFlags.NonPublic
+            Dim assm As Assembly() = AppDomain.CurrentDomain.GetAssemblies
+            Dim types As Type() = assm.SelectMany(Function(a) a.GetTypes.Where(Function(t) t.IsSealed And Not t.IsGenericType And Not t.IsNested)).ToArray
+            Dim methods As MethodInfo() = types.SelectMany(Function(t) t.GetMethods(binding).Where(Function(m) m.IsDefined(GetType(ExtensionAttribute), False))).ToArray
+            Return methods
+        End Function
+
+        Public Function GetExtensions(t As Type) As MethodInfo()
+            Return Me._extensions.Where(Function(m) IsAssignableToGenericType(t, m.GetParameters()(0).ParameterType)).ToArray
+        End Function
+
+        Public Shared Function IsAssignableToGenericType(ByVal givenType As Type, ByVal genericType As Type) As Boolean
+            If givenType = genericType Then Return True
+            For Each it In givenType.GetInterfaces()
+                If it.IsGenericType AndAlso it.GetGenericTypeDefinition().GUID = genericType.GUID Then Return True
+            Next
+            If givenType.IsGenericType AndAlso givenType.GetGenericTypeDefinition().GUID = genericType.GUID Then Return True
+            Dim baseType As Type = givenType.BaseType
+            If baseType Is Nothing Then Return False
+            Return IsAssignableToGenericType(baseType, genericType)
         End Function
 
         Private Shared Function _ExtractNameSpaces(typelist As IEnumerable(Of Type)) As String()
@@ -50,6 +77,15 @@ Namespace Virtual
             ).Distinct.ToArray
         End Function
 
+        Public Sub Enter(context As Context)
+            context.SetParent(Me._current_context)
+            Me._current_context = context
+        End Sub
+
+        Public Sub Leave()
+            Me._current_context = Me._current_context.Parent
+        End Sub
+
         Public Sub DeclareLocal(name As String, type As Type, Optional value As Object = Nothing)
             If Me._variables.ContainsKey(name) Then Throw New Exception("Cannot declare variable '{name}': Variable already exists.")
             Me._variables.Add(name, New LocalVariable(name, type, value))
@@ -57,13 +93,19 @@ Namespace Virtual
 
         Public ReadOnly Property Variable(name As String) As LocalVariable
             Get
-                If Not Me._variables.ContainsKey(name) Then Throw New Exception($"Variable '{name}' is not declared.")
-                Return Me._variables(name)
+                If Not Me.IsDeclared(name) Then Throw New Exception($"Variable '{name}' is not declared.")
+                Dim retval As LocalVariable = Nothing
+                If Me._variables.ContainsKey(name) Then
+                    retval = Me._variables(name)
+                Else
+                    retval = Me._current_context.GetVariable(name)
+                End If
+                Return retval
             End Get
         End Property
 
         Public Function IsDeclared(name As String) As Boolean
-            Return Me._variables.ContainsKey(name)
+            Return Me._variables.ContainsKey(name) OrElse (Me._current_context IsNot Nothing AndAlso Me._current_context.IsDeclared(name))
         End Function
 
         Public Sub Import(name As String)

@@ -40,7 +40,7 @@ Namespace Parsing.AST
             Dim retval As Object = Nothing
             Dim type As Type = Me._type.Evaluate(target)
             If Me._array_ranks IsNot Nothing Then
-                'Crate array and check bounds vs. init value if present
+                'TODO Crate array and check bounds vs. init value if present
                 Stop
             Else
                 Dim args As Object() = Me._arguments.Select(Function(a) a.Evaluate(target)).ToArray

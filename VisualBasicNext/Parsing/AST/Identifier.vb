@@ -1,4 +1,5 @@
 ﻿Imports System.Reflection
+Imports System.Runtime.CompilerServices
 Imports VisualBasicNext.Virtual
 
 Namespace Parsing.AST
@@ -187,7 +188,7 @@ Namespace Parsing.AST
                 Dim signature As Type() = arguments.Select(Function(a) a.GetType).ToArray
                 Select Case cand.First.MemberType
                     Case MemberTypes.Property
-                        Dim m As PropertyInfo = cand.First(Function(c) DirectCast(c, PropertyInfo).GetIndexParameters.Select(Function(p) p.ParameterType).SequenceEqual(Signature))
+                        Dim m As PropertyInfo = cand.First(Function(c) DirectCast(c, PropertyInfo).GetIndexParameters.Select(Function(p) p.ParameterType).SequenceEqual(signature))
                         retval = New Member(ref, {m}, Function() m.GetValue(ref.Object, arguments), Sub(o As Object) m.SetValue(ref.Object, o, arguments))
                     Case Else
                         Throw New Exception("Invalid default member type.")
@@ -199,6 +200,7 @@ Namespace Parsing.AST
         Public Shared Function GetMember(ref As Reference, target As State, atom As Element) As Member
             Dim binding As BindingFlags = BindingFlags.Public Or If(ref.IsStatic, BindingFlags.Static, BindingFlags.Instance)
             Dim members As MemberInfo() = ref.Type.GetMembers(binding).Where(Function(m) m.Name.Equals(atom.Name)).ToArray
+            If members.Count = 0 AndAlso Not ref.IsStatic Then members = GetExtionsMethod(target, ref, atom)
             If members.Count = 0 Then Throw New Exception($"{atom.Name} is not a member of {ref.Type.Name}.")
             Dim retval As Member = Nothing
             Select Case members.First.MemberType
@@ -222,6 +224,11 @@ Namespace Parsing.AST
             Return retval
         End Function
 
+        Public Shared Function GetExtionsMethod(target As State, ref As Reference, atom As Element) As MemberInfo()
+            Dim methods As MethodInfo() = target.GetExtensions(ref.Type)
+            Return methods.Where(Function(m) m.Name.Equals(atom.Name)).ToArray
+        End Function
+
         Public Shared Function ResolveMemberAccess(member As Member, target As State, atom As Element) As Reference
             Dim retval As Member = member
             If member.Getter IsNot Nothing Then retval = New Member(New Reference(member.Getter.Invoke), {}, Nothing, Nothing)
@@ -239,11 +246,19 @@ Namespace Parsing.AST
                     Dim signature As Type() = arguments.Select(Function(a) a.GetType).ToArray
                     Select Case retval.Member.First.MemberType
                         Case MemberTypes.Property
-                            Dim p As PropertyInfo = member.Member.First(Function(c) DirectCast(c, PropertyInfo).GetIndexParameters.Select(Function(i) i.ParameterType).SequenceEqual(signature))
+                            Dim p As PropertyInfo = member.Member.First(Function(c) _SignatureMatch(DirectCast(c, PropertyInfo), signature))
                             retval = New Member(New Reference(p.GetValue(retval.Reference.Object, arguments)), {}, Nothing, Nothing)
                         Case MemberTypes.Method
-                            Dim m As MethodInfo = member.Member.First(Function(c) DirectCast(c, MethodInfo).GetParameters.Select(Function(p) p.ParameterType).SequenceEqual(signature))
-                            retval = New Member(New Reference(m.Invoke(retval.Reference.Object, arguments)), {}, Nothing, Nothing)
+                            'TODO: check if argument types are assignable from signature instead of sequence equals
+                            If member.Member.First.IsDefined(GetType(ExtensionAttribute), False) Then
+                                signature = {member.Reference.Type}.Concat(signature).ToArray
+                                arguments = {member.Reference.Object}.Concat(arguments).ToArray
+                                Dim m As MethodInfo = member.Member.First(Function(c) _SignatureMatch(DirectCast(c, MethodInfo), signature))
+                                retval = New Member(New Reference(m.Invoke(retval.Reference.Object, arguments)), {}, Nothing, Nothing)
+                            Else
+                                Dim m As MethodInfo = member.Member.First(Function(c) _SignatureMatch(DirectCast(c, MethodInfo), signature))
+                                retval = New Member(New Reference(m.Invoke(retval.Reference.Object, arguments)), {}, Nothing, Nothing)
+                            End If
                         Case Else
                             Throw New Exception($"Unable to evaluate member of type {retval.Member.First.MemberType.ToString()}")
                     End Select
@@ -272,6 +287,24 @@ Namespace Parsing.AST
                 End If
             End If
             Return retval.Reference
+        End Function
+
+        Private Shared Function _SignatureMatch(method As MethodInfo, signature As Type()) As Boolean
+            Dim args As ParameterInfo() = method.GetParameters
+            If args.Count <> signature.Count Then Return False
+            For i As Integer = 0 To args.Count - 1
+                If Not args(i).ParameterType.IsAssignableFrom(signature(i)) Then Return False
+            Next
+            Return True
+        End Function
+
+        Private Shared Function _SignatureMatch(prop As PropertyInfo, signature As Type()) As Boolean
+            Dim args As ParameterInfo() = prop.GetIndexParameters
+            If args.Count <> signature.Count Then Return False
+            For i As Integer = 0 To args.Count - 1
+                If Not args(i).ParameterType.IsAssignableFrom(signature(i)) Then Return False
+            Next
+            Return True
         End Function
 
         Private Shared Function GetTypeName(atom As Element) As String

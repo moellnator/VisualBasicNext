@@ -44,7 +44,13 @@ Imports VisualBasicNext.Parsing.Tokenizing
         If Not retval Is Nothing Then Debug.Print(retval.ToString)
     End Sub
 
-
+    <TestMethod> Public Sub TestLambda()
+        Dim vm As New Virtual.Machine
+        vm.CurrentState.Import("System")
+        vm.CurrentState.DeclareLocal("list", GetType(List(Of Integer)), New List(Of Integer) From {1, 2, 3})
+        Dim retval As Object = vm.Evaluate("list.Select(Of Integer, Integer)(Function(a as Integer) as Integer a+1).ToArray(Of Integer)()")
+        Debug.Print(String.Join(", ", DirectCast(retval, Integer()).Select(Function(c) c.ToString).ToArray))
+    End Sub
 
 End Class
 
