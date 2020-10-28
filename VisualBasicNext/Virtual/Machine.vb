@@ -18,6 +18,16 @@ Namespace Virtual
             Return retval
         End Function
 
+        Public Sub Execute(statements As String)
+            If Not statements.Equals(String.Empty) Then
+                Dim tokens As Token() = Tokenizer.Tokenize(statements).ToArray
+                Dim expr As Parser = Scripting.Script.Instance And Parser.Require(Parser.Terminator)
+                Dim cst As CST.Node = expr.Parse(New Generator.State(tokens, -1)).Node.First
+                Dim vm As AST.Node = AST.Node.FromCST(cst)
+                vm.Evaluate(CurrentState)
+            End If
+        End Sub
+
     End Class
 
 End Namespace

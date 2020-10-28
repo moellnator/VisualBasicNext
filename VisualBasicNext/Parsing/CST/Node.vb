@@ -5,8 +5,8 @@ Namespace Parsing.CST
     Public Enum NodeTypes
         Generic = 0
         Statement
-        EndOfStatement
         DeclarationStatement
+        ImportStatement
         Expression
         Literal
         TypeName

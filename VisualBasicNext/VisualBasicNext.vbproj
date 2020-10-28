@@ -82,13 +82,17 @@
     </Compile>
     <Compile Include="Parsing\AST\Block.vb" />
     <Compile Include="Parsing\AST\Ctor.vb" />
+    <Compile Include="Parsing\AST\Declaration.vb" />
     <Compile Include="Parsing\AST\ExprArray.vb" />
     <Compile Include="Parsing\AST\Expression.vb" />
     <Compile Include="Parsing\AST\Identifier.vb" />
+    <Compile Include="Parsing\AST\Import.vb" />
     <Compile Include="Parsing\AST\Inline.vb" />
     <Compile Include="Parsing\AST\Literal.vb" />
     <Compile Include="Parsing\AST\Node.vb" />
     <Compile Include="Parsing\AST\Operators.vb" />
+    <Compile Include="Parsing\AST\Script.vb" />
+    <Compile Include="Parsing\AST\Statement.vb" />
     <Compile Include="Parsing\AST\Ternary.vb" />
     <Compile Include="Parsing\AST\TypeCast.vb" />
     <Compile Include="Parsing\AST\TypeComp.vb" />
@@ -109,6 +113,8 @@
     <Compile Include="Parsing\Generator\Wrapper.vb" />
     <Compile Include="Parsing\ParserException.vb" />
     <Compile Include="Parsing\Scripting\Expression.vb" />
+    <Compile Include="Parsing\Scripting\Script.vb" />
+    <Compile Include="Parsing\Scripting\Statement.vb" />
     <Compile Include="Parsing\Scripting\TypeName.vb" />
     <Compile Include="Parsing\TextLocation.vb" />
     <Compile Include="Parsing\Tokenizing\Token.vb" />

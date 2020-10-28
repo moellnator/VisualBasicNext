@@ -30,6 +30,14 @@
                     retval = New Ctor(node)
                 Case CST.NodeTypes.Inline
                     retval = New Inline(node)
+                Case CST.NodeTypes.Statement
+                    retval = FromCST(node.Children.First)
+                Case CST.NodeTypes.Script
+                    retval = New Script(node)
+                Case CST.NodeTypes.ImportStatement
+                    retval = New Import(node)
+                Case CST.NodeTypes.DeclarationStatement
+                    retval = New Declaration(node)
                 Case Else
                     Throw New ParserException($"Unknown cst node '{node.NodeType}' at {node.Origin}", node.Origin)
             End Select
