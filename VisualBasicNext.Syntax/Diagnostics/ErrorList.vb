@@ -1,4 +1,6 @@
-﻿Namespace Diagnostics
+﻿Imports VisualBasicNext.Syntax.Lexing
+
+Namespace Diagnostics
     Public Class ErrorList : Implements IReadOnlyList(Of ErrorObject)
 
         Private ReadOnly _content As List(Of ErrorObject)
@@ -8,6 +10,7 @@
         End Sub
 
         Public Sub New(previous As ErrorList)
+            Me.New()
             Me._content.AddRange(previous)
         End Sub
 
@@ -25,6 +28,10 @@
 
         Public Sub ReportMissing(text As String, span As Text.Span)
             Me._content.Add(New ErrorObject($"Expected missing '{text}' in source at {span.GetStartPosition.ToString}.", span))
+        End Sub
+
+        Public Sub ReportUnexpectedToken(expected As SyntaxKind, actual As SyntaxKind, span As Text.Span)
+            Me._content.Add(New ErrorObject($"Expected <{expected.ToString}> instead of <{actual.ToString}> in source at {span.GetStartPosition.ToString}.", span))
         End Sub
 
         Default Public ReadOnly Property Item(index As Integer) As ErrorObject Implements IReadOnlyList(Of ErrorObject).Item

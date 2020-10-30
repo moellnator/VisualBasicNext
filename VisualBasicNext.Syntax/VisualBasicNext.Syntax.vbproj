@@ -68,7 +68,7 @@
     <Compile Include="Diagnostics\ErrorObject.vb" />
     <Compile Include="Diagnostics\ErrorList.vb" />
     <Compile Include="Lexing\Lexer.vb" />
-    <Compile Include="Lexing\Token.vb" />
+    <Compile Include="Lexing\SyntaxToken.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -84,6 +84,16 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Parsing\BlockExpressionNode.vb" />
+    <Compile Include="Parsing\EmptyStatementNode.vb" />
+    <Compile Include="Parsing\ExpressionNode.vb" />
+    <Compile Include="Parsing\ExpressionStatementNode.vb" />
+    <Compile Include="Parsing\IdentifierExpressionNode.vb" />
+    <Compile Include="Parsing\LiteralNode.vb" />
+    <Compile Include="Parsing\ScriptNode.vb" />
+    <Compile Include="Parsing\StatementNode.vb" />
+    <Compile Include="Parsing\SyntaxNode.vb" />
+    <Compile Include="Parsing\Parser.vb" />
     <Compile Include="Text\Line.vb" />
     <Compile Include="Text\Position.vb" />
     <Compile Include="Text\Source.vb" />

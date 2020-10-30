@@ -3,7 +3,7 @@ Imports VisualBasicNext.Syntax.Diagnostics
 Imports VisualBasicNext.Syntax.Text
 
 Namespace Lexing
-    Public Class Lexer : Implements IEnumerable(Of Token)
+    Public Class Lexer : Implements IEnumerable(Of SyntaxToken)
 
         Public ReadOnly Property Diagnostics As New ErrorList
         Private ReadOnly _source As Source
@@ -38,168 +38,168 @@ Namespace Lexing
             Me._move(1)
         End Sub
 
-        Public Function GetNextToken() As Token
-            Dim kind As TokenTypes = TokenTypes.EndOfSource
+        Public Function GetNextToken() As SyntaxToken
+            Dim kind As SyntaxKind = SyntaxKind.EndOfSourceToken
             Dim start As Integer = Me._index
             Dim value As Object = Nothing
             Select Case True
                 Case Me._current = vbNullChar
                 Case Me._current = vbCr AndAlso Me._next = vbLf
-                    kind = TokenTypes.PlusEqualsToken
+                    kind = SyntaxKind.EndOfLineToken
                     Me._move(2)
                 Case Me._current = ":"c
-                    kind = TokenTypes.PlusEqualsToken
+                    kind = SyntaxKind.EndOfLineToken
                     Me._move_next()
                 Case Char.IsWhiteSpace(Me._current)
                     Me._read_whitespace()
-                    kind = TokenTypes.WhiteSpace
+                    kind = SyntaxKind.WhiteSpaceToken
                 Case Me._current = "'"c
                     Dim line As Line = Me._source(Me._source.GetLineIndex(Me._index))
                     Me._move(line.Start + line.Length - Me._index)
-                    kind = TokenTypes.Comment
+                    kind = SyntaxKind.CommentToken
                 Case Me._current = """"c
                     value = Me._read_string()
-                    kind = TokenTypes.StringValue
+                    kind = SyntaxKind.StringValueToken
                 Case Me._current = "&"c AndAlso {"b"c, "o"c, "h"c}.Contains(Char.ToLower(Me._next))
                     value = _read_base_number()
-                    kind = TokenTypes.NumberValue
+                    kind = SyntaxKind.NumberValueToken
                 Case Char.IsDigit(Me._current)
                     value = _read_number()
-                    kind = TokenTypes.NumberValue
+                    kind = SyntaxKind.NumberValueToken
                 Case Me._current = "#"
                     value = _read_date()
-                    kind = TokenTypes.DateValue
+                    kind = SyntaxKind.DateValueToken
                 Case Me._current = "."c
-                    kind = TokenTypes.DotToken
+                    kind = SyntaxKind.DotToken
                     Me._move_next()
                 Case Me._current = "?"c
                     If Me._next = "." Then
-                        kind = TokenTypes.QuestionmarkDotToken
+                        kind = SyntaxKind.QuestionmarkDotToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.QuestionmarkToken
+                        kind = SyntaxKind.QuestionmarkToken
                         Me._move_next()
                     End If
                 Case Me._current = ","c
-                    kind = TokenTypes.CommaToken
+                    kind = SyntaxKind.CommaToken
                     Me._move_next()
                 Case Me._current = "("c
-                    kind = TokenTypes.OpenBracketToken
+                    kind = SyntaxKind.OpenBracketToken
                     Me._move_next()
                 Case Me._current = ")"c
-                    kind = TokenTypes.CloseBracketToken
+                    kind = SyntaxKind.CloseBracketToken
                     Me._move_next()
                 Case Me._current = "{"c
-                    kind = TokenTypes.OpenBraceToken
+                    kind = SyntaxKind.OpenBraceToken
                     Me._move_next()
                 Case Me._current = "}"c
-                    kind = TokenTypes.CloseBraceToken
+                    kind = SyntaxKind.CloseBraceToken
                     Me._move_next()
                 Case Me._current = "="c
-                    kind = TokenTypes.EqualsToken
+                    kind = SyntaxKind.EqualsToken
                     Me._move_next()
                 Case Me._current() = "+"c
                     If Me._next = "=" Then
-                        kind = TokenTypes.PlusEqualsToken
+                        kind = SyntaxKind.PlusEqualsToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.PlusToken
+                        kind = SyntaxKind.PlusToken
                         Me._move_next()
                     End If
                 Case Me._current() = "-"c
                     If Me._next = "=" Then
-                        kind = TokenTypes.MinusEqualsToken
+                        kind = SyntaxKind.MinusEqualsToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.MinusToken
+                        kind = SyntaxKind.MinusToken
                         Me._move_next()
                     End If
                 Case Me._current() = "*"c
                     If Me._next = "=" Then
-                        kind = TokenTypes.StarEqualsToken
+                        kind = SyntaxKind.StarEqualsToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.StarToken
+                        kind = SyntaxKind.StarToken
                         Me._move_next()
                     End If
                 Case Me._current() = "/"c
                     If Me._next = "=" Then
-                        kind = TokenTypes.SlashEqualsToken
+                        kind = SyntaxKind.SlashEqualsToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.SlashToken
+                        kind = SyntaxKind.SlashToken
                         Me._move_next()
                     End If
                 Case Me._current() = "\"c
                     If Me._next = "=" Then
-                        kind = TokenTypes.BackslashEqualsToken
+                        kind = SyntaxKind.BackslashEqualsToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.BackslashToken
+                        kind = SyntaxKind.BackslashToken
                         Me._move_next()
                     End If
                 Case Me._current() = "&"c
                     If Me._next = "=" Then
-                        kind = TokenTypes.AmpersandEqualsToken
+                        kind = SyntaxKind.AmpersandEqualsToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.AmpersandToken
+                        kind = SyntaxKind.AmpersandToken
                         Me._move_next()
                     End If
                 Case Me._current() = "^"c
                     If Me._next = "=" Then
-                        kind = TokenTypes.CircumflexEqualsToken
+                        kind = SyntaxKind.CircumflexEqualsToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.CircumflexToken
+                        kind = SyntaxKind.CircumflexToken
                         Me._move_next()
                     End If
                 Case Me._current() = ">"c
                     If Me._next = ">"c Then
                         Me._move_next()
                         If Me._next = "=" Then
-                            kind = TokenTypes.GreaterGreaterEqualsToken
+                            kind = SyntaxKind.GreaterGreaterEqualsToken
                             Me._move(2)
                         Else
-                            kind = TokenTypes.GreaterGreaterToken
+                            kind = SyntaxKind.GreaterGreaterToken
                             Me._move_next()
                         End If
                     ElseIf Me._next = "="c Then
-                        kind = TokenTypes.GreaterEqualsToken
+                        kind = SyntaxKind.GreaterEqualsToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.GreaterToken
+                        kind = SyntaxKind.GreaterToken
                         Me._move_next()
                     End If
                 Case Me._current() = "<"c
                     If Me._next = "<"c Then
                         Me._move_next()
                         If Me._next = "=" Then
-                            kind = TokenTypes.LowerLowerEqualsToken
+                            kind = SyntaxKind.LowerLowerEqualsToken
                             Me._move(2)
                         Else
-                            kind = TokenTypes.LowerLowerToken
+                            kind = SyntaxKind.LowerLowerToken
                             Me._move_next()
                         End If
                     ElseIf Me._next = "="c Then
-                        kind = TokenTypes.LowerEqualsToken
+                        kind = SyntaxKind.LowerEqualsToken
                         Me._move(2)
                     ElseIf Me._next = ">"c Then
-                        kind = TokenTypes.LowerGreaterToken
+                        kind = SyntaxKind.LowerGreaterToken
                         Me._move(2)
                     Else
-                        kind = TokenTypes.LowerToken
+                        kind = SyntaxKind.LowerToken
                         Me._move_next()
                     End If
                 Case Char.IsLetter(Me._current) Or Me._current = "_"c
                     kind = Me._read_identifier(value)
                 Case Else
                     Me.Diagnostics.ReportBadCharakter(Me._current, New Span(Me._source, Me._index, 1))
-                    kind = TokenTypes.BadToken
+                    kind = SyntaxKind.BadToken
                     Me._move_next()
             End Select
             Dim span As Span = Span.FromBounds(Me._source, start, Me._index)
-            Return New Token(kind, span, value)
+            Return New SyntaxToken(kind, span, value)
         End Function
 
         Private Sub _read_whitespace()
@@ -488,11 +488,11 @@ Namespace Lexing
             End If
         End Function
 
-        Private Function _read_identifier(ByRef value As Object) As TokenTypes
+        Private Function _read_identifier(ByRef value As Object) As SyntaxKind
             Dim done As Boolean = False
             Dim start As Integer = Me._index
             Dim builder As New System.Text.StringBuilder
-            Dim retval As TokenTypes = TokenTypes.Identifier
+            Dim retval As SyntaxKind = SyntaxKind.IdentifierToken
             value = Nothing
             While Not done
                 If Char.IsLetterOrDigit(Me._current) Or Me._current = "_"c Then
@@ -506,58 +506,58 @@ Namespace Lexing
             Select Case name.ToLower
                 Case "true", "false"
                     value = Boolean.Parse(name)
-                    retval = TokenTypes.BoolValue
+                    retval = SyntaxKind.BoolValueToken
                 Case "nothing"
                     value = Nothing
-                    retval = TokenTypes.NothingValue
+                    retval = SyntaxKind.NothingValueToken
                 Case "and"
-                    retval = TokenTypes.NotKeyword
+                    retval = SyntaxKind.NotKeywordToken
                 Case "andalso"
-                    retval = TokenTypes.AndAlsoKeyword
+                    retval = SyntaxKind.AndAlsoKeywordToken
                 Case "or"
-                    retval = TokenTypes.OrKeyword
+                    retval = SyntaxKind.OrKeywordToken
                 Case "orelse"
-                    retval = TokenTypes.OrElseKeyword
+                    retval = SyntaxKind.OrElseKeywordToken
                 Case "xor"
-                    retval = TokenTypes.XorKeyword
+                    retval = SyntaxKind.XorKeywordToken
                 Case "not"
-                    retval = TokenTypes.NotKeyword
+                    retval = SyntaxKind.NotKeywordToken
                 Case "mod"
-                    retval = TokenTypes.ModKeyword
+                    retval = SyntaxKind.ModKeywordToken
                 Case "is"
-                    retval = TokenTypes.IsKeyword
+                    retval = SyntaxKind.IsKeywordToken
                 Case "isnot"
-                    retval = TokenTypes.IsNotKeyword
+                    retval = SyntaxKind.IsNotKeywordToken
                 Case "like"
-                    retval = TokenTypes.LikeKeyword
+                    retval = SyntaxKind.LikeKeywordToken
                 Case "if"
-                    retval = TokenTypes.IfKeyword
+                    retval = SyntaxKind.IfKeywordToken
                 Case "typeof"
-                    retval = TokenTypes.TypeOfKeyword
+                    retval = SyntaxKind.TypeOfKeywordToken
                 Case "new"
-                    retval = TokenTypes.NewKeyword
+                    retval = SyntaxKind.NewKeywordToken
                 Case "ctype"
-                    retval = TokenTypes.CTypeKeyword
+                    retval = SyntaxKind.CTypeKeywordToken
                 Case "as"
-                    retval = TokenTypes.AsKeyword
+                    retval = SyntaxKind.AsKeywordToken
                 Case "of"
-                    retval = TokenTypes.OfKeyword
+                    retval = SyntaxKind.OfKeywordToken
                 Case "function"
-                    retval = TokenTypes.FunctionKeyword
+                    retval = SyntaxKind.FunctionKeywordToken
                 Case "sub"
-                    retval = TokenTypes.SubKeyword
+                    retval = SyntaxKind.SubKeywordToken
                 Case Else
-                    retval = TokenTypes.Identifier
+                    retval = SyntaxKind.IdentifierToken
             End Select
             Return retval
         End Function
 
-        Public Iterator Function GetEnumerator() As IEnumerator(Of Token) Implements IEnumerable(Of Token).GetEnumerator
-            Dim current As Token = Nothing
+        Public Iterator Function GetEnumerator() As IEnumerator(Of SyntaxToken) Implements IEnumerable(Of SyntaxToken).GetEnumerator
+            Dim current As SyntaxToken = Nothing
             Do
                 current = Me.GetNextToken
                 Yield current
-            Loop Until current.TokenType = TokenTypes.EndOfSource
+            Loop Until current.Kind = SyntaxKind.EndOfSourceToken
         End Function
 
         Private Function IEnumerable_GetEnumerator() As IEnumerator Implements IEnumerable.GetEnumerator

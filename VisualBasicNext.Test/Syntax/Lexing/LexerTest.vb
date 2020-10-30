@@ -7,8 +7,8 @@ Imports VisualBasicNext.Syntax.Text
         Dim source As Source = Source.FromText(String.Empty)
         Dim lexer As New Lexer(source)
         Assert.IsFalse(lexer.Diagnostics.Any)
-        Dim token As Token = AssertIsSingle(lexer.ToArray)
-        Assert.AreEqual(TokenTypes.EndOfSource, token.TokenType)
+        Dim token As SyntaxToken = AssertIsSingle(lexer.ToArray)
+        Assert.AreEqual(SyntaxKind.EndOfSourceToken, token.Kind)
     End Sub
 
     Private Shared Function AssertIsSingle(Of T)(enumeration As IEnumerable(Of T)) As T
@@ -17,15 +17,15 @@ Imports VisualBasicNext.Syntax.Text
     End Function
 
     <TestMethod> Public Sub TestSingleTokens()
-        For Each token_test As KeyValuePair(Of String, TokenTypes) In TestToken
+        For Each token_test As KeyValuePair(Of String, SyntaxKind) In TestToken
             Dim source As Source = Source.FromText(token_test.Key)
             Dim lexer As New Lexer(source)
-            Dim tokens As Token() = lexer.ToArray
+            Dim tokens As SyntaxToken() = lexer.ToArray
             Assert.IsFalse(lexer.Diagnostics.Any)
             Assert.IsTrue(tokens.Count = 2)
-            Assert.AreEqual(token_test.Value, tokens.First.TokenType)
-            Assert.AreEqual(token_test.Key, tokens.First.Source.ToString)
-            Assert.AreEqual(TokenTypes.EndOfSource, tokens.Last.TokenType)
+            Assert.AreEqual(token_test.Value, tokens.First.Kind)
+            Assert.AreEqual(token_test.Key, tokens.First.Span.ToString)
+            Assert.AreEqual(SyntaxKind.EndOfSourceToken, tokens.Last.Kind)
             If TestTokenValue.ContainsKey(token_test.Key) Then
                 Assert.AreEqual(TestTokenValue(token_test.Key), tokens.First.Value)
             End If
@@ -33,65 +33,66 @@ Imports VisualBasicNext.Syntax.Text
         Next
     End Sub
 
-    Private Shared ReadOnly TestToken As New Dictionary(Of String, TokenTypes) From {
-        {" ", TokenTypes.WhiteSpace},
-        {"   ", TokenTypes.WhiteSpace},
-        {vbNewLine, TokenTypes.PlusEqualsToken},
-        {"'comment", TokenTypes.Comment},
-        {"""Test""""String""", TokenTypes.StringValue},
-        {"""a""c", TokenTypes.StringValue},
-        {"&HAA", TokenTypes.NumberValue},
-        {"&O17", TokenTypes.NumberValue},
-        {"&B1111", TokenTypes.NumberValue},
-        {"&HAASB", TokenTypes.NumberValue},
-        {"&HAAUB", TokenTypes.NumberValue},
-        {"&O17S", TokenTypes.NumberValue},
-        {"12", TokenTypes.NumberValue},
-        {"1.2", TokenTypes.NumberValue},
-        {"1.2e3", TokenTypes.NumberValue},
-        {"1.2e-3", TokenTypes.NumberValue},
-        {"12UI", TokenTypes.NumberValue},
-        {"1.2D", TokenTypes.NumberValue},
-        {"1.2e-3F", TokenTypes.NumberValue},
-        {"12SB", TokenTypes.NumberValue},
-        {"#13.8.2002 12:14 PM#", TokenTypes.DateValue},
-        {".", TokenTypes.DotToken},
-        {"?.", TokenTypes.QuestionmarkDotToken},
-        {"?", TokenTypes.QuestionmarkToken},
-        {",", TokenTypes.CommaToken},
-        {"(", TokenTypes.OpenBracketToken},
-        {")", TokenTypes.CloseBracketToken},
-        {"{", TokenTypes.OpenBraceToken},
-        {"}", TokenTypes.CloseBraceToken},
-        {"+", TokenTypes.PlusToken},
-        {"=", TokenTypes.EqualsToken},
-        {"+=", TokenTypes.PlusEqualsToken},
-        {"-", TokenTypes.MinusToken},
-        {"-=", TokenTypes.MinusEqualsToken},
-        {"*", TokenTypes.StarToken},
-        {"*=", TokenTypes.StarEqualsToken},
-        {"/", TokenTypes.SlashToken},
-        {"/=", TokenTypes.SlashEqualsToken},
-        {"\", TokenTypes.BackslashToken},
-        {"\=", TokenTypes.BackslashEqualsToken},
-        {"&", TokenTypes.AmpersandToken},
-        {"&=", TokenTypes.AmpersandEqualsToken},
-        {"^", TokenTypes.CircumflexToken},
-        {"^=", TokenTypes.CircumflexEqualsToken},
-        {">", TokenTypes.GreaterToken},
-        {">>", TokenTypes.GreaterGreaterToken},
-        {">>=", TokenTypes.GreaterGreaterEqualsToken},
-        {">=", TokenTypes.GreaterEqualsToken},
-        {"<>", TokenTypes.LowerGreaterToken},
-        {"<", TokenTypes.LowerToken},
-        {"<<", TokenTypes.LowerLowerToken},
-        {"<<=", TokenTypes.LowerLowerEqualsToken},
-        {"<=", TokenTypes.LowerEqualsToken},
-        {"Nothing", TokenTypes.NothingValue},
-        {"True", TokenTypes.BoolValue},
-        {"False", TokenTypes.BoolValue},
-        {"abs", TokenTypes.Identifier},
-        {"New", TokenTypes.NewKeyword}
+    Private Shared ReadOnly TestToken As New Dictionary(Of String, SyntaxKind) From {
+        {" ", SyntaxKind.WhiteSpaceToken},
+        {"   ", SyntaxKind.WhiteSpaceToken},
+        {vbNewLine, SyntaxKind.EndOfLineToken},
+        {"'comment", SyntaxKind.CommentToken},
+        {"""Test""""String""", SyntaxKind.StringValueToken},
+        {"""a""c", SyntaxKind.StringValueToken},
+        {"&HAA", SyntaxKind.NumberValueToken},
+        {"&O17", SyntaxKind.NumberValueToken},
+        {"&B1111", SyntaxKind.NumberValueToken},
+        {"&HAASB", SyntaxKind.NumberValueToken},
+        {"&HAAUB", SyntaxKind.NumberValueToken},
+        {"&O17S", SyntaxKind.NumberValueToken},
+        {"12", SyntaxKind.NumberValueToken},
+        {"1.2", SyntaxKind.NumberValueToken},
+        {"1.2e3", SyntaxKind.NumberValueToken},
+        {"1.2e-3", SyntaxKind.NumberValueToken},
+        {"12UI", SyntaxKind.NumberValueToken},
+        {"1.2D", SyntaxKind.NumberValueToken},
+        {"1.2e-3F", SyntaxKind.NumberValueToken},
+        {"12SB", SyntaxKind.NumberValueToken},
+        {"#13.8.2002 12:14 PM#", SyntaxKind.DateValueToken},
+        {".", SyntaxKind.DotToken},
+        {":", SyntaxKind.EndOfLineToken},
+        {"?.", SyntaxKind.QuestionmarkDotToken},
+        {"?", SyntaxKind.QuestionmarkToken},
+        {",", SyntaxKind.CommaToken},
+        {"(", SyntaxKind.OpenBracketToken},
+        {")", SyntaxKind.CloseBracketToken},
+        {"{", SyntaxKind.OpenBraceToken},
+        {"}", SyntaxKind.CloseBraceToken},
+        {"+", SyntaxKind.PlusToken},
+        {"=", SyntaxKind.EqualsToken},
+        {"+=", SyntaxKind.PlusEqualsToken},
+        {"-", SyntaxKind.MinusToken},
+        {"-=", SyntaxKind.MinusEqualsToken},
+        {"*", SyntaxKind.StarToken},
+        {"*=", SyntaxKind.StarEqualsToken},
+        {"/", SyntaxKind.SlashToken},
+        {"/=", SyntaxKind.SlashEqualsToken},
+        {"\", SyntaxKind.BackslashToken},
+        {"\=", SyntaxKind.BackslashEqualsToken},
+        {"&", SyntaxKind.AmpersandToken},
+        {"&=", SyntaxKind.AmpersandEqualsToken},
+        {"^", SyntaxKind.CircumflexToken},
+        {"^=", SyntaxKind.CircumflexEqualsToken},
+        {">", SyntaxKind.GreaterToken},
+        {">>", SyntaxKind.GreaterGreaterToken},
+        {">>=", SyntaxKind.GreaterGreaterEqualsToken},
+        {">=", SyntaxKind.GreaterEqualsToken},
+        {"<>", SyntaxKind.LowerGreaterToken},
+        {"<", SyntaxKind.LowerToken},
+        {"<<", SyntaxKind.LowerLowerToken},
+        {"<<=", SyntaxKind.LowerLowerEqualsToken},
+        {"<=", SyntaxKind.LowerEqualsToken},
+        {"Nothing", SyntaxKind.NothingValueToken},
+        {"True", SyntaxKind.BoolValueToken},
+        {"False", SyntaxKind.BoolValueToken},
+        {"abs", SyntaxKind.IdentifierToken},
+        {"New", SyntaxKind.NewKeywordToken}
     }
 
     Private Shared ReadOnly TestTokenValue As New Dictionary(Of String, Object) From {

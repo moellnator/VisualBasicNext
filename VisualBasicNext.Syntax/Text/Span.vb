@@ -1,7 +1,7 @@
 ﻿Namespace Text
     Public Class Span
 
-        Private ReadOnly _source As Source
+        Public ReadOnly Property Source As Source
         Public ReadOnly Property Start As Integer
         Public ReadOnly Property Length As Integer
         Public ReadOnly Property [End] As Integer
@@ -11,7 +11,7 @@
         End Property
 
         Public Sub New(source As Source, start As Integer, length As Integer)
-            Me._source = source
+            Me.Source = source
             Me.Start = start
             If Me.Start < 0 Then Throw New ArgumentException("Argument can not be negative.", NameOf(start))
             Me.Length = length
@@ -22,12 +22,17 @@
             Return New Span(source, start, [end] - start)
         End Function
 
+
+        Public Shared Function FromBounds(start As Span, [end] As Span) As Span
+            Return FromBounds(start.Source, start.Start, [end].End)
+        End Function
+
         Public Overrides Function ToString() As String
-            Return If(Me.Start >= _source.ToString.Count, "", Me._source.ToString.Substring(Me.Start, Me.Length))
+            Return If(Me.Start >= Source.ToString.Count, "", Me.Source.ToString.Substring(Me.Start, Me.Length))
         End Function
 
         Public Function GetStartPosition() As Position
-            Return Position.FromSourceLocation(Me._source, Me.Start)
+            Return Position.FromSourceLocation(Me.Source, Me.Start)
         End Function
 
     End Class
