@@ -1,7 +1,7 @@
 ﻿Imports VisualBasicNext.Syntax.Lexing
 
 Namespace Parsing
-    Public Class LiteralNode : Inherits ExpressionNode
+    Public Class LiteralExpressionNode : Inherits ExpressionNode
 
         Public ReadOnly Property LiteralToken As SyntaxToken
 

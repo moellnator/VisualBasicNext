@@ -1,4 +1,5 @@
 ﻿Imports VisualBasicNext.Syntax.Lexing
+Imports VisualBasicNext.Syntax.Parsing
 
 Namespace Diagnostics
     Public Class ErrorList : Implements IReadOnlyList(Of ErrorObject)
@@ -14,24 +15,65 @@ Namespace Diagnostics
             Me._content.AddRange(previous)
         End Sub
 
+        Public ReadOnly Property HasErrors As Boolean
+            Get
+                Return Me.Any()
+            End Get
+        End Property
+
+        Public Sub Append(errorList As ErrorList)
+            Me._content.AddRange(errorList._content)
+        End Sub
+
         Public Sub ReportBadCharakter(input As Char, span As Text.Span)
-            Me._content.Add(New ErrorObject($"Invalid character '{input}' in source at {span.GetStartPosition.ToString}.", span))
+            Me.ReportMessage($"Invalid character '{input}'", span)
         End Sub
 
         Public Sub ReportBadConversion(fromType As Type, toType As Type, span As Text.Span)
-            Me._content.Add(New ErrorObject($"Invalid conversion from type ({fromType.ToString}) to ({toType.ToString}) in source at {span.GetStartPosition.ToString}.", span))
+            Me.ReportMessage($"Invalid conversion from type ({fromType.ToString}) to ({toType.ToString})", span)
         End Sub
 
         Public Sub ReportBadLiteral(literal As String, target As Type, span As Text.Span)
-            Me._content.Add(New ErrorObject($"Literal '{literal}' does not represent a value of type ({target}) in source at {span.GetStartPosition.ToString}.", span))
+            Me.ReportMessage($"Literal '{literal}' does not represent a value of type ({target})", span)
         End Sub
 
         Public Sub ReportMissing(text As String, span As Text.Span)
-            Me._content.Add(New ErrorObject($"Expected missing '{text}' in source at {span.GetStartPosition.ToString}.", span))
+            Me.ReportMessage($"Expected missing '{text}'", span)
         End Sub
 
         Public Sub ReportUnexpectedToken(expected As SyntaxKind, actual As SyntaxKind, span As Text.Span)
-            Me._content.Add(New ErrorObject($"Expected <{expected.ToString}> instead of <{actual.ToString}> in source at {span.GetStartPosition.ToString}.", span))
+            Me.ReportMessage($"Expected <{expected.ToString}> instead of <{actual.ToString}>", span)
+        End Sub
+
+        Public Sub ReportUndefinedType(typename As TypeNameNode)
+            Me.ReportMessage($"Undefined or inaccessible type <{typename.Span.ToString()}>", typename.Span)
+        End Sub
+
+        Public Sub ReportTypeNotGeneric(type As Type, syntax As TypeNameNode)
+            Me.ReportMessage($"Type <type.Name> is not a generic type", syntax.Span)
+        End Sub
+
+        Public Sub ReportGenericArgumentMissmatch(type As Type, generics As List(Of Type), syntax As TypeNameNode)
+            Me.ReportMessage(
+                $"No matching generic type definition found of <{type.Name}> with generic arguments ({String.Join(","c, generics.Select(Function(g) g.Name).ToArray)})",
+                syntax.Span
+            )
+        End Sub
+
+        Public Sub ReportVariableAlreadyDefined(name As String, statement As SyntaxToken)
+            Me.ReportMessage($"Variable '{name}' has already been defines in the current scope ", statement.Span)
+        End Sub
+
+        Public Sub ReportInvalidConversion(fromType As Type, toType As Type, expression As Text.Span)
+            Me.ReportMessage($"No implicit conversion from <{fromType.ToString}> to type <{toType.ToString}> found ", expression)
+        End Sub
+
+        Public Sub ReportVariableNotDeclared(syntax As SyntaxToken)
+            Me.ReportMessage($"Variable '{syntax.Span.ToString} is not declared in current scope'", syntax.Span)
+        End Sub
+
+        Private Sub ReportMessage(message As String, span As Text.Span)
+            Me._content.Add(New ErrorObject(message & $" in source at {span.GetStartPosition.ToString}.", span))
         End Sub
 
         Default Public ReadOnly Property Item(index As Integer) As ErrorObject Implements IReadOnlyList(Of ErrorObject).Item
@@ -57,6 +99,13 @@ Namespace Diagnostics
         Public Sub Clear()
             Me._content.Clear()
         End Sub
+
+        Public Shared Operator &(a As ErrorList, b As ErrorList) As ErrorList
+            Dim retval As New ErrorList()
+            retval._content.AddRange(a)
+            retval._content.AddRange(b)
+            Return retval
+        End Operator
 
     End Class
 

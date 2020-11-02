@@ -72,7 +72,15 @@ Namespace Lexing
         ExpressionStatementNode
         EmptyStatementNode
         BlockExpressionNode
-        IdentifierExpressionNode
+        TypeNameNode
+        TypeNameItemNode
+        GenericsListNode
+        GenericListItemNode
+        ArrayDimensionsListNode
+        ArrayDimensionsListItemNode
+        VariableDeclarationStatementNode
+        DimKeywordToken
+        VariableExpressionNode
     End Enum
 
     Public Class SyntaxToken : Inherits SyntaxNode

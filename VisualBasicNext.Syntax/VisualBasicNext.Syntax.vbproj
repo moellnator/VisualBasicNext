@@ -65,8 +65,26 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Binding\Binder.vb" />
+    <Compile Include="Binding\BoundConstant.vb" />
+    <Compile Include="Binding\BoundErrorExpression.vb" />
+    <Compile Include="Binding\BoundExpression.vb" />
+    <Compile Include="Binding\BoundExpressionStatement.vb" />
+    <Compile Include="Binding\BoundGlobalScope.vb" />
+    <Compile Include="Binding\BoundLiteralExpression.vb" />
+    <Compile Include="Binding\BoundNode.vb" />
+    <Compile Include="Binding\BoundNodeKinds.vb" />
+    <Compile Include="Binding\BoundScope.vb" />
+    <Compile Include="Binding\BoundScript.vb" />
+    <Compile Include="Binding\BoundStatement.vb" />
+    <Compile Include="Binding\BoundVariableDeclarationStatement.vb" />
+    <Compile Include="Binding\BoundVariableExpression.vb" />
+    <Compile Include="Binding\TypeResolver.vb" />
+    <Compile Include="Compilation.vb" />
     <Compile Include="Diagnostics\ErrorObject.vb" />
     <Compile Include="Diagnostics\ErrorList.vb" />
+    <Compile Include="EvaluationResult.vb" />
+    <Compile Include="Evaluator.vb" />
     <Compile Include="Lexing\Lexer.vb" />
     <Compile Include="Lexing\SyntaxToken.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
@@ -84,20 +102,31 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Parsing\ArrayDimensionsListItemNode.vb" />
+    <Compile Include="Parsing\ArrayDimensionsListNode.vb" />
     <Compile Include="Parsing\BlockExpressionNode.vb" />
     <Compile Include="Parsing\EmptyStatementNode.vb" />
     <Compile Include="Parsing\ExpressionNode.vb" />
     <Compile Include="Parsing\ExpressionStatementNode.vb" />
-    <Compile Include="Parsing\IdentifierExpressionNode.vb" />
-    <Compile Include="Parsing\LiteralNode.vb" />
+    <Compile Include="Parsing\GenericListItemNode.vb" />
+    <Compile Include="Parsing\GenericsListNode.vb" />
+    <Compile Include="Parsing\VariableExpressionNode.vb" />
+    <Compile Include="Parsing\LiteralExpressionNode.vb" />
     <Compile Include="Parsing\ScriptNode.vb" />
     <Compile Include="Parsing\StatementNode.vb" />
     <Compile Include="Parsing\SyntaxNode.vb" />
     <Compile Include="Parsing\Parser.vb" />
+    <Compile Include="Parsing\TypeNameItemNode.vb" />
+    <Compile Include="Parsing\TypeNameNode.vb" />
+    <Compile Include="Parsing\VaraibleDeclarationStatementNode.vb" />
+    <Compile Include="Symbols\GlobalVariableSymbol.vb" />
+    <Compile Include="Symbols\Symbol.vb" />
+    <Compile Include="Symbols\VariableSymbol.vb" />
     <Compile Include="Text\Line.vb" />
     <Compile Include="Text\Position.vb" />
     <Compile Include="Text\Source.vb" />
     <Compile Include="Text\Span.vb" />
+    <Compile Include="VMState.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">
@@ -118,5 +147,6 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

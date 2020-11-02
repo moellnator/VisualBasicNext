@@ -8,7 +8,7 @@ Namespace Parsing
         Public Overrides ReadOnly Iterator Property Children As IEnumerable(Of SyntaxNode)
             Get
                 Yield Me.Expression
-                Yield Me.EndOfStatementToken
+                If Not Me.EndOfStatementToken Is Nothing Then Yield Me.EndOfStatementToken
             End Get
         End Property
 

@@ -546,6 +546,10 @@ Namespace Lexing
                     retval = SyntaxKind.FunctionKeywordToken
                 Case "sub"
                     retval = SyntaxKind.SubKeywordToken
+                Case "dim"
+                    retval = SyntaxKind.DimKeywordToken
+                Case "_"
+                    Me.Diagnostics.ReportBadCharakter("_", New Span(Me._source, start, 1))
                 Case Else
                     retval = SyntaxKind.IdentifierToken
             End Select
