@@ -8,9 +8,15 @@ Namespace Binding
 
         Private ReadOnly _parent As BoundScope
         Private ReadOnly _symbols As New Dictionary(Of String, Symbol)
+        Private ReadOnly _imports As New List(Of String)
 
         Public Sub New(parent As BoundScope)
             Me._parent = parent
+            If Me._parent IsNot Nothing Then Me._imports.AddRange(parent._imports)
+        End Sub
+
+        Public Sub Import(name As String)
+            If Not Me._imports.Contains(name) Then Me._imports.Add(name)
         End Sub
 
         Public Function TryDeclareVariable(symbol As VariableSymbol) As Boolean
@@ -38,6 +44,10 @@ Namespace Binding
 
         Private Function GetDeclaredSymbols(Of T As Symbol)() As ImmutableArray(Of T)
             Return Me._symbols.Values.OfType(Of T).ToImmutableArray
+        End Function
+
+        Public Function GetImports() As ImmutableArray(Of String)
+            Return Me._imports.ToImmutableArray
         End Function
 
     End Class

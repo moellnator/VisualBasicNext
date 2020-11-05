@@ -41,7 +41,8 @@ Public Class Compilation
         If Me._GetGlobalScope.Diagnostics.HasErrors Then Return New EvaluationResult(Nothing, Me._GetGlobalScope.Diagnostics)
         If program.Diagnostics.HasErrors Then Return New EvaluationResult(Nothing, program.Diagnostics)
         Dim evaluator As New Evaluator(program, state)
-        Return New EvaluationResult(evaluator.Evaluate, program.Diagnostics)
+        Dim result As Object = evaluator.Evaluate
+        Return New EvaluationResult(result, program.Diagnostics & evaluator.Diagnostics)
     End Function
 
 End Class

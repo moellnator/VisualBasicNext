@@ -63,14 +63,36 @@ Namespace Parsing
 
         Private Function _MatchStatement() As StatementNode
             Select Case Me._current.Kind
-                'TODO: Add statements - import, assignment, ...
+                'TODO: Add statements - assignment, ...
                 Case SyntaxKind.EndOfLineToken
                     Return New EmptyStatementNode(Me._next_token)
                 Case SyntaxKind.DimKeywordToken
                     Return Me._MatchVaraibleDeclarationStatement
+                Case SyntaxKind.ImportsKeywordToken
+                    Return Me._MatchImportStatement
                 Case Else
                     Return Me._MatchExpressionStatement
             End Select
+        End Function
+
+        Private Function _MatchImportStatement() As ImportsStatementNode
+            Dim keyword As SyntaxNode = Me._MatchToken(SyntaxKind.ImportsKeywordToken)
+            Dim node As NamespaceNode = Me._MatchNamespace
+            Return New ImportsStatementNode(keyword, node, Me._MatchEndOfStatement)
+        End Function
+
+        Private Function _MatchNamespace() As NamespaceNode
+            Dim items As New List(Of NamespaceItemNode) From {Me._MatchNamespaceItem(True)}
+            While Me._current.Kind = SyntaxKind.DotToken
+                items.Add(Me._MatchNamespaceItem)
+            End While
+            Return New NamespaceNode(items.ToImmutableArray)
+        End Function
+
+        Private Function _MatchNamespaceItem(Optional isFirst As Boolean = False) As NamespaceItemNode
+            Dim delimeter As SyntaxToken = If(isFirst, Nothing, Me._MatchToken(SyntaxKind.DotToken))
+            Dim identifier As SyntaxToken = Me._MatchToken(SyntaxKind.IdentifierToken)
+            Return New NamespaceItemNode(delimeter, identifier)
         End Function
 
         Private Function _MatchVaraibleDeclarationStatement() As StatementNode
@@ -119,9 +141,15 @@ Namespace Parsing
 
         Private Function _MatchAtomicExpression() As ExpressionNode
             Select Case Me._current.Kind
-                'TODO:  typecast, ternary, nullcheck, array, gettype 
+                'TODO:  ternary, nullcheck, array, ctypedynamic 
                 Case SyntaxKind.OpenBracketToken
                     Return Me._MatchBlockExpression
+                Case SyntaxKind.CTypeKeywordToken
+                    Return Me._MatchCastExpression
+                Case SyntaxKind.CTypeDynamicKeywordToken
+                    Return Me._MatchCastDynamicExpression
+                Case SyntaxKind.GetTypeKeywordToken
+                    Return Me._MatchGetTypeExpression
                 Case SyntaxKind.BoolValueToken
                     Return Me._MatchBooleanExpression
                 Case SyntaxKind.NumberValueToken
@@ -137,6 +165,37 @@ Namespace Parsing
                     'TODO -> Match full quallifiers!
                     Return New VariableExpressionNode(identifier)
             End Select
+        End Function
+
+        Private Function _MatchGetTypeExpression() As GetTypeExpressionNode
+            Return New GetTypeExpressionNode(
+                Me._MatchToken(SyntaxKind.GetTypeKeywordToken),
+                Me._MatchToken(SyntaxKind.OpenBracketToken),
+                Me._MatchTypeName,
+                Me._MatchToken(SyntaxKind.CloseBracketToken)
+            )
+        End Function
+
+        Private Function _MatchCastExpression() As CastExpressionNode
+            Return New CastExpressionNode(
+                Me._MatchToken(SyntaxKind.CTypeKeywordToken),
+                Me._MatchToken(SyntaxKind.OpenBracketToken),
+                Me._MatchExpression,
+                Me._MatchToken(SyntaxKind.CommaToken),
+                Me._MatchTypeName,
+                Me._MatchToken(SyntaxKind.CloseBracketToken)
+            )
+        End Function
+
+        Private Function _MatchCastDynamicExpression() As CastDynamicExpressionNode
+            Return New CastDynamicExpressionNode(
+                Me._MatchToken(SyntaxKind.CTypeDynamicKeywordToken),
+                Me._MatchToken(SyntaxKind.OpenBracketToken),
+                Me._MatchExpression,
+                Me._MatchToken(SyntaxKind.CommaToken),
+                Me._MatchExpression,
+                Me._MatchToken(SyntaxKind.CloseBracketToken)
+            )
         End Function
 
         Private Function _MatchBlockExpression() As BlockExpressionNode

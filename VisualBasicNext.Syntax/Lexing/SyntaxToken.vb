@@ -81,6 +81,15 @@ Namespace Lexing
         VariableDeclarationStatementNode
         DimKeywordToken
         VariableExpressionNode
+        ImportsKeywordToken
+        ImportsStatementNode
+        NamespaceNode
+        NamespaceItemNode
+        CastExpressionNode
+        GetTypeExpressionNode
+        GetTypeKeywordToken
+        CTypeDynamicKeywordToken
+        CastDynamicExpressionNode
     End Enum
 
     Public Class SyntaxToken : Inherits SyntaxNode

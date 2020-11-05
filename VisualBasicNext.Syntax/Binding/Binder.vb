@@ -2,6 +2,7 @@
 Imports VisualBasicNext.Syntax.Diagnostics
 Imports VisualBasicNext.Syntax.Parsing
 Imports VisualBasicNext.Syntax.Symbols
+Imports VisualBasicNext.TypeExtensions
 
 Namespace Binding
     Public Class Binder
@@ -22,9 +23,14 @@ Namespace Binding
             ).Where(
                 Function(s) s IsNot Nothing
             ).ToImmutableArray
-            'TODO -> Filter for Lambdas and save them in global scope
-            'TODO -> Add global import into global scope
-            Return New BoundGlobalScope(script, previous, binder.Diagnostics, binder._scope.GetDeclaredVariables, statements)
+            Return New BoundGlobalScope(
+                script,
+                previous,
+                binder.Diagnostics,
+                binder._scope.GetDeclaredVariables,
+                statements,
+                binder._scope.GetImports
+            )
         End Function
 
         Private Shared Function CreateParentScope(previous As BoundGlobalScope) As BoundScope
@@ -37,8 +43,10 @@ Namespace Binding
             While stack.Count > 0
                 previous = stack.Pop
                 For Each v As VariableSymbol In previous.Variables
-                    'TODO -> Add previous lambdas
                     root.TryDeclareVariable(v)
+                Next
+                For Each i As String In previous.Imports
+                    root.Import(i)
                 Next
             End While
             Return root
@@ -57,9 +65,18 @@ Namespace Binding
                     Return Me._BindExpressionStatement(statement)
                 Case Lexing.SyntaxKind.VariableDeclarationStatementNode
                     Return Me._BindVariableDeclarationStatement(statement)
+                Case Lexing.SyntaxKind.ImportsStatementNode
+                    Return Me._BindImportStatement(statement)
                 Case Else
                     Throw New Exception($"Syntax node <{statement.Kind.ToString}> is not a statement.")
             End Select
+        End Function
+
+        Private Function _BindImportStatement(statement As ImportsStatementNode) As BoundImportStatement
+            Dim name As String = statement.Identifier.Span.ToString
+            If Not TypeResolver.IsValidNamespace(name) Then Me.Diagnostics.ReportBadNamespace(name, statement.Identifier.Span)
+            Me._scope.Import(name)
+            Return New BoundImportStatement(statement, name)
         End Function
 
         Private Function _BindVariableDeclarationStatement(statement As VariableDeclarationStatementNode) As BoundStatement
@@ -73,11 +90,12 @@ Namespace Binding
                 If type Is Nothing Then
                     type = init_type
                 Else
-                    If Not TypeResolver.CanConvert(init_type, type) Then
+                    If Not init_type.IsImplicitlyCastableTo(type) Then
                         Me.Diagnostics.ReportInvalidConversion(init_type, type, statement.Expression.Span)
                     End If
                 End If
             End If
+            If type Is Nothing Then type = GetType(Object)
             Dim symbol As Symbol = Me._BindVariableDeclaration(name, type)
             Return New BoundVariableDeclarationStatement(statement, symbol, initializer)
         End Function
@@ -88,8 +106,7 @@ Namespace Binding
 
         Private Function _BindTypeClause(typename As TypeNameNode) As Type
             If typename Is Nothing Then Return Nothing
-            'TODO -> Check if global imports are available
-            Dim resolver As New TypeResolver(typename, ImmutableArray(Of String).Empty)
+            Dim resolver As New TypeResolver(typename, Me._scope.GetImports)
             Dim retval As Type = resolver.ResolveType
             If Not resolver.Diagnostics.Any Then
                 Return retval
@@ -119,9 +136,45 @@ Namespace Binding
                     Return Me._BindLiteralExpression(expression)
                 Case Lexing.SyntaxKind.VariableExpressionNode
                     Return Me._BindVariableExpression(expression)
+                Case Lexing.SyntaxKind.CastExpressionNode
+                    Return Me._BindCastExpression(expression)
+                Case Lexing.SyntaxKind.CastDynamicExpressionNode
+                    Return Me._BindCastDynamicExpression(expression)
+                Case Lexing.SyntaxKind.GetTypeExpressionNode
+                    Return Me._BindGetTypeExpression(expression)
                 Case Else
                     Throw New Exception($"Syntax node <{expression.Kind.ToString}> is not an expression.")
             End Select
+        End Function
+
+        Private Function _BindExpression(Of T)(expression As ExpressionNode) As BoundExpression
+            Dim retval As BoundExpression = Me._BindExpression(expression)
+            If Not retval.BoundType.IsCastableTo(GetType(T)) Then
+                Me.Diagnostics.ReportInvalidConversion(retval.BoundType, GetType(T), expression.Span)
+                Return New BoundErrorExpression(expression)
+            End If
+            Return retval
+        End Function
+
+        Private Function _BindGetTypeExpression(expression As GetTypeExpressionNode) As BoundExpression
+            Dim type As Type = Me._BindTypeClause(expression.TypeName)
+            Return New BoundGetTypeExpression(expression, type)
+        End Function
+
+        Private Function _BindCastExpression(expression As CastExpressionNode) As BoundExpression
+            Dim type As Type = Me._BindTypeClause(expression.Typename)
+            Dim value As BoundExpression = Me._BindExpression(expression.Expression)
+            If Not value.BoundType.IsCastableTo(type) Then
+                Me.Diagnostics.ReportInvalidConversion(value.BoundType, type, expression.Typename.Span)
+                Return New BoundErrorExpression(expression)
+            End If
+            Return New BoundCastExpression(expression, value, type)
+        End Function
+
+        Private Function _BindCastDynamicExpression(expression As CastDynamicExpressionNode) As BoundExpression
+            Dim type As BoundExpression = Me._BindExpression(Of Type)(expression.TypeNode)
+            Dim value As BoundExpression = Me._BindExpression(expression.Expression)
+            Return New BoundCastDynamicExpression(expression, value, type)
         End Function
 
         Private Function _BindVariableExpression(expression As VariableExpressionNode) As BoundExpression

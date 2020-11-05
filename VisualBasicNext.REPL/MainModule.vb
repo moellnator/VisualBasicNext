@@ -47,7 +47,7 @@ Module MainModule
                             Next
                         Else
                             'compilation.SyntaxTree.WriteTo(Console.Out)
-                            _Print(result.Value?.ToString & vbNewLine, ConsoleColor.DarkGreen)
+                            If result.Value IsNot Nothing Then _Print(result.Value?.ToString & vbNewLine, ConsoleColor.DarkGreen)
                             previous = compilation
                         End If
                         multiline = ""

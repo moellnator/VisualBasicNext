@@ -66,11 +66,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Binding\Binder.vb" />
+    <Compile Include="Binding\BoundCastDynamicExpression.vb" />
+    <Compile Include="Binding\BoundCastExpression.vb" />
     <Compile Include="Binding\BoundConstant.vb" />
     <Compile Include="Binding\BoundErrorExpression.vb" />
     <Compile Include="Binding\BoundExpression.vb" />
     <Compile Include="Binding\BoundExpressionStatement.vb" />
+    <Compile Include="Binding\BoundGetTypeExpression.vb" />
     <Compile Include="Binding\BoundGlobalScope.vb" />
+    <Compile Include="Binding\BoundImportStatement.vb" />
     <Compile Include="Binding\BoundLiteralExpression.vb" />
     <Compile Include="Binding\BoundNode.vb" />
     <Compile Include="Binding\BoundNodeKinds.vb" />
@@ -105,11 +109,15 @@
     <Compile Include="Parsing\ArrayDimensionsListItemNode.vb" />
     <Compile Include="Parsing\ArrayDimensionsListNode.vb" />
     <Compile Include="Parsing\BlockExpressionNode.vb" />
+    <Compile Include="Parsing\CastExpressionNode.vb" />
+    <Compile Include="Parsing\CastDynamicExpressionNode.vb" />
     <Compile Include="Parsing\EmptyStatementNode.vb" />
     <Compile Include="Parsing\ExpressionNode.vb" />
     <Compile Include="Parsing\ExpressionStatementNode.vb" />
     <Compile Include="Parsing\GenericListItemNode.vb" />
     <Compile Include="Parsing\GenericsListNode.vb" />
+    <Compile Include="Parsing\GetTypeExpressionNode.vb" />
+    <Compile Include="Parsing\ImportsStatementNode.vb" />
     <Compile Include="Parsing\VariableExpressionNode.vb" />
     <Compile Include="Parsing\LiteralExpressionNode.vb" />
     <Compile Include="Parsing\ScriptNode.vb" />
@@ -147,6 +155,11 @@
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\VisualBasicNext.TypeExtensions\VisualBasicNext.TypeExtensions.csproj">
+      <Project>{169c9104-b27d-42e5-8d51-189c68ed1966}</Project>
+      <Name>VisualBasicNext.TypeExtensions</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

@@ -538,6 +538,8 @@ Namespace Lexing
                     retval = SyntaxKind.NewKeywordToken
                 Case "ctype"
                     retval = SyntaxKind.CTypeKeywordToken
+                Case "ctypedynamic"
+                    retval = SyntaxKind.CTypeDynamicKeywordToken
                 Case "as"
                     retval = SyntaxKind.AsKeywordToken
                 Case "of"
@@ -548,6 +550,10 @@ Namespace Lexing
                     retval = SyntaxKind.SubKeywordToken
                 Case "dim"
                     retval = SyntaxKind.DimKeywordToken
+                Case "imports"
+                    retval = SyntaxKind.ImportsKeywordToken
+                Case "gettype"
+                    retval = SyntaxKind.GetTypeKeywordToken
                 Case "_"
                     Me.Diagnostics.ReportBadCharakter("_", New Span(Me._source, start, 1))
                 Case Else

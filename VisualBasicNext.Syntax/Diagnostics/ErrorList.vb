@@ -1,5 +1,6 @@
 ﻿Imports VisualBasicNext.Syntax.Lexing
 Imports VisualBasicNext.Syntax.Parsing
+Imports VisualBasicNext.Syntax.Text
 
 Namespace Diagnostics
     Public Class ErrorList : Implements IReadOnlyList(Of ErrorObject)
@@ -65,7 +66,7 @@ Namespace Diagnostics
         End Sub
 
         Public Sub ReportInvalidConversion(fromType As Type, toType As Type, expression As Text.Span)
-            Me.ReportMessage($"No implicit conversion from <{fromType.ToString}> to type <{toType.ToString}> found ", expression)
+            Me.ReportMessage($"No valid conversion from <{fromType.ToString}> to type <{toType.ToString}> found ", expression)
         End Sub
 
         Public Sub ReportVariableNotDeclared(syntax As SyntaxToken)
@@ -74,6 +75,10 @@ Namespace Diagnostics
 
         Private Sub ReportMessage(message As String, span As Text.Span)
             Me._content.Add(New ErrorObject(message & $" in source at {span.GetStartPosition.ToString}.", span))
+        End Sub
+
+        Public Sub ReportBadNamespace(name As String, span As Span)
+            Me.ReportMessage($"Namespace '{name}' not found in current app domain", span)
         End Sub
 
         Default Public ReadOnly Property Item(index As Integer) As ErrorObject Implements IReadOnlyList(Of ErrorObject).Item

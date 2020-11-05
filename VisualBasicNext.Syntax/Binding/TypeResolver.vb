@@ -91,9 +91,9 @@ Namespace Binding
                 For Each t As Type In assembly.GetTypes()
                     If t.Attributes.HasFlag(TypeAttributes.Public) And Not t.FullName.Contains("<") And Not t.IsNested Then
                         _add_partial_namespaces(t.Namespace, namespaces)
-                        If declared.ContainsKey(t.FullName) Then Stop
-                        declared.Add(t.FullName, t)
-                        _add_nested_types(t, t.FullName, declared)
+                        If declared.ContainsKey(t.FullName.ToLower) Then Stop
+                        declared.Add(t.FullName.ToLower, t)
+                        _add_nested_types(t, t.FullName.ToLower, declared)
                     End If
                 Next
             Next
@@ -104,8 +104,8 @@ Namespace Binding
         Private Shared Sub _add_partial_namespaces(namespaceName As String, ByRef output As List(Of String))
             If Not output.Contains(namespaceName) Then
                 Dim parts As String() = If(namespaceName, "").Split("."c)
-                For i = 1 To parts.Count - 1
-                    Dim partial_namespace As String = String.Join("."c, parts.Take(i).ToString)
+                For i = 1 To parts.Count
+                    Dim partial_namespace As String = String.Join("."c, parts.Take(i).ToArray).ToLower
                     If Not output.Contains(partial_namespace) Then output.Add(partial_namespace)
                 Next
             End If
@@ -113,7 +113,7 @@ Namespace Binding
 
         Private Shared Sub _add_nested_types(base As Type, key As String, ByRef output As Dictionary(Of String, Type))
             For Each nest As Type In base.GetNestedTypes(BindingFlags.Public)
-                Dim nest_key As String = key & "." & nest.Name
+                Dim nest_key As String = key & "." & nest.Name.ToLower
                 output.Add(nest_key, nest)
                 _add_nested_types(nest, nest_key, output)
             Next
@@ -171,6 +171,10 @@ Namespace Binding
             Me._imports = If(importsList, ImmutableArray(Of String).Empty)
         End Sub
 
+        Public Shared Function IsValidNamespace(name As String) As Boolean
+            Return _Namespaces.Contains(name.ToLower)
+        End Function
+
         Public Function ResolveType() As Type
             Dim retval As Type = GetType(Object)
             If _TryResolveBaseType(Me._syntax, Me._imports, retval) Then
@@ -197,7 +201,7 @@ Namespace Binding
         End Function
 
         Private Shared Function _GetItemName(item As TypeNameItemNode) As String
-            Return item.Identifier.Span.ToString & If(item.HasGenerics, "`" & item.Generics.ListItems.Count, "")
+            Return item.Identifier.Span.ToString.ToLower & If(item.HasGenerics, "`" & item.Generics.ListItems.Count, "")
         End Function
 
         Private Function _MakeArrayType(type As Type) As Type
@@ -236,36 +240,6 @@ Namespace Binding
                 Return type
             End Try
         End Function
-
-        Public Shared Function CanConvert(fromType As Type, toType As Type) As Boolean
-            If toType.IsAssignableFrom(fromType) Then Return True
-            If HasImplicitConversion(fromType, fromType, toType) Or HasImplicitConversion(toType, fromType, toType) Then Return True
-            If HasImplicitNumberConversion(fromType, toType) Then Return True
-            If toType.IsEnum AndAlso CanConvert(fromType, [Enum].GetUnderlyingType(toType)) Then Return True
-            If Nullable.GetUnderlyingType(toType) IsNot Nothing Then Return CanConvert(fromType, Nullable.GetUnderlyingType(toType))
-            Return False
-        End Function
-
-        Private Shared Function HasImplicitConversion(defined As Type, base As Type, target As Type) As Boolean
-            Return defined.GetMethods(BindingFlags.Public Or BindingFlags.Static).Where(
-                Function(m) m.Name = "op_Implicit" & m.ReturnType.Equals(target)
-            ).Any(
-                Function(m)
-                    Dim p As ParameterInfo = m.GetParameters.FirstOrDefault
-                    Return p IsNot Nothing AndAlso p.ParameterType.Equals(base)
-                End Function
-            )
-        End Function
-
-        Private Shared Function HasImplicitNumberConversion(fromType As Type, toType As Type) As Boolean
-            Dim typeList As List(Of Type) = Nothing
-            If ImplicitNumericConversions.TryGetValue(fromType, typeList) Then
-                If typeList.Contains(toType) Then Return True
-            End If
-            Return False
-        End Function
-
-        'See: https://github.com/CYJB/Cyjb/blob/f4424c4f81cacd09e9ce5d202a03b0c121c09ac2/Cyjb/TypeExt.cs for more type conversion stuff
 
     End Class
 
