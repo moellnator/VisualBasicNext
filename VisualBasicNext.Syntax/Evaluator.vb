@@ -84,9 +84,72 @@ Public Class Evaluator
                 Return Me.EvaluateCastDynamicExpression(expression)
             Case BoundNodeKinds.BoundGetTypeExpression
                 Return Me.EvaluateGetTypeExpression(expression)
+            Case BoundNodeKinds.BoundTernaryExpression
+                Return Me.EvaluateTernaryExpression(expression)
+            Case BoundNodeKinds.BoundNullCheckExpression
+                Return Me.EvaluateNullCheckExpression(expression)
+            Case BoundNodeKinds.BoundArrayExpression
+                Return Me.EvaluateArrayExpression(expression)
             Case Else
                 Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
         End Select
+    End Function
+
+    Private Function EvaluateArrayExpression(expression As BoundArrayExpression) As Object
+        Dim obj_array As Object() = expression.Items.Select(Function(item) Me.EvaluateExpression(item)).ToArray
+        If expression.Rank = 1 Then
+            If Not expression.BoundType.Equals(GetType(Object).MakeArrayType) Then
+                Dim retval As Array = Array.CreateInstance(expression.BoundType.GetElementType, obj_array.Count)
+                If obj_array.Count > 0 Then Array.Copy(obj_array, retval, obj_array.Count)
+                Return retval
+            Else
+                Return obj_array
+            End If
+        Else
+            Dim lenghts As Integer() = {obj_array.Length}.Concat(Enumerable.Range(0, expression.Rank - 1).Select(Function(level) DirectCast(obj_array.First, Array).GetUpperBound(level) + 1)).ToArray
+            Dim retval As Array = Array.CreateInstance(expression.BoundType.GetElementType, lenghts)
+            CopyArrayMultidimensional(obj_array, retval)
+            Return retval
+        End If
+    End Function
+
+    Private Shared Sub CopyArrayMultidimensional(source As Object(), target As Array)
+        For index As Integer = 0 To source.Count - 1
+            IterCopyArrayMultiDimensional(source, target, {index})
+        Next
+    End Sub
+
+    Private Shared Sub IterCopyArrayMultiDimensional(source As Object(), target As Array, level As Integer())
+        If level.Count = target.Rank Then
+            target.SetValue(DirectCast(source(level.First), Array).GetValue(level.Skip(1).ToArray), level)
+        Else
+            For index As Integer = 0 To target.GetUpperBound(level.Count)
+                IterCopyArrayMultiDimensional(source, target, level.Append(index).ToArray)
+            Next
+        End If
+    End Sub
+
+    Private Function EvaluateTernaryExpression(expression As BoundTernaryExpression) As Object
+        Dim isTrue As Boolean = Me.EvaluateExpression(expression.Condition)
+        If isTrue Then
+            Return Me.EvaluateExpression(expression.TrueExpression)
+        Else
+            Return Me.EvaluateExpression(expression.FalseExpression)
+        End If
+    End Function
+
+    Private Function EvaluateNullCheckExpression(expression As BoundNullCheckExpression) As Object
+        Dim value As Object = Me.EvaluateExpression(expression.Expression)
+        If value IsNot Nothing Then
+            Return value
+        Else
+            Try
+                Return CTypeDynamic(Me.EvaluateExpression(expression.FallbackExpression), expression.BoundType)
+            Catch ex As InvalidCastException
+                Me.Diagnostics.ReportInvalidConversion(expression.FallbackExpression.BoundType, expression.BoundType, expression.FallbackExpression.Syntax.Span)
+                Return Nothing
+            End Try
+        End If
     End Function
 
     Private Function EvaluateGetTypeExpression(expression As BoundGetTypeExpression) As Object

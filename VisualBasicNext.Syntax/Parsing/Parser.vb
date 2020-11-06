@@ -141,7 +141,8 @@ Namespace Parsing
 
         Private Function _MatchAtomicExpression() As ExpressionNode
             Select Case Me._current.Kind
-                'TODO:  ternary, nullcheck, array, ctypedynamic 
+                Case SyntaxKind.OpenBraceToken
+                    Return Me._MatchArrayExpression
                 Case SyntaxKind.OpenBracketToken
                     Return Me._MatchBlockExpression
                 Case SyntaxKind.CTypeKeywordToken
@@ -150,6 +151,8 @@ Namespace Parsing
                     Return Me._MatchCastDynamicExpression
                 Case SyntaxKind.GetTypeKeywordToken
                     Return Me._MatchGetTypeExpression
+                Case SyntaxKind.IfKeywordToken
+                    Return Me._MatchIfExpression
                 Case SyntaxKind.BoolValueToken
                     Return Me._MatchBooleanExpression
                 Case SyntaxKind.NumberValueToken
@@ -165,6 +168,54 @@ Namespace Parsing
                     'TODO -> Match full quallifiers!
                     Return New VariableExpressionNode(identifier)
             End Select
+        End Function
+
+        Private Function _MatchArrayExpression() As ArrayExpressionNode
+            Dim openBrace As SyntaxToken = Me._MatchToken(SyntaxKind.OpenBraceToken)
+            If Me._current.Kind <> SyntaxKind.CloseBraceToken Then
+                Dim items As New List(Of ArrayItemNode) From {Me._MatchArrayItem(True)}
+                While Me._current.Kind = SyntaxKind.CommaToken
+                    items.Add(Me._MatchArrayItem)
+                End While
+                Return New ArrayExpressionNode(openBrace, items, Me._MatchToken(SyntaxKind.CloseBraceToken))
+            Else
+                Return New ArrayExpressionNode(openBrace, Array.Empty(Of ArrayItemNode), Me._MatchToken(SyntaxKind.CloseBraceToken))
+            End If
+        End Function
+
+        Private Function _MatchArrayItem(Optional isFirst As Boolean = False) As ArrayItemNode
+            Dim delimeter As SyntaxToken = If(isFirst, Nothing, Me._MatchToken(SyntaxKind.CommaToken))
+            Dim item As ExpressionNode = Me._MatchExpression
+            Return New ArrayItemNode(delimeter, item)
+        End Function
+
+        Private Function _MatchIfExpression() As ExpressionNode
+            Dim ifKeyword As SyntaxToken = Me._MatchToken(SyntaxKind.IfKeywordToken)
+            Dim openBracket As SyntaxToken = Me._MatchToken(SyntaxKind.OpenBracketToken)
+            Dim condition As ExpressionNode = Me._MatchExpression
+            Dim delimeter As SyntaxToken = Me._MatchToken(SyntaxKind.CommaToken)
+            Dim trueExpression As ExpressionNode = Me._MatchExpression
+            If Me._current.Kind = SyntaxKind.CommaToken Then
+                Return New TernaryExpressionNode(
+                    ifKeyword,
+                    openBracket,
+                    condition,
+                    delimeter,
+                    trueExpression,
+                    Me._MatchToken(SyntaxKind.CommaToken),
+                    Me._MatchExpression,
+                    Me._MatchToken(SyntaxKind.CloseBracketToken)
+                )
+            Else
+                Return New NullCheckExpressionNode(
+                    ifKeyword,
+                    openBracket,
+                    condition,
+                    delimeter,
+                    trueExpression,
+                    Me._MatchToken(SyntaxKind.CloseBracketToken)
+                )
+            End If
         End Function
 
         Private Function _MatchGetTypeExpression() As GetTypeExpressionNode

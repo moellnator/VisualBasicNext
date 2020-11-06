@@ -47,13 +47,28 @@ Module MainModule
                             Next
                         Else
                             'compilation.SyntaxTree.WriteTo(Console.Out)
-                            If result.Value IsNot Nothing Then _Print(result.Value?.ToString & vbNewLine, ConsoleColor.DarkGreen)
+                            _PrintValue(result.Value)
                             previous = compilation
                         End If
                         multiline = ""
                     End If
             End Select
         End While
+    End Sub
+
+    Private Sub _PrintValue(value As Object, Optional indent As String = "")
+        If value IsNot Nothing Then
+            If Not value.GetType.Equals(GetType(String)) AndAlso GetType(IEnumerable).IsAssignableFrom(value.GetType) Then
+                Dim en As IEnumerable = value
+                _Print($"  {indent}Enumerating <{value.GetType.Name}>: " & vbNewLine, ConsoleColor.White)
+                For Each v As Object In en
+                    _PrintValue(v, indent & "  ")
+                Next
+            Else
+                _Print($"  {indent}<{value.GetType.Name}> ", ConsoleColor.Green)
+                _Print(value.ToString & vbNewLine, ConsoleColor.DarkGreen)
+            End If
+        End If
     End Sub
 
     Private Sub _Print(text As String, Optional color As ConsoleColor = ConsoleColor.Gray)

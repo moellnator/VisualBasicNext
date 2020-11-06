@@ -10,6 +10,9 @@
         BoundCastExpression
         BoundGetTypeExpression
         BoundCastDynamicExpression
+        BoundTernaryExpression
+        BoundNullCheckExpression
+        BoundArrayExpression
     End Enum
 
 End Namespace

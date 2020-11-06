@@ -142,6 +142,12 @@ Namespace Binding
                     Return Me._BindCastDynamicExpression(expression)
                 Case Lexing.SyntaxKind.GetTypeExpressionNode
                     Return Me._BindGetTypeExpression(expression)
+                Case Lexing.SyntaxKind.TernaryExpressionNode
+                    Return Me._BindTernaryExpression(expression)
+                Case Lexing.SyntaxKind.NullCheckExpression
+                    Return Me._BindNullCheckExpression(expression)
+                Case Lexing.SyntaxKind.ArrayExpressionNode
+                    Return Me._BindArrayExpression(expression)
                 Case Else
                     Throw New Exception($"Syntax node <{expression.Kind.ToString}> is not an expression.")
             End Select
@@ -154,6 +160,43 @@ Namespace Binding
                 Return New BoundErrorExpression(expression)
             End If
             Return retval
+        End Function
+
+        Private Function _BindArrayExpression(expression As ArrayExpressionNode) As BoundArrayExpression
+            Dim items As ImmutableArray(Of BoundExpression) = expression.Items.Select(Function(e) Me._BindExpression(e.Expression)).ToImmutableArray
+            Dim all_array As Boolean = items.Count > 0 AndAlso expression.Items.All(Function(e) e.Expression.Kind = Lexing.SyntaxKind.ArrayExpressionNode)
+            Dim common_type As Type = GetType(Object)
+            If items.Count > 0 AndAlso items.All(Function(c) c.BoundType.Equals(items.First.BoundType)) Then common_type = items.First.BoundType
+            If all_array Then
+                Dim common_count As Integer = DirectCast(expression.Items.First.Expression, ArrayExpressionNode).Items.Count
+                If expression.Items.All(Function(e) DirectCast(e.Expression, ArrayExpressionNode).Items.Count = common_count) And common_type.IsArray Then
+                    Dim rank As Integer = common_type.GetArrayRank + 1
+                    Return New BoundArrayExpression(expression, items, common_type.GetElementType.MakeArrayType(rank), rank)
+                Else
+                    Return New BoundArrayExpression(expression, items, common_type.MakeArrayType)
+                End If
+            Else
+                Return New BoundArrayExpression(expression, items, common_type.MakeArrayType)
+            End If
+        End Function
+
+        Private Function _BindTernaryExpression(expression As TernaryExpressionNode) As BoundTernaryExpression
+            Dim condition As BoundExpression = Me._BindExpression(Of Boolean)(expression.Condition)
+            Dim trueExpression As BoundExpression = Me._BindExpression(expression.TrueExpression)
+            Dim falseExpression As BoundExpression = Me._BindExpression(expression.FalseExpression)
+            Dim boundType As Type = GetType(Object)
+            If trueExpression.BoundType.Equals(falseExpression.BoundType) Then boundType = trueExpression.BoundType
+            Return New BoundTernaryExpression(expression, condition, trueExpression, falseExpression, boundType)
+        End Function
+
+        Private Function _BindNullCheckExpression(expression As NullCheckExpressionNode) As BoundExpression
+            Dim expressionFirst As BoundExpression = Me._BindExpression(expression.Expression)
+            Dim expressionFallBack As BoundExpression = Me._BindExpression(expression.FallbackExpression)
+            If Not expressionFallBack.BoundType.IsCastableTo(expressionFirst.BoundType) Then
+                Me.Diagnostics.ReportInvalidConversion(expressionFallBack.BoundType, expressionFirst.BoundType, expression.FallbackExpression.Span)
+                Return New BoundErrorExpression(expression)
+            End If
+            Return New BoundNullCheckExpression(expression, expressionFirst, expressionFallBack, expressionFirst.BoundType)
         End Function
 
         Private Function _BindGetTypeExpression(expression As GetTypeExpressionNode) As BoundExpression

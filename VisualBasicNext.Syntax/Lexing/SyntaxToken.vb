@@ -90,6 +90,10 @@ Namespace Lexing
         GetTypeKeywordToken
         CTypeDynamicKeywordToken
         CastDynamicExpressionNode
+        TernaryExpressionNode
+        NullCheckExpression
+        ArrayExpressionNode
+        ArrayItemNode
     End Enum
 
     Public Class SyntaxToken : Inherits SyntaxNode
