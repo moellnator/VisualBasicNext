@@ -148,6 +148,10 @@ Namespace Binding
                     Return Me._BindNullCheckExpression(expression)
                 Case Lexing.SyntaxKind.ArrayExpressionNode
                     Return Me._BindArrayExpression(expression)
+                Case Lexing.SyntaxKind.UnaryExpressionNode
+                    Return Me._BindUnaryExpression(expression)
+                Case Lexing.SyntaxKind.BinaryExpressionNode
+                    Return Me._BindBinaryExpression(expression)
                 Case Else
                     Throw New Exception($"Syntax node <{expression.Kind.ToString}> is not an expression.")
             End Select
@@ -177,6 +181,29 @@ Namespace Binding
                 End If
             Else
                 Return New BoundArrayExpression(expression, items, common_type.MakeArrayType)
+            End If
+        End Function
+
+        Private Function _BindBinaryExpression(expression As BinaryExpressionNode) As BoundExpression
+            Dim left As BoundExpression = Me._BindExpression(expression.Left)
+            Dim right As BoundExpression = Me._BindExpression(expression.Right)
+            Dim op As BoundBinaryOperator = BoundBinaryOperator.Bind(expression.OperatorToken, left, right)
+            If op IsNot Nothing Then
+                Return New BoundBinaryExpression(expression, left, op, right)
+            Else
+                Me.Diagnostics.ReportOperatorNotDefined(expression.OperatorToken.Kind, left.BoundType, right.BoundType, expression.OperatorToken.Span)
+                Return New BoundErrorExpression(expression)
+            End If
+        End Function
+
+        Private Function _BindUnaryExpression(expression As UnaryExpressionNode) As BoundExpression
+            Dim operand As BoundExpression = Me._BindExpression(expression.Right)
+            Dim op As BoundUnaryOperator = BoundUnaryOperator.Bind(expression.OperatorToken, operand)
+            If op IsNot Nothing Then
+                Return New BoundUnaryExpression(expression, op, operand)
+            Else
+                Me.Diagnostics.ReportOperatorNotDefined(expression.OperatorToken.Kind, operand.BoundType, expression.OperatorToken.Span)
+                Return New BoundErrorExpression(expression)
             End If
         End Function
 

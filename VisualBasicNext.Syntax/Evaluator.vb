@@ -90,9 +90,34 @@ Public Class Evaluator
                 Return Me.EvaluateNullCheckExpression(expression)
             Case BoundNodeKinds.BoundArrayExpression
                 Return Me.EvaluateArrayExpression(expression)
+            Case BoundNodeKinds.BoundUnaryExpression
+                Return Me.EvaluateUnaryExpression(expression)
+            Case BoundNodeKinds.BoundBinaryExpression
+                Return Me.EvaluateBinaryExpression(expression)
             Case Else
                 Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
         End Select
+    End Function
+
+    Private Function EvaluateBinaryExpression(expression As BoundBinaryExpression) As Object
+        Dim left As Object = Me.EvaluateExpression(expression.Left)
+        Dim right As Object = Me.EvaluateExpression(expression.Right)
+        Try
+            Return expression.Op.Invoke(left, right)
+        Catch ex As InvalidCastException
+            Me.Diagnostics.ReportOperatorNotDefined(expression.Op.Syntax.Kind, left.GetType, right.GetType, expression.Op.Syntax.Span)
+            Return Nothing
+        End Try
+    End Function
+
+    Private Function EvaluateUnaryExpression(expression As BoundUnaryExpression) As Object
+        Dim value As Object = Me.EvaluateExpression(expression.Right)
+        Try
+            Return expression.Op.Invoke(value)
+        Catch ex As InvalidCastException
+            Me.Diagnostics.ReportOperatorNotDefined(expression.Op.Syntax.Kind, value.GetType, expression.Op.Syntax.Span)
+            Return Nothing
+        End Try
     End Function
 
     Private Function EvaluateArrayExpression(expression As BoundArrayExpression) As Object

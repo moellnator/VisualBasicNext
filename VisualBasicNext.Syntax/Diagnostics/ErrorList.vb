@@ -81,6 +81,14 @@ Namespace Diagnostics
             Me.ReportMessage($"Namespace '{name}' not found in current app domain", span)
         End Sub
 
+        Public Sub ReportOperatorNotDefined(kind As SyntaxKind, boundType As Type, span As Span)
+            Me.ReportMessage($"Operator <{kind.ToString}> not defined on type <{boundType.Name}>", span)
+        End Sub
+
+        Public Sub ReportOperatorNotDefined(kind As SyntaxKind, leftType As Type, rigthType As Type, span As Span)
+            Me.ReportMessage($"Operator <{kind.ToString}> not defined between type <{leftType.Name}> and <{rigthType.Name}>", span)
+        End Sub
+
         Default Public ReadOnly Property Item(index As Integer) As ErrorObject Implements IReadOnlyList(Of ErrorObject).Item
             Get
                 Return Me._content.Item(index)

@@ -36,8 +36,6 @@ Namespace Lexing
         BackslashToken
         CircumflexEqualsToken
         CircumflexToken
-        GreatethanToken
-        CircuamflexToken
         GreaterToken
         GreaterGreaterToken
         GreaterGreaterEqualsToken
@@ -94,6 +92,9 @@ Namespace Lexing
         NullCheckExpression
         ArrayExpressionNode
         ArrayItemNode
+        BinaryExpressionNode
+        UnaryExpressionNode
+        AndKeywordToken
     End Enum
 
     Public Class SyntaxToken : Inherits SyntaxNode

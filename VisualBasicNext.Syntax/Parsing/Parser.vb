@@ -63,7 +63,7 @@ Namespace Parsing
 
         Private Function _MatchStatement() As StatementNode
             Select Case Me._current.Kind
-                'TODO: Add statements - assignment, ...
+                'TODO -> Add statements - assignment, ...
                 Case SyntaxKind.EndOfLineToken
                     Return New EmptyStatementNode(Me._next_token)
                 Case SyntaxKind.DimKeywordToken
@@ -135,11 +135,36 @@ Namespace Parsing
         End Function
 
         Private Function _MatchExpression() As ExpressionNode
-            'TODO: Binary, Unary, Lambda, MultilineLambda, Action, MultilineAction, Member, New, TypeOf
-            Return Me._MatchAtomicExpression
+            'TODO -> Lambda, MultilineLambda, Action, MultilineAction, Member, New, TypeOf ... Is ...
+            Return Me._MatchBinaryExpression
+        End Function
+
+        Private Function _MatchBinaryExpression(Optional parentPrecedence As Integer = 0) As ExpressionNode
+            Dim left As ExpressionNode = Nothing
+            Dim unary_operator_precedence As Integer = Me._current.Kind.GetUnaryOperatorPrecedence
+            If unary_operator_precedence <> 0 And unary_operator_precedence >= parentPrecedence Then
+                Dim operatorToken As SyntaxToken = Me._next_token
+                Dim operand As ExpressionNode = Me._MatchBinaryExpression(unary_operator_precedence)
+                left = New UnaryExpressionNode(operatorToken, operand)
+            Else
+                left = Me._MatchAtomicExpression
+            End If
+            While True
+                Dim precedence As Integer = Me._current.Kind.GetBinaryOperatorPrecedence
+                If precedence = 0 Or precedence <= parentPrecedence Then Exit While
+                Dim opertorToken As SyntaxToken = Me._next_token
+                Dim right As ExpressionNode = Me._MatchBinaryExpression(precedence)
+                left = New BinaryExpressionNode(left, opertorToken, right)
+            End While
+            Return left
         End Function
 
         Private Function _MatchAtomicExpression() As ExpressionNode
+            'TODO -> Add extrapolated strings $" ... { Expression } ... "
+            'TODO -> Add TryCast Operator
+            'TODO -> Add nameOf Operator
+            'TODO -> Try to add the addressOf operator?
+            'TODO -> Add Await operator?
             Select Case Me._current.Kind
                 Case SyntaxKind.OpenBraceToken
                     Return Me._MatchArrayExpression
@@ -278,6 +303,7 @@ Namespace Parsing
         End Function
 
         Private Function _MatchTypeName() As TypeNameNode
+            'TODO -> Add nullable types using optional ?-Token
             Dim items As ImmutableArray(Of TypeNameItemNode).Builder = ImmutableArray.CreateBuilder(Of TypeNameItemNode)
             items.Add(_MatchTypenameItem(True))
             While Me._current.Kind = SyntaxKind.DotToken

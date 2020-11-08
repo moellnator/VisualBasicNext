@@ -13,6 +13,10 @@
         BoundTernaryExpression
         BoundNullCheckExpression
         BoundArrayExpression
+        BoundBinaryExpression
+        BoundUnaryExpression
+        BoundBinaryOperator
+        BoundUnaryOperator
     End Enum
 
 End Namespace

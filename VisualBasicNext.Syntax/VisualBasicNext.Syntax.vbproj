@@ -67,6 +67,8 @@
   <ItemGroup>
     <Compile Include="Binding\Binder.vb" />
     <Compile Include="Binding\BoundArrayExpression.vb" />
+    <Compile Include="Binding\BoundBinaryExpression.vb" />
+    <Compile Include="Binding\BoundBinaryOperator.vb" />
     <Compile Include="Binding\BoundCastDynamicExpression.vb" />
     <Compile Include="Binding\BoundCastExpression.vb" />
     <Compile Include="Binding\BoundConstant.vb" />
@@ -84,6 +86,8 @@
     <Compile Include="Binding\BoundScript.vb" />
     <Compile Include="Binding\BoundStatement.vb" />
     <Compile Include="Binding\BoundTernaryExpression.vb" />
+    <Compile Include="Binding\BoundUnaryExpression.vb" />
+    <Compile Include="Binding\BoundUnaryOperator.vb" />
     <Compile Include="Binding\BoundVariableDeclarationStatement.vb" />
     <Compile Include="Binding\BoundVariableExpression.vb" />
     <Compile Include="Binding\TypeResolver.vb" />
@@ -113,6 +117,7 @@
     <Compile Include="Parsing\ArrayDimensionsListNode.vb" />
     <Compile Include="Parsing\ArrayExpressionNode.vb" />
     <Compile Include="Parsing\ArrayItemNode.vb" />
+    <Compile Include="Parsing\BinaryExpressionNode.vb" />
     <Compile Include="Parsing\BlockExpressionNode.vb" />
     <Compile Include="Parsing\CastExpressionNode.vb" />
     <Compile Include="Parsing\CastDynamicExpressionNode.vb" />
@@ -124,7 +129,9 @@
     <Compile Include="Parsing\GetTypeExpressionNode.vb" />
     <Compile Include="Parsing\ImportsStatementNode.vb" />
     <Compile Include="Parsing\NullCheckExpressionNode.vb" />
+    <Compile Include="Parsing\SyntaxFacts.vb" />
     <Compile Include="Parsing\TernaryExpressionNode.vb" />
+    <Compile Include="Parsing\UnaryExpressionNode.vb" />
     <Compile Include="Parsing\VariableExpressionNode.vb" />
     <Compile Include="Parsing\LiteralExpressionNode.vb" />
     <Compile Include="Parsing\ScriptNode.vb" />

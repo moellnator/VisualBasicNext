@@ -511,7 +511,7 @@ Namespace Lexing
                     value = Nothing
                     retval = SyntaxKind.NothingValueToken
                 Case "and"
-                    retval = SyntaxKind.NotKeywordToken
+                    retval = SyntaxKind.AndKeywordToken
                 Case "andalso"
                     retval = SyntaxKind.AndAlsoKeywordToken
                 Case "or"
