@@ -179,6 +179,14 @@ Namespace Binding
             Dim retval As Type = GetType(Object)
             If _TryResolveBaseType(Me._syntax, Me._imports, retval) Then
                 If Me._syntax.Items.Any(Function(node) node.HasGenerics) Then retval = _MakeGenericType(retval)
+                If Me._syntax.NullableToken IsNot Nothing Then
+                    If retval.IsValueType Then
+                        retval = GetType(Nullable(Of)).MakeGenericType({retval})
+                    Else
+                        Diagnostics.ReportReferenceTypeCannotBeNullable(retval, Me._syntax)
+                        retval = GetType(Object)
+                    End If
+                End If
                 If Me._syntax.HasArrayDimensions Then retval = Me._MakeArrayType(retval)
             Else
                 Diagnostics.ReportUndefinedType(Me._syntax)

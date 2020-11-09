@@ -335,15 +335,15 @@ Namespace Parsing
         End Function
 
         Private Function _MatchTypeName() As TypeNameNode
-            'TODO -> Add nullable types using optional ?-Token
             Dim items As ImmutableArray(Of TypeNameItemNode).Builder = ImmutableArray.CreateBuilder(Of TypeNameItemNode)
             items.Add(_MatchTypenameItem(True))
             While Me._current.Kind = SyntaxKind.DotToken
                 items.Add(_MatchTypenameItem)
             End While
+            Dim nullable_token As SyntaxToken = If(Me._current.Kind = SyntaxKind.QuestionmarkToken, Me._MatchToken(SyntaxKind.QuestionmarkToken), Nothing)
             Dim array_dimensions As ArrayDimensionsListNode = Nothing
             If Me._current.Kind = SyntaxKind.OpenBracketToken Then array_dimensions = Me._MatchArrayDimensionsList
-            Return New TypeNameNode(items.ToImmutableArray, array_dimensions)
+            Return New TypeNameNode(items.ToImmutableArray, nullable_token, array_dimensions)
         End Function
 
         Private Function _MatchTypenameItem(Optional isFirst As Boolean = False) As TypeNameItemNode

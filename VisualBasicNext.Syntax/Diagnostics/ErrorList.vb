@@ -89,6 +89,10 @@ Namespace Diagnostics
             Me.ReportMessage($"Operator <{kind.ToString}> not defined between type <{leftType.Name}> and <{rigthType.Name}>", span)
         End Sub
 
+        Public Sub ReportReferenceTypeCannotBeNullable(target As Type, syntax As TypeNameNode)
+            Me.ReportMessage($"Type <{target.Name}> must be value type in order to be defined nullable.", syntax.Span)
+        End Sub
+
         Default Public ReadOnly Property Item(index As Integer) As ErrorObject Implements IReadOnlyList(Of ErrorObject).Item
             Get
                 Return Me._content.Item(index)

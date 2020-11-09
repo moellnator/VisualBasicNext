@@ -5,6 +5,7 @@ Public Class Experiments
     Public Sub Experiment()
         Dim a As String = "1"
         a = a & 2
+
     End Sub
 
     Public Class TestClass

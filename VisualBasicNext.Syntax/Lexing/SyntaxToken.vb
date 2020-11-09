@@ -21,7 +21,6 @@ Namespace Lexing
         CloseBracketToken
         OpenBraceToken
         CloseBraceToken
-        Questionmark
         EqualsToken
         PlusToken
         MinusEqualsToken
