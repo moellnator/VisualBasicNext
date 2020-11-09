@@ -7,7 +7,7 @@ Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VisualBasicNext", "VisualBa
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VisualBasicNext.Test", "VisualBasicNext.Test\VisualBasicNext.Test.vbproj", "{69797B36-EDD6-42F4-A4E4-B13204576077}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VisualBasicNext.Syntax", "VisualBasicNext.Syntax\VisualBasicNext.Syntax.vbproj", "{433B982D-CF52-406B-A486-53507F478A50}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VisualBasicNext.CodeAnalysis", "VisualBasicNext.Syntax\VisualBasicNext.CodeAnalysis.vbproj", "{433B982D-CF52-406B-A486-53507F478A50}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "VisualBasicNext.REPL", "VisualBasicNext.REPL\VisualBasicNext.REPL.vbproj", "{5E93EC8B-B10B-4E7E-B6D9-5572C38C36F4}"
 EndProject

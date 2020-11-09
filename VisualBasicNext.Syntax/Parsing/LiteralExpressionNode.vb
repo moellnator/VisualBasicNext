@@ -1,4 +1,4 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class LiteralExpressionNode : Inherits ExpressionNode
@@ -11,7 +11,7 @@ Namespace Parsing
             End Get
         End Property
 
-        Public Sub New(literalToken As SyntaxToken)
+        Friend Sub New(literalToken As SyntaxToken)
             MyBase.New(SyntaxKind.LiteralNode)
             Me.LiteralToken = literalToken
         End Sub

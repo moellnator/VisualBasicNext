@@ -1,13 +1,15 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
-Imports VisualBasicNext.Syntax.Text
+﻿Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Lexing
+Imports VisualBasicNext.CodeAnalysis.Text
 
 <TestClass> Public Class LexerTest
 
     <TestMethod> Public Sub TestEmptySource()
         Dim source As Source = Source.FromText(String.Empty)
-        Dim lexer As New Lexer(source)
-        Assert.IsFalse(lexer.Diagnostics.Any)
-        Dim token As SyntaxToken = AssertIsSingle(lexer.ToArray)
+        Dim diagnostics As ErrorList = Nothing
+        Dim result As SyntaxToken() = SyntaxToken.GetTokensFromSource(source, diagnostics).ToArray
+        Assert.IsFalse(diagnostics.HasErrors)
+        Dim token As SyntaxToken = AssertIsSingle(result)
         Assert.AreEqual(SyntaxKind.EndOfSourceToken, token.Kind)
     End Sub
 
@@ -19,17 +21,17 @@ Imports VisualBasicNext.Syntax.Text
     <TestMethod> Public Sub TestSingleTokens()
         For Each token_test As KeyValuePair(Of String, SyntaxKind) In TestToken
             Dim source As Source = Source.FromText(token_test.Key)
-            Dim lexer As New Lexer(source)
-            Dim tokens As SyntaxToken() = lexer.ToArray
-            Assert.IsFalse(lexer.Diagnostics.Any)
-            Assert.IsTrue(tokens.Count = 2)
-            Assert.AreEqual(token_test.Value, tokens.First.Kind)
-            Assert.AreEqual(token_test.Key, tokens.First.Span.ToString)
-            Assert.AreEqual(SyntaxKind.EndOfSourceToken, tokens.Last.Kind)
+            Dim diagnostics As ErrorList = Nothing
+            Dim result As SyntaxToken() = SyntaxToken.GetTokensFromSource(source, diagnostics).ToArray
+            Assert.IsFalse(diagnostics.HasErrors)
+            Assert.IsTrue(result.Count = 2)
+            Assert.AreEqual(token_test.Value, result.First.Kind)
+            Assert.AreEqual(token_test.Key, result.First.Span.ToString)
+            Assert.AreEqual(SyntaxKind.EndOfSourceToken, result.Last.Kind)
             If TestTokenValue.ContainsKey(token_test.Key) Then
-                Assert.AreEqual(TestTokenValue(token_test.Key), tokens.First.Value)
+                Assert.AreEqual(TestTokenValue(token_test.Key), result.First.Value)
             End If
-            Debug.Print(tokens.First.ToString)
+            Debug.Print(result.First.ToString)
         Next
     End Sub
 

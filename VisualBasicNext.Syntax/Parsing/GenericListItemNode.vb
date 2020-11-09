@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class GenericsListItemNode : Inherits SyntaxNode
 
-        Public Sub New(delimeterToken As SyntaxToken, typeName As TypeNameNode)
+        Friend Sub New(delimeterToken As SyntaxToken, typeName As TypeNameNode)
             MyBase.New(SyntaxKind.GenericListItemNode)
             Me.DelimeterToken = delimeterToken
             Me.TypeName = typeName

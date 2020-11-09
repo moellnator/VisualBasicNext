@@ -1,5 +1,5 @@
-﻿Imports VisualBasicNext.Syntax.Parsing
-Imports VisualBasicNext.Syntax.Symbols
+﻿Imports VisualBasicNext.CodeAnalysis.Parsing
+Imports VisualBasicNext.CodeAnalysis.Symbols
 
 Namespace Binding
     Friend Class BoundVariableExpression : Inherits BoundExpression

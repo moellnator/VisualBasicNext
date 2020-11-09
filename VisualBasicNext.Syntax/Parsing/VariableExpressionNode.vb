@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class VariableExpressionNode : Inherits ExpressionNode
 
-        Public Sub New(identifier As SyntaxToken)
+        Friend Sub New(identifier As SyntaxToken)
             MyBase.New(SyntaxKind.VariableExpressionNode)
             Me.Identifier = identifier
         End Sub

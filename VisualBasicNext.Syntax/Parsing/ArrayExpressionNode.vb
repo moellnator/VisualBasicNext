@@ -1,10 +1,10 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Lexing
+Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class ArrayExpressionNode : Inherits ExpressionNode
 
-        Public Sub New(openBrace As SyntaxToken, items As IEnumerable(Of ArrayItemNode), closeBrace As SyntaxToken)
+        Friend Sub New(openBrace As SyntaxToken, items As IEnumerable(Of ArrayItemNode), closeBrace As SyntaxToken)
             MyBase.New(SyntaxKind.ArrayExpressionNode)
             Me.OpenBrace = openBrace
             Me.Items = items.ToImmutableArray

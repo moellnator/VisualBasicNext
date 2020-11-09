@@ -1,7 +1,7 @@
-﻿Imports VisualBasicNext.Syntax.Parsing
+﻿Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Public Class BoundCastDynamicExpression : Inherits BoundExpression
+    Friend Class BoundCastDynamicExpression : Inherits BoundExpression
 
         Public Sub New(syntax As SyntaxNode, expression As BoundExpression, type As BoundExpression)
             MyBase.New(syntax, BoundNodeKind.BoundCastDynamicExpression, GetType(Object))

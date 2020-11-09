@@ -1,5 +1,5 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
-Imports VisualBasicNext.Syntax.Text
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
+Imports VisualBasicNext.CodeAnalysis.Text
 
 Namespace Parsing
 

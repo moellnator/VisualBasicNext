@@ -1,8 +1,8 @@
-﻿Imports VisualBasicNext.Syntax.Binding
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Evaluating
-Imports VisualBasicNext.Syntax.Parsing
-Imports VisualBasicNext.Syntax.Text
+﻿Imports VisualBasicNext.CodeAnalysis.Binding
+Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Evaluating
+Imports VisualBasicNext.CodeAnalysis.Parsing
+Imports VisualBasicNext.CodeAnalysis.Text
 
 Public Class Compilation
 

@@ -1,10 +1,10 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Lexing
+Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class ImportsStatementNode : Inherits StatementNode
 
-        Public Sub New(importsKeyword As SyntaxToken, identifier As NamespaceNode, endOfStatementToken As SyntaxToken)
+        Friend Sub New(importsKeyword As SyntaxToken, identifier As NamespaceNode, endOfStatementToken As SyntaxToken)
             MyBase.New(SyntaxKind.ImportsStatementNode, endOfStatementToken)
             Me.ImportsKeyword = importsKeyword
             Me.Identifier = identifier

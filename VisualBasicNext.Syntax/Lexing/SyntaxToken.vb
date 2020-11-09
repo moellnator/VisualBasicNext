@@ -1,5 +1,5 @@
-﻿Imports VisualBasicNext.Syntax.Parsing
-Imports VisualBasicNext.Syntax.Text
+﻿Imports VisualBasicNext.CodeAnalysis.Parsing
+Imports VisualBasicNext.CodeAnalysis.Text
 
 Namespace Lexing
 
@@ -128,6 +128,12 @@ Namespace Lexing
 
         Public Overrides Function ToString() As String
             Return $"{Me.Kind.ToString} ({If(Value IsNot Nothing, "<" & Value.GetType.ToString & "> " & Value.ToString, "")})"
+        End Function
+
+        Public Shared Function GetTokensFromSource(source As Source, ByRef diagnostics As Diagnostics.ErrorList) As IEnumerable(Of SyntaxToken)
+            Dim lexer As New Lexer(source)
+            diagnostics = lexer.Diagnostics
+            Return lexer
         End Function
 
     End Class

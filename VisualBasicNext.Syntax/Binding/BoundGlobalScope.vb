@@ -1,10 +1,10 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Parsing
-Imports VisualBasicNext.Syntax.Symbols
+Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Parsing
+Imports VisualBasicNext.CodeAnalysis.Symbols
 
 Namespace Binding
-    Public Class BoundGlobalScope
+    Friend Class BoundGlobalScope
         Public ReadOnly Property Syntax As SyntaxNode
         Public ReadOnly Property Previous As BoundGlobalScope
         Public ReadOnly Property Diagnostics As ErrorList

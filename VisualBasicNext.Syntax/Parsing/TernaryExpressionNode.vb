@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class TernaryExpressionNode : Inherits ExpressionNode
 
-        Public Sub New(ifToken As SyntaxToken,
+        Friend Sub New(ifToken As SyntaxToken,
                        openBracket As SyntaxToken,
                        condition As ExpressionNode,
                        firstDelimeter As SyntaxToken,

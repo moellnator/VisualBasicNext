@@ -22,7 +22,6 @@
             Return New Span(source, start, [end] - start)
         End Function
 
-
         Public Shared Function FromBounds(start As Span, [end] As Span) As Span
             Return FromBounds(start.Source, start.Start, [end].End)
         End Function

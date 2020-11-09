@@ -1,9 +1,9 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Parsing
+Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Public Class BoundScript : Inherits BoundNode
+    Friend Class BoundScript : Inherits BoundNode
 
         Public Sub New(previous As BoundScript, syntax As SyntaxNode, statements As IEnumerable(Of BoundStatement), diagnostics As ErrorList)
             MyBase.New(syntax, BoundNodeKind.BoundScript)

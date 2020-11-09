@@ -1,5 +1,5 @@
 ﻿Namespace Binding
-    Public Enum BoundNodeKind
+    Friend Enum BoundNodeKind
         BoundScript
         BoundExpressionStatement
         BoundLiteral

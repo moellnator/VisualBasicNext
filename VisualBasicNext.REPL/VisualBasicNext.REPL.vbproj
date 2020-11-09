@@ -108,9 +108,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VisualBasicNext.Syntax\VisualBasicNext.Syntax.vbproj">
+    <ProjectReference Include="..\VisualBasicNext.Syntax\VisualBasicNext.CodeAnalysis.vbproj">
       <Project>{433B982D-CF52-406B-A486-53507F478A50}</Project>
-      <Name>VisualBasicNext.Syntax</Name>
+      <Name>VisualBasicNext.CodeAnalysis</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

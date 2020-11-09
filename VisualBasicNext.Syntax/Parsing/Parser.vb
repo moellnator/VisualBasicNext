@@ -1,10 +1,10 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Lexing
-Imports VisualBasicNext.Syntax.Text
+Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Lexing
+Imports VisualBasicNext.CodeAnalysis.Text
 
 Namespace Parsing
-    Public Class Parser
+    Friend Class Parser
 
         Public ReadOnly Property Diagnostics As ErrorList
         Private ReadOnly _tokens As ImmutableArray(Of SyntaxToken)

@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{433B982D-CF52-406B-A486-53507F478A50}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>VisualBasicNext.Syntax</RootNamespace>
-    <AssemblyName>VisualBasicNext.Syntax</AssemblyName>
+    <RootNamespace>VisualBasicNext.CodeAnalysis</RootNamespace>
+    <AssemblyName>VisualBasicNext.CodeAnalysis</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <MyType>Windows</MyType>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
@@ -19,7 +19,7 @@
     <DefineDebug>true</DefineDebug>
     <DefineTrace>true</DefineTrace>
     <OutputPath>bin\Debug\</OutputPath>
-    <DocumentationFile>VisualBasicNext.Syntax.xml</DocumentationFile>
+    <DocumentationFile>VisualBasicNext.CodeAnalysis.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -28,7 +28,7 @@
     <DefineTrace>true</DefineTrace>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DocumentationFile>VisualBasicNext.Syntax.xml</DocumentationFile>
+    <DocumentationFile>VisualBasicNext.CodeAnalysis.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
@@ -94,8 +94,8 @@
     <Compile Include="Binding\BoundVariableExpression.vb" />
     <Compile Include="Binding\TypeResolver.vb" />
     <Compile Include="Compilation.vb" />
-    <Compile Include="Diagnostics\ErrorObject.vb" />
     <Compile Include="Diagnostics\ErrorList.vb" />
+    <Compile Include="Diagnostics\ErrorObject.vb" />
     <Compile Include="Evaluating\EvaluationException.vb" />
     <Compile Include="Evaluating\EvaluationResult.vb" />
     <Compile Include="Evaluating\Evaluator.vb" />
@@ -128,6 +128,7 @@
     <Compile Include="Parsing\ExpressionNode.vb" />
     <Compile Include="Parsing\ExpressionStatementNode.vb" />
     <Compile Include="Parsing\ExtrapolatedStringNode.vb" />
+    <Compile Include="Parsing\ExtrapolatedStringSubNode.vb" />
     <Compile Include="Parsing\GenericListItemNode.vb" />
     <Compile Include="Parsing\GenericsListNode.vb" />
     <Compile Include="Parsing\GetTypeExpressionNode.vb" />

@@ -1,4 +1,4 @@
-﻿Imports VisualBasicNext.Syntax.Symbols
+﻿Imports VisualBasicNext.CodeAnalysis.Symbols
 
 Public Class VMState
 

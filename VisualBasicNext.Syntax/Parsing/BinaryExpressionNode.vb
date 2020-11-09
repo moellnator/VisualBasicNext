@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class BinaryExpressionNode : Inherits ExpressionNode
 
-        Public Sub New(left As ExpressionNode, operatorToken As SyntaxToken, right As ExpressionNode)
+        Friend Sub New(left As ExpressionNode, operatorToken As SyntaxToken, right As ExpressionNode)
             MyBase.New(SyntaxKind.BinaryExpressionNode)
             Me.Left = left
             Me.OperatorToken = operatorToken

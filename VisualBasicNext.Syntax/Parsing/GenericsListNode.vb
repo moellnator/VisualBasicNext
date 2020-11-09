@@ -1,10 +1,10 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Lexing
+Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class GenericsListNode : Inherits SyntaxNode
 
-        Public Sub New(openBracketToken As SyntaxToken, ofKeyWordToken As SyntaxToken, listItems As IEnumerable(Of GenericsListItemNode), closeBracketToken As SyntaxToken)
+        Friend Sub New(openBracketToken As SyntaxToken, ofKeyWordToken As SyntaxToken, listItems As IEnumerable(Of GenericsListItemNode), closeBracketToken As SyntaxToken)
             MyBase.New(SyntaxKind.GenericsListNode)
             Me.OpenBracketToken = openBracketToken
             Me.OfKeyWordToken = ofKeyWordToken

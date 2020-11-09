@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class ArrayItemNode : Inherits SyntaxNode
 
-        Public Sub New(delimeter As SyntaxToken, expression As ExpressionNode)
+        Friend Sub New(delimeter As SyntaxToken, expression As ExpressionNode)
             MyBase.New(SyntaxKind.ArrayItemNode)
             Me.Delimeter = delimeter
             Me.Expression = expression

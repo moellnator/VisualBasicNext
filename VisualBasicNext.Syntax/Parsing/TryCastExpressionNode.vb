@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class TryCastExpressionNode : Inherits ExpressionNode
 
-        Public Sub New(trycastKeyword As SyntaxToken,
+        Friend Sub New(trycastKeyword As SyntaxToken,
                        openBracket As SyntaxToken,
                        expression As ExpressionNode,
                        delimeter As SyntaxNode,

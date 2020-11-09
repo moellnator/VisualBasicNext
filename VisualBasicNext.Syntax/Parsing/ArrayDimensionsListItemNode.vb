@@ -1,10 +1,10 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Lexing
+Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class ArrayDimensionsListItemNode : Inherits SyntaxNode
 
-        Public Sub New(openBracketToken As SyntaxToken, delimeters As IEnumerable(Of SyntaxToken), closeBracketToken As SyntaxToken)
+        Friend Sub New(openBracketToken As SyntaxToken, delimeters As IEnumerable(Of SyntaxToken), closeBracketToken As SyntaxToken)
             MyBase.New(SyntaxKind.ArrayDimensionsListItemNode)
             Me.OpenBracketToken = openBracketToken
             Me.Delimeters = delimeters.ToImmutableArray

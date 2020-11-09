@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class GetTypeExpressionNode : Inherits ExpressionNode
 
-        Public Sub New(getTypeToken As SyntaxToken, openBracket As SyntaxToken, typeName As TypeNameNode, closeBracket As SyntaxToken)
+        Friend Sub New(getTypeToken As SyntaxToken, openBracket As SyntaxToken, typeName As TypeNameNode, closeBracket As SyntaxToken)
             MyBase.New(SyntaxKind.GetTypeExpressionNode)
             Me.GetTypeToken = getTypeToken
             Me.OpenBracket = openBracket

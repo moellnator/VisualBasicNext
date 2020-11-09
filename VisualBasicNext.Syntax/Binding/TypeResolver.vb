@@ -1,10 +1,10 @@
 ﻿Imports System.Collections.Immutable
 Imports System.Reflection
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Parsing
+Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Public Class TypeResolver
+    Friend Class TypeResolver
 
         Private Shared ReadOnly ImplicitNumericConversions As New Dictionary(Of Type, List(Of Type))() From {
            {GetType(SByte), New List(Of Type) From {
@@ -167,7 +167,7 @@ Namespace Binding
 
         Public Sub New(syntax As SyntaxNode, Optional importsList? As ImmutableArray(Of String) = Nothing)
             Me._syntax = syntax
-            Me._diagnostics = New ErrorList
+            Me._Diagnostics = New ErrorList
             Me._imports = If(importsList, ImmutableArray(Of String).Empty)
         End Sub
 

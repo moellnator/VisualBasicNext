@@ -1,7 +1,7 @@
-﻿Imports VisualBasicNext.Syntax.Parsing
+﻿Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Public MustInherit Class BoundNode
+    Friend MustInherit Class BoundNode
 
         Protected Sub New(syntax As SyntaxNode, kind As BoundNodeKind)
             Me.Syntax = syntax

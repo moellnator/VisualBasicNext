@@ -1,4 +1,4 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class ExpressionStatementNode : Inherits StatementNode
@@ -12,7 +12,7 @@ Namespace Parsing
             End Get
         End Property
 
-        Public Sub New(expression As ExpressionNode, endOfStatementToken As SyntaxToken)
+        Friend Sub New(expression As ExpressionNode, endOfStatementToken As SyntaxToken)
             MyBase.New(SyntaxKind.ExpressionStatementNode, endOfStatementToken)
             Me.Expression = expression
         End Sub

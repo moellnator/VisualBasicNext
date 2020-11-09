@@ -1,10 +1,10 @@
 ﻿Imports System.Reflection
-Imports VisualBasicNext.Syntax.Lexing
-Imports VisualBasicNext.Syntax.Parsing
+Imports VisualBasicNext.CodeAnalysis.Lexing
+Imports VisualBasicNext.CodeAnalysis.Parsing
 Imports VisualBasicNext.TypeExtensions
 
 Namespace Binding
-    Public Class BoundBinaryOperator : Inherits BoundNode
+    Friend Class BoundBinaryOperator : Inherits BoundNode
 
         Private ReadOnly _internal As Func(Of Object, Object, Object)
         Public Property ReturnType As Type

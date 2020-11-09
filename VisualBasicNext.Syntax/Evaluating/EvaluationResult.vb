@@ -1,4 +1,4 @@
-﻿Imports VisualBasicNext.Syntax.Diagnostics
+﻿Imports VisualBasicNext.CodeAnalysis.Diagnostics
 
 Namespace Evaluating
     Public Class EvaluationResult

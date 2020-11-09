@@ -1,10 +1,8 @@
 ﻿Imports System.Collections.Immutable
-Imports System.Reflection
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Symbols
+Imports VisualBasicNext.CodeAnalysis.Symbols
 
 Namespace Binding
-    Public Class BoundScope
+    Friend Class BoundScope
 
         Private ReadOnly _parent As BoundScope
         Private ReadOnly _symbols As New Dictionary(Of String, Symbol)

@@ -1,9 +1,9 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Text
+Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Text
 
 Namespace Lexing
-    Public Class Lexer : Implements IEnumerable(Of SyntaxToken)
+    Friend Class Lexer : Implements IEnumerable(Of SyntaxToken)
 
         Public ReadOnly Property Diagnostics As New ErrorList
         Private ReadOnly _source As Source

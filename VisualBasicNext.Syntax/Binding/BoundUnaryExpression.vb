@@ -1,7 +1,7 @@
-﻿Imports VisualBasicNext.Syntax.Parsing
+﻿Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Public Class BoundUnaryExpression : Inherits BoundExpression
+    Friend Class BoundUnaryExpression : Inherits BoundExpression
 
         Public Sub New(syntax As SyntaxNode, op As BoundUnaryOperator, right As BoundExpression)
             MyBase.New(syntax, BoundNodeKind.BoundUnaryExpression, op.ReturnType)

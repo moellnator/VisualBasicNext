@@ -1,7 +1,7 @@
-﻿Imports VisualBasicNext.Syntax.Parsing
+﻿Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Public Class BoundImportStatement : Inherits BoundStatement
+    Friend Class BoundImportStatement : Inherits BoundStatement
 
         Public Sub New(syntax As ImportsStatementNode, name As String)
             MyBase.New(syntax, BoundNodeKind.BoundImportStatement)

@@ -1,10 +1,10 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Lexing
+Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class TypeNameNode : Inherits SyntaxNode
 
-        Public Sub New(items As IEnumerable(Of TypeNameItemNode), nullableToken As SyntaxToken, arrayDimensions As ArrayDimensionsListNode)
+        Friend Sub New(items As IEnumerable(Of TypeNameItemNode), nullableToken As SyntaxToken, arrayDimensions As ArrayDimensionsListNode)
             MyBase.New(SyntaxKind.TypeNameNode)
             Me.Items = items.ToImmutableArray
             Me.NullableToken = nullableToken

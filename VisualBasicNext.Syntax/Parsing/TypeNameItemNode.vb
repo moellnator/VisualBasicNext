@@ -1,14 +1,13 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class TypeNameItemNode : Inherits SyntaxNode
 
-        Public Sub New(delimeter As SyntaxToken, identifier As SyntaxToken, generics As GenericsListNode)
+        Friend Sub New(delimeter As SyntaxToken, identifier As SyntaxToken, generics As GenericsListNode)
             MyBase.New(SyntaxKind.TypeNameItemNode)
             Me.Delimeter = delimeter
             Me.Identifier = identifier
             Me.Generics = generics
-
         End Sub
 
         Public Overrides ReadOnly Iterator Property Children As IEnumerable(Of SyntaxNode)

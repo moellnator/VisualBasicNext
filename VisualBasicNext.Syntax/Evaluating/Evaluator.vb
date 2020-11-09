@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Binding
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Symbols
+﻿Imports VisualBasicNext.CodeAnalysis.Binding
+Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Symbols
 
 Namespace Evaluating
-    Public Class Evaluator
+    Friend Class Evaluator
 
         Public ReadOnly Property Diagnostics As New ErrorList
 
@@ -22,7 +22,7 @@ Namespace Evaluating
             Dim retval As Object = Nothing
             Try
                 For Each statement As BoundStatement In Me.Script.Statements
-                    retval = Me.EvaluateStatement(statement)
+                    retval = Me._EvaluateStatement(statement)
                 Next
             Catch ex As EvaluationException
                 Me.Diagnostics.ReportRuntimeException(ex.InnerException, ex.Syntax)
@@ -30,34 +30,34 @@ Namespace Evaluating
             Return retval
         End Function
 
-        Private Function EvaluateStatement(statement As BoundStatement) As Object
+        Private Function _EvaluateStatement(statement As BoundStatement) As Object
             Dim retval As Object = Nothing
 
             Select Case statement.Kind
                 Case BoundNodeKind.BoundVariableDeclarationStatement
-                    Me.EvaluateVariableDeclarationStatement(statement)
+                    Me._EvaluateVariableDeclarationStatement(statement)
                 Case BoundNodeKind.BoundExpressionStatement
-                    retval = Me.EvaluateExpressionStatement(statement)
+                    retval = Me._EvaluateExpressionStatement(statement)
                 Case BoundNodeKind.BoundImportStatement
                 Case Else
                     Throw New Exception($"Unknown statement in evaluator: '{statement.Kind.ToString}'.")
             End Select
 
-                Return retval
+            Return retval
         End Function
 
-        Private Sub EvaluateVariableDeclarationStatement(statement As BoundVariableDeclarationStatement)
+        Private Sub _EvaluateVariableDeclarationStatement(statement As BoundVariableDeclarationStatement)
             Dim initial As Object = Nothing
             If statement.Initializer IsNot Nothing Then
-                initial = Me.EvaluateExpression(statement.Initializer)
-                Me.Assign(statement.Symbol, initial, statement.Initializer.Syntax.Span)
+                initial = Me._EvaluateExpression(statement.Initializer)
+                Me._Assign(statement.Symbol, initial, statement.Initializer.Syntax.Span)
             Else
                 initial = CTypeDynamic(Nothing, DirectCast(statement.Symbol, VariableSymbol).Type)
-                Me.Assign(statement.Symbol, initial, statement.Syntax.Span)
+                Me._Assign(statement.Symbol, initial, statement.Syntax.Span)
             End If
         End Sub
 
-        Private Sub Assign(symbol As VariableSymbol, value As Object, span As Text.Span)
+        Private Sub _Assign(symbol As VariableSymbol, value As Object, span As Text.Span)
             Try
                 Dim converted As Object = CTypeDynamic(value, symbol.Type)
                 If symbol.Kind = SymbolKinds.GlobalVariable Then
@@ -74,44 +74,44 @@ Namespace Evaluating
             End Try
         End Sub
 
-        Private Function EvaluateExpressionStatement(statement As BoundExpressionStatement) As Object
-            Return Me.EvaluateExpression(statement.Expression)
+        Private Function _EvaluateExpressionStatement(statement As BoundExpressionStatement) As Object
+            Return Me._EvaluateExpression(statement.Expression)
         End Function
 
-        Private Function EvaluateExpression(expression As BoundExpression) As Object
+        Private Function _EvaluateExpression(expression As BoundExpression) As Object
             If expression.Constant IsNot Nothing Then Return expression.Constant.Value
             Select Case expression.Kind
                 Case BoundNodeKind.BoundLiteral
-                    Return Me.EvaluateLiteralExpression(expression)
+                    Return Me._EvaluateLiteralExpression(expression)
                 Case BoundNodeKind.BoundVariableExpression
-                    Return Me.EvaluateVariableExpression(expression)
+                    Return Me._EvaluateVariableExpression(expression)
                 Case BoundNodeKind.BoundCastExpression
-                    Return Me.EvaluateCastExpression(expression)
+                    Return Me._EvaluateCastExpression(expression)
                 Case BoundNodeKind.BoundCastDynamicExpression
-                    Return Me.EvaluateCastDynamicExpression(expression)
+                    Return Me._EvaluateCastDynamicExpression(expression)
                 Case BoundNodeKind.BoundGetTypeExpression
-                    Return Me.EvaluateGetTypeExpression(expression)
+                    Return Me._EvaluateGetTypeExpression(expression)
                 Case BoundNodeKind.BoundTernaryExpression
-                    Return Me.EvaluateTernaryExpression(expression)
+                    Return Me._EvaluateTernaryExpression(expression)
                 Case BoundNodeKind.BoundNullCheckExpression
-                    Return Me.EvaluateNullCheckExpression(expression)
+                    Return Me._EvaluateNullCheckExpression(expression)
                 Case BoundNodeKind.BoundArrayExpression
-                    Return Me.EvaluateArrayExpression(expression)
+                    Return Me._EvaluateArrayExpression(expression)
                 Case BoundNodeKind.BoundUnaryExpression
-                    Return Me.EvaluateUnaryExpression(expression)
+                    Return Me._EvaluateUnaryExpression(expression)
                 Case BoundNodeKind.BoundBinaryExpression
-                    Return Me.EvaluateBinaryExpression(expression)
+                    Return Me._EvaluateBinaryExpression(expression)
                 Case BoundNodeKind.BoundExtrapolatedStringExpression
-                    Return Me.EvaluateExtrapolatedStringExpression(expression)
+                    Return Me._EvaluateExtrapolatedStringExpression(expression)
                 Case BoundNodeKind.BoundTryCastExpression
-                    Return Me.EvaluateTryCastExpression(expression)
+                    Return Me._EvaluateTryCastExpression(expression)
                 Case Else
                     Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
             End Select
         End Function
 
-        Private Function EvaluateTryCastExpression(expression As BoundTryCastExpression) As Object
-            Dim value As Object = Me.EvaluateExpression(expression.Expression)
+        Private Function _EvaluateTryCastExpression(expression As BoundTryCastExpression) As Object
+            Dim value As Object = Me._EvaluateExpression(expression.Expression)
             Try
                 Return CTypeDynamic(value, expression.Target)
             Catch ex As Exception
@@ -119,14 +119,14 @@ Namespace Evaluating
             End Try
         End Function
 
-        Private Function EvaluateExtrapolatedStringExpression(expression As BoundExtrapolatedStringExpression) As Object
+        Private Function _EvaluateExtrapolatedStringExpression(expression As BoundExtrapolatedStringExpression) As Object
             Dim retval As New System.Text.StringBuilder
             Dim expr As BoundExpression = Nothing
             retval.Append(expression.Start)
             For index As Integer = 0 To expression.Expressions.Length - 1
                 Try
                     expr = expression.Expressions(index)
-                    Dim value As String = Me.EvaluateExpression(expr)
+                    Dim value As String = Me._EvaluateExpression(expr)
                     retval.Append(value)
                     retval.Append(expression.Remainders(index))
                 Catch ex As InvalidCastException
@@ -139,9 +139,9 @@ Namespace Evaluating
             Return retval.ToString
         End Function
 
-        Private Function EvaluateBinaryExpression(expression As BoundBinaryExpression) As Object
-            Dim left As Object = Me.EvaluateExpression(expression.Left)
-            Dim right As Object = Me.EvaluateExpression(expression.Right)
+        Private Function _EvaluateBinaryExpression(expression As BoundBinaryExpression) As Object
+            Dim left As Object = Me._EvaluateExpression(expression.Left)
+            Dim right As Object = Me._EvaluateExpression(expression.Right)
             Try
                 Return expression.Op.Invoke(left, right)
             Catch ex As InvalidCastException
@@ -152,8 +152,8 @@ Namespace Evaluating
             End Try
         End Function
 
-        Private Function EvaluateUnaryExpression(expression As BoundUnaryExpression) As Object
-            Dim value As Object = Me.EvaluateExpression(expression.Right)
+        Private Function _EvaluateUnaryExpression(expression As BoundUnaryExpression) As Object
+            Dim value As Object = Me._EvaluateExpression(expression.Right)
             Try
                 Return expression.Op.Invoke(value)
             Catch ex As InvalidCastException
@@ -162,9 +162,9 @@ Namespace Evaluating
             End Try
         End Function
 
-        Private Function EvaluateArrayExpression(expression As BoundArrayExpression) As Object
+        Private Function _EvaluateArrayExpression(expression As BoundArrayExpression) As Object
             Try
-                Dim obj_array As Object() = expression.Items.Select(Function(item) Me.EvaluateExpression(item)).ToArray
+                Dim obj_array As Object() = expression.Items.Select(Function(item) Me._EvaluateExpression(item)).ToArray
                 If expression.Rank = 1 Then
                     If Not expression.BoundType.Equals(GetType(Object).MakeArrayType) Then
                         Dim retval As Array = Array.CreateInstance(expression.BoundType.GetElementType, obj_array.Count)
@@ -176,7 +176,7 @@ Namespace Evaluating
                 Else
                     Dim lenghts As Integer() = {obj_array.Length}.Concat(Enumerable.Range(0, expression.Rank - 1).Select(Function(level) DirectCast(obj_array.First, Array).GetUpperBound(level) + 1)).ToArray
                     Dim retval As Array = Array.CreateInstance(expression.BoundType.GetElementType, lenghts)
-                    CopyArrayMultidimensional(obj_array, retval)
+                    _CopyArrayMultidimensional(obj_array, retval)
                     Return retval
                 End If
             Catch ex As Exception
@@ -184,43 +184,43 @@ Namespace Evaluating
             End Try
         End Function
 
-        Private Shared Sub CopyArrayMultidimensional(source As Object(), target As Array)
+        Private Shared Sub _CopyArrayMultidimensional(source As Object(), target As Array)
             For index As Integer = 0 To source.Count - 1
-                IterCopyArrayMultiDimensional(source, target, {index})
+                _IterCopyArrayMultiDimensional(source, target, {index})
             Next
         End Sub
 
-        Private Shared Sub IterCopyArrayMultiDimensional(source As Object(), target As Array, level As Integer())
+        Private Shared Sub _IterCopyArrayMultiDimensional(source As Object(), target As Array, level As Integer())
             If level.Count = target.Rank Then
                 target.SetValue(DirectCast(source(level.First), Array).GetValue(level.Skip(1).ToArray), level)
             Else
                 For index As Integer = 0 To target.GetUpperBound(level.Count)
-                    IterCopyArrayMultiDimensional(source, target, level.Append(index).ToArray)
+                    _IterCopyArrayMultiDimensional(source, target, level.Append(index).ToArray)
                 Next
             End If
         End Sub
 
-        Private Function EvaluateTernaryExpression(expression As BoundTernaryExpression) As Object
+        Private Function _EvaluateTernaryExpression(expression As BoundTernaryExpression) As Object
             Try
-                Dim isTrue As Boolean = Me.EvaluateExpression(expression.Condition)
+                Dim isTrue As Boolean = Me._EvaluateExpression(expression.Condition)
                 If isTrue Then
-                    Return Me.EvaluateExpression(expression.TrueExpression)
+                    Return Me._EvaluateExpression(expression.TrueExpression)
                 Else
-                    Return Me.EvaluateExpression(expression.FalseExpression)
+                    Return Me._EvaluateExpression(expression.FalseExpression)
                 End If
             Catch ex As Exception
                 Throw New EvaluationException(ex, expression.Syntax.Span)
             End Try
         End Function
 
-        Private Function EvaluateNullCheckExpression(expression As BoundNullCheckExpression) As Object
+        Private Function _EvaluateNullCheckExpression(expression As BoundNullCheckExpression) As Object
             Try
-                Dim value As Object = Me.EvaluateExpression(expression.Expression)
+                Dim value As Object = Me._EvaluateExpression(expression.Expression)
                 If value IsNot Nothing Then
                     Return value
                 Else
                     Try
-                        Return CTypeDynamic(Me.EvaluateExpression(expression.FallbackExpression), expression.BoundType)
+                        Return CTypeDynamic(Me._EvaluateExpression(expression.FallbackExpression), expression.BoundType)
                     Catch ex As InvalidCastException
                         Me.Diagnostics.ReportInvalidConversion(expression.FallbackExpression.BoundType, expression.BoundType, expression.FallbackExpression.Syntax.Span)
                         Return Nothing
@@ -231,13 +231,13 @@ Namespace Evaluating
             End Try
         End Function
 
-        Private Function EvaluateGetTypeExpression(expression As BoundGetTypeExpression) As Object
+        Private Function _EvaluateGetTypeExpression(expression As BoundGetTypeExpression) As Object
             Return expression.Type
         End Function
 
-        Private Function EvaluateCastDynamicExpression(expression As BoundCastDynamicExpression) As Object
+        Private Function _EvaluateCastDynamicExpression(expression As BoundCastDynamicExpression) As Object
             Try
-                Return CTypeDynamic(Me.EvaluateExpression(expression.Expression), Me.EvaluateExpression(expression.Type))
+                Return CTypeDynamic(Me._EvaluateExpression(expression.Expression), Me._EvaluateExpression(expression.Type))
             Catch ex As InvalidCastException
                 Me.Diagnostics.ReportInvalidConversion(expression.Expression.BoundType, expression.BoundType, expression.Syntax.Span)
                 Return Nothing
@@ -246,9 +246,9 @@ Namespace Evaluating
             End Try
         End Function
 
-        Private Function EvaluateCastExpression(expression As BoundCastExpression) As Object
+        Private Function _EvaluateCastExpression(expression As BoundCastExpression) As Object
             Try
-                Return CTypeDynamic(Me.EvaluateExpression(expression.Expression), expression.Type)
+                Return CTypeDynamic(Me._EvaluateExpression(expression.Expression), expression.Type)
             Catch ex As InvalidCastException
                 Me.Diagnostics.ReportInvalidConversion(expression.Expression.BoundType, expression.BoundType, expression.Syntax.Span)
                 Return Nothing
@@ -257,7 +257,7 @@ Namespace Evaluating
             End Try
         End Function
 
-        Private Function EvaluateVariableExpression(expression As BoundVariableExpression) As Object
+        Private Function _EvaluateVariableExpression(expression As BoundVariableExpression) As Object
             Try
                 If expression.Variable.Kind = SymbolKinds.GlobalVariable Then
                     Return Me.State.Variable(expression.Variable)
@@ -269,7 +269,7 @@ Namespace Evaluating
             End Try
         End Function
 
-        Private Function EvaluateLiteralExpression(expression As BoundLiteralExpression) As Object
+        Private Function _EvaluateLiteralExpression(expression As BoundLiteralExpression) As Object
             Return expression.Value
         End Function
 

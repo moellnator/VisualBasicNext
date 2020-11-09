@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class EmptyStatementNode : Inherits StatementNode
 
-        Public Sub New(endOfStatementToken As SyntaxToken)
+        Friend Sub New(endOfStatementToken As SyntaxToken)
             MyBase.New(SyntaxKind.EmptyStatementNode, endOfStatementToken)
         End Sub
 

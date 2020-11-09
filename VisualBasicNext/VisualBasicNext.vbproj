@@ -80,50 +80,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Parsing\AST\Block.vb" />
-    <Compile Include="Parsing\AST\Ctor.vb" />
-    <Compile Include="Parsing\AST\Declaration.vb" />
-    <Compile Include="Parsing\AST\ExprArray.vb" />
-    <Compile Include="Parsing\AST\Expression.vb" />
-    <Compile Include="Parsing\AST\Identifier.vb" />
-    <Compile Include="Parsing\AST\Import.vb" />
-    <Compile Include="Parsing\AST\Inline.vb" />
-    <Compile Include="Parsing\AST\Literal.vb" />
-    <Compile Include="Parsing\AST\Node.vb" />
-    <Compile Include="Parsing\AST\Operators.vb" />
-    <Compile Include="Parsing\AST\Script.vb" />
-    <Compile Include="Parsing\AST\Statement.vb" />
-    <Compile Include="Parsing\AST\Ternary.vb" />
-    <Compile Include="Parsing\AST\TypeCast.vb" />
-    <Compile Include="Parsing\AST\TypeComp.vb" />
-    <Compile Include="Parsing\AST\TypeIdentifier.vb" />
-    <Compile Include="Parsing\AST\TypeName.vb" />
-    <Compile Include="Parsing\CST\Node.vb" />
-    <Compile Include="Parsing\Generator\Any.vb" />
-    <Compile Include="Parsing\Generator\Many.vb" />
-    <Compile Include="Parsing\Generator\Match.vb" />
-    <Compile Include="Parsing\Generator\Option.vb" />
-    <Compile Include="Parsing\Generator\Optional.vb" />
-    <Compile Include="Parsing\Generator\Parser.vb" />
-    <Compile Include="Parsing\Generator\Required.vb" />
-    <Compile Include="Parsing\Generator\Result.vb" />
-    <Compile Include="Parsing\Generator\Sequence.vb" />
-    <Compile Include="Parsing\Generator\State.vb" />
-    <Compile Include="Parsing\Generator\Terminator.vb" />
-    <Compile Include="Parsing\Generator\Wrapper.vb" />
-    <Compile Include="Parsing\ParserException.vb" />
-    <Compile Include="Parsing\Scripting\Expression.vb" />
-    <Compile Include="Parsing\Scripting\Script.vb" />
-    <Compile Include="Parsing\Scripting\Statement.vb" />
-    <Compile Include="Parsing\Scripting\TypeName.vb" />
-    <Compile Include="Parsing\TextLocation.vb" />
-    <Compile Include="Parsing\Tokenizing\Token.vb" />
-    <Compile Include="Parsing\Tokenizing\Tokenizer.vb" />
-    <Compile Include="Virtual\Context.vb" />
-    <Compile Include="Virtual\DynamicVariable.vb" />
-    <Compile Include="Virtual\LocalVariable.vb" />
-    <Compile Include="Virtual\Machine.vb" />
-    <Compile Include="Virtual\State.vb" />
+    <Compile Include="__Old\AST\Identifier.vb" />
+    <Compile Include="__Old\AST\Inline.vb" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="My Project\Resources.resx">

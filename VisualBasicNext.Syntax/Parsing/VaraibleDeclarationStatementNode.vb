@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class VariableDeclarationStatementNode : Inherits StatementNode
 
-        Public Sub New(dimKeywordToken As SyntaxToken,
+        Friend Sub New(dimKeywordToken As SyntaxToken,
                        identifierToken As SyntaxToken,
                        asKeyWordToken As SyntaxToken,
                        typename As TypeNameNode,

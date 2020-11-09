@@ -1,5 +1,5 @@
 ﻿Namespace Binding
-    Public Class BoundConstant
+    Friend Class BoundConstant
 
         Public Sub New(value As Object)
             Me.Value = value

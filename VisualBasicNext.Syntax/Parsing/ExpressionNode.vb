@@ -1,4 +1,4 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public MustInherit Class ExpressionNode : Inherits SyntaxNode

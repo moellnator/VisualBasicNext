@@ -1,7 +1,7 @@
-﻿Imports VisualBasicNext.Syntax.Parsing
+﻿Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Evaluating
-    Public Class EvaluationException : Inherits Exception
+    Friend Class EvaluationException : Inherits Exception
 
         Public Sub New(innerException As Exception, syntax As Text.Span)
             MyBase.New("A runtime exception occured.", innerException)

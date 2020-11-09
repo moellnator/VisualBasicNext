@@ -1,8 +1,8 @@
 ﻿Imports System.Runtime.CompilerServices
-Imports VisualBasicNext.Syntax.Lexing
+Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
-    Public Module SyntaxFacts
+    Friend Module SyntaxFacts
 
         <Extension> Public Function GetUnaryOperatorPrecedence(kind As SyntaxKind) As Integer
             Dim retval As Integer = 0

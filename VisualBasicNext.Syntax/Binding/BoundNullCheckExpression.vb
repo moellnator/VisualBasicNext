@@ -1,7 +1,7 @@
-﻿Imports VisualBasicNext.Syntax.Parsing
+﻿Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Public Class BoundNullCheckExpression : Inherits BoundExpression
+    Friend Class BoundNullCheckExpression : Inherits BoundExpression
 
         Public Sub New(syntaxNode As SyntaxNode, expression As BoundExpression, fallbackExpression As BoundExpression, boundType As Type)
             MyBase.New(syntaxNode, BoundNodeKind.BoundNullCheckExpression, boundType)

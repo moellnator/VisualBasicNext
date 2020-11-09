@@ -1,11 +1,11 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Parsing
-Imports VisualBasicNext.Syntax.Symbols
+Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Parsing
+Imports VisualBasicNext.CodeAnalysis.Symbols
 Imports VisualBasicNext.TypeExtensions
 
 Namespace Binding
-    Public Class Binder
+    Friend Class Binder
 
         Public ReadOnly Property Diagnostics As New ErrorList
 

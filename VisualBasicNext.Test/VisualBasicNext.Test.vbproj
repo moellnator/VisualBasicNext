@@ -121,9 +121,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\VisualBasicNext.Syntax\VisualBasicNext.Syntax.vbproj">
+    <ProjectReference Include="..\VisualBasicNext.Syntax\VisualBasicNext.CodeAnalysis.vbproj">
       <Project>{433b982d-cf52-406b-a486-53507f478a50}</Project>
-      <Name>VisualBasicNext.Syntax</Name>
+      <Name>VisualBasicNext.CodeAnalysis</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

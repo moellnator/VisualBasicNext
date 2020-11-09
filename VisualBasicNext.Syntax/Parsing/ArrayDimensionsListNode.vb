@@ -1,10 +1,10 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Lexing
+Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class ArrayDimensionsListNode : Inherits SyntaxNode
 
-        Public Sub New(listItems As IEnumerable(Of ArrayDimensionsListItemNode))
+        Friend Sub New(listItems As IEnumerable(Of ArrayDimensionsListItemNode))
             MyBase.New(SyntaxKind.ArrayDimensionsListNode)
             Me.ListItems = listItems.ToImmutableArray
         End Sub

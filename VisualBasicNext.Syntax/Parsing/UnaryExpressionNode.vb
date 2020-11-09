@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class UnaryExpressionNode : Inherits ExpressionNode
 
-        Public Sub New(operatorToken As SyntaxToken, right As ExpressionNode)
+        Friend Sub New(operatorToken As SyntaxToken, right As ExpressionNode)
             MyBase.New(SyntaxKind.UnaryExpressionNode)
             Me.OperatorToken = operatorToken
             Me.Right = right

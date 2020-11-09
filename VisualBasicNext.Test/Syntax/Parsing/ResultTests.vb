@@ -1,6 +1,6 @@
-﻿Imports VisualBasicNext.Syntax
-Imports VisualBasicNext.Syntax.Diagnostics
-Imports VisualBasicNext.Syntax.Evaluating
+﻿Imports VisualBasicNext.CodeAnalysis
+Imports VisualBasicNext.CodeAnalysis.Diagnostics
+Imports VisualBasicNext.CodeAnalysis.Evaluating
 
 <TestClass> Public Class EvaluationTest
 

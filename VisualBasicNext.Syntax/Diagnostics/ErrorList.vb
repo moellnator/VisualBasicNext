@@ -1,6 +1,6 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
-Imports VisualBasicNext.Syntax.Parsing
-Imports VisualBasicNext.Syntax.Text
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
+Imports VisualBasicNext.CodeAnalysis.Parsing
+Imports VisualBasicNext.CodeAnalysis.Text
 
 Namespace Diagnostics
     Public Class ErrorList : Implements IReadOnlyList(Of ErrorObject)
@@ -26,54 +26,54 @@ Namespace Diagnostics
             Me._content.AddRange(errorList._content)
         End Sub
 
-        Public Sub ReportBadCharakter(input As Char, span As Text.Span)
+        Friend Sub ReportBadCharakter(input As Char, span As Text.Span)
             Me.ReportMessage($"Invalid character '{input}'", span)
         End Sub
 
-        Public Sub ReportBadConversion(fromType As Type, toType As Type, span As Text.Span)
+        Friend Sub ReportBadConversion(fromType As Type, toType As Type, span As Text.Span)
             Me.ReportMessage($"Invalid conversion from type ({fromType.ToString}) to ({toType.ToString})", span)
         End Sub
 
-        Public Sub ReportRuntimeException(innerException As Exception, syntax As Span)
+        Friend Sub ReportRuntimeException(innerException As Exception, syntax As Span)
             Me.ReportMessage($"A runtime exception of type <{innerException.GetType.Name}> orruced: {innerException.Message}. The error occured", syntax)
         End Sub
 
-        Public Sub ReportBadLiteral(literal As String, target As Type, span As Text.Span)
+        Friend Sub ReportBadLiteral(literal As String, target As Type, span As Text.Span)
             Me.ReportMessage($"Literal '{literal}' does not represent a value of type ({target})", span)
         End Sub
 
-        Public Sub ReportMissing(text As String, span As Text.Span)
+        Friend Sub ReportMissing(text As String, span As Text.Span)
             Me.ReportMessage($"Expected missing '{text}'", span)
         End Sub
 
-        Public Sub ReportUnexpectedToken(expected As SyntaxKind, actual As SyntaxKind, span As Text.Span)
+        Friend Sub ReportUnexpectedToken(expected As SyntaxKind, actual As SyntaxKind, span As Text.Span)
             Me.ReportMessage($"Expected <{expected.ToString}> instead of <{actual.ToString}>", span)
         End Sub
 
-        Public Sub ReportUndefinedType(typename As TypeNameNode)
+        Friend Sub ReportUndefinedType(typename As TypeNameNode)
             Me.ReportMessage($"Undefined or inaccessible type <{typename.Span.ToString()}>", typename.Span)
         End Sub
 
-        Public Sub ReportTypeNotGeneric(type As Type, syntax As TypeNameNode)
+        Friend Sub ReportTypeNotGeneric(type As Type, syntax As TypeNameNode)
             Me.ReportMessage($"Type <type.Name> is not a generic type", syntax.Span)
         End Sub
 
-        Public Sub ReportGenericArgumentMissmatch(type As Type, generics As List(Of Type), syntax As TypeNameNode)
+        Friend Sub ReportGenericArgumentMissmatch(type As Type, generics As List(Of Type), syntax As TypeNameNode)
             Me.ReportMessage(
                 $"No matching generic type definition found of <{type.Name}> with generic arguments ({String.Join(","c, generics.Select(Function(g) g.Name).ToArray)})",
                 syntax.Span
             )
         End Sub
 
-        Public Sub ReportVariableAlreadyDefined(name As String, statement As SyntaxToken)
+        Friend Sub ReportVariableAlreadyDefined(name As String, statement As SyntaxToken)
             Me.ReportMessage($"Variable '{name}' has already been defines in the current scope ", statement.Span)
         End Sub
 
-        Public Sub ReportInvalidConversion(fromType As Type, toType As Type, expression As Text.Span)
+        Friend Sub ReportInvalidConversion(fromType As Type, toType As Type, expression As Text.Span)
             Me.ReportMessage($"No valid conversion from <{fromType.ToString}> to type <{toType.ToString}> found ", expression)
         End Sub
 
-        Public Sub ReportVariableNotDeclared(syntax As SyntaxToken)
+        Friend Sub ReportVariableNotDeclared(syntax As SyntaxToken)
             Me.ReportMessage($"Variable '{syntax.Span.ToString} is not declared in current scope'", syntax.Span)
         End Sub
 
@@ -81,19 +81,19 @@ Namespace Diagnostics
             Me._content.Add(New ErrorObject(message & $" in source at {span.GetStartPosition.ToString}.", span))
         End Sub
 
-        Public Sub ReportBadNamespace(name As String, span As Span)
+        Friend Sub ReportBadNamespace(name As String, span As Span)
             Me.ReportMessage($"Namespace '{name}' not found in current app domain", span)
         End Sub
 
-        Public Sub ReportOperatorNotDefined(kind As SyntaxKind, boundType As Type, span As Span)
+        Friend Sub ReportOperatorNotDefined(kind As SyntaxKind, boundType As Type, span As Span)
             Me.ReportMessage($"Operator <{kind.ToString}> not defined on type <{boundType.Name}>", span)
         End Sub
 
-        Public Sub ReportOperatorNotDefined(kind As SyntaxKind, leftType As Type, rigthType As Type, span As Span)
+        Friend Sub ReportOperatorNotDefined(kind As SyntaxKind, leftType As Type, rigthType As Type, span As Span)
             Me.ReportMessage($"Operator <{kind.ToString}> not defined between type <{leftType.Name}> and <{rigthType.Name}>", span)
         End Sub
 
-        Public Sub ReportReferenceTypeCannotBeNullable(target As Type, syntax As TypeNameNode)
+        Friend Sub ReportReferenceTypeCannotBeNullable(target As Type, syntax As TypeNameNode)
             Me.ReportMessage($"Type <{target.Name}> must be value type in order to be defined nullable.", syntax.Span)
         End Sub
 

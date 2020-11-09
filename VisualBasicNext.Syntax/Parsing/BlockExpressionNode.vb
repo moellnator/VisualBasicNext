@@ -1,4 +1,4 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class BlockExpressionNode : Inherits ExpressionNode
@@ -15,7 +15,7 @@ Namespace Parsing
             End Get
         End Property
 
-        Public Sub New(openBracketToken As SyntaxToken, expression As ExpressionNode, closingBracketToken As SyntaxToken)
+        Friend Sub New(openBracketToken As SyntaxToken, expression As ExpressionNode, closingBracketToken As SyntaxToken)
             MyBase.New(SyntaxKind.BlockExpressionNode)
             Me.OpenBracketToken = openBracketToken
             Me.Expression = expression

@@ -1,9 +1,9 @@
-﻿Imports VisualBasicNext.Syntax.Lexing
+﻿Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class CastExpressionNode : Inherits ExpressionNode
 
-        Public Sub New(ctypeToken As SyntaxToken,
+        Friend Sub New(ctypeToken As SyntaxToken,
                        openBracket As SyntaxToken,
                        expression As ExpressionNode,
                        delimeterToken As SyntaxToken,

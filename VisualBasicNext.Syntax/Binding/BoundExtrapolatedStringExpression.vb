@@ -1,8 +1,8 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Parsing
+Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Public Class BoundExtrapolatedStringExpression : Inherits BoundExpression
+    Friend Class BoundExtrapolatedStringExpression : Inherits BoundExpression
 
         Public Sub New(syntax As SyntaxNode, start As String, expressions As IEnumerable(Of BoundExpression), remainders As IEnumerable(Of String))
             MyBase.New(syntax, BoundNodeKind.BoundExtrapolatedStringExpression, GetType(String))

@@ -1,5 +1,5 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Lexing
+Imports VisualBasicNext.CodeAnalysis.Lexing
 
 Namespace Parsing
     Public Class ScriptNode : Inherits SyntaxNode
@@ -16,11 +16,16 @@ Namespace Parsing
             End Get
         End Property
 
-        Public Sub New(statements As IEnumerable(Of StatementNode), endOfFileToken As SyntaxToken)
+        Friend Sub New(statements As IEnumerable(Of StatementNode), endOfFileToken As SyntaxToken)
             MyBase.New(SyntaxKind.ScriptNode)
             Me.Statements = statements.ToImmutableArray
             Me.EndOfFileToken = endOfFileToken
         End Sub
+
+        Public Shared Function FromSource(source As Text.Source) As ScriptNode
+            Dim parser As New Parser(source)
+            Return parser.Parse
+        End Function
 
     End Class
 

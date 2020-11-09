@@ -1,8 +1,8 @@
 ﻿Imports System.Collections.Immutable
-Imports VisualBasicNext.Syntax.Parsing
+Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Public Class BoundArrayExpression : Inherits BoundExpression
+    Friend Class BoundArrayExpression : Inherits BoundExpression
 
         Public Sub New(syntaxNode As SyntaxNode, items As IEnumerable(Of BoundExpression), boundType As Type, Optional rank As Integer = 1)
             MyBase.New(syntaxNode, BoundNodeKind.BoundArrayExpression, boundType)

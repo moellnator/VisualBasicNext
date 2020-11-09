@@ -1,4 +1,4 @@
-﻿Imports VisualBasicNext.Syntax.Text
+﻿Imports VisualBasicNext.CodeAnalysis.Text
 
 <TestClass> Public Class SourceTest
 
