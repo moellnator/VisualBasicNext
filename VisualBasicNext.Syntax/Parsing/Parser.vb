@@ -63,7 +63,8 @@ Namespace Parsing
 
         Private Function _MatchStatement() As StatementNode
             Select Case Me._current.Kind
-                'TODO -> Add statements - assignment, ...
+                'TODO -> Assignment
+                'TODO -> More Statements
                 Case SyntaxKind.EndOfLineToken
                     Return New EmptyStatementNode(Me._next_token)
                 Case SyntaxKind.DimKeywordToken
@@ -135,7 +136,10 @@ Namespace Parsing
         End Function
 
         Private Function _MatchExpression() As ExpressionNode
-            'TODO -> Lambda, MultilineLambda, Action, MultilineAction, Member, New, TypeOf ... Is ...
+            'TODO -> Lambda, MultilineLambda
+            'TODO -> Action, MultilineAction
+            'TODO -> New (including from and array notation)
+            'TODO -> TypeOf ... Is ...
             Return Me._MatchBinaryExpression
         End Function
 

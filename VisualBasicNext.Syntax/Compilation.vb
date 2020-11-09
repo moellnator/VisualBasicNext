@@ -1,5 +1,6 @@
 ﻿Imports VisualBasicNext.Syntax.Binding
 Imports VisualBasicNext.Syntax.Diagnostics
+Imports VisualBasicNext.Syntax.Evaluating
 Imports VisualBasicNext.Syntax.Parsing
 Imports VisualBasicNext.Syntax.Text
 

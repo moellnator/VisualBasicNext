@@ -34,6 +34,10 @@ Namespace Diagnostics
             Me.ReportMessage($"Invalid conversion from type ({fromType.ToString}) to ({toType.ToString})", span)
         End Sub
 
+        Public Sub ReportRuntimeException(innerException As Exception, syntax As Span)
+            Me.ReportMessage($"A runtime exception of type <{innerException.GetType.Name}> orruced: {innerException.Message}. The error occured", syntax)
+        End Sub
+
         Public Sub ReportBadLiteral(literal As String, target As Type, span As Text.Span)
             Me.ReportMessage($"Literal '{literal}' does not represent a value of type ({target})", span)
         End Sub

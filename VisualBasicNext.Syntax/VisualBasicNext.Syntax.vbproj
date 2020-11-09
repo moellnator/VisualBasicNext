@@ -96,8 +96,9 @@
     <Compile Include="Compilation.vb" />
     <Compile Include="Diagnostics\ErrorObject.vb" />
     <Compile Include="Diagnostics\ErrorList.vb" />
-    <Compile Include="EvaluationResult.vb" />
-    <Compile Include="Evaluator.vb" />
+    <Compile Include="Evaluating\EvaluationException.vb" />
+    <Compile Include="Evaluating\EvaluationResult.vb" />
+    <Compile Include="Evaluating\Evaluator.vb" />
     <Compile Include="Lexing\Lexer.vb" />
     <Compile Include="Lexing\SyntaxToken.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
