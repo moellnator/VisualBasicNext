@@ -1,4 +1,5 @@
-﻿Imports VisualBasicNext.CodeAnalysis.Symbols
+﻿Imports System.Collections.Immutable
+Imports VisualBasicNext.CodeAnalysis.Symbols
 
 Public Class VMState
 
@@ -15,5 +16,13 @@ Public Class VMState
             Me._globals.Add(symbol, value)
         End Set
     End Property
+
+    Public Function IsDefined(name As String) As VariableSymbol
+        Return Me._globals.FirstOrDefault(Function(g) g.Key.Name = name).Key
+    End Function
+
+    Public Function GetGlobalVariableSymbols() As ImmutableArray(Of VariableSymbol)
+        Return Me._globals.Keys.ToImmutableArray
+    End Function
 
 End Class

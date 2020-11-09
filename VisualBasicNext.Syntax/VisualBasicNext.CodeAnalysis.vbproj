@@ -93,6 +93,8 @@
     <Compile Include="Binding\BoundVariableDeclarationStatement.vb" />
     <Compile Include="Binding\BoundVariableExpression.vb" />
     <Compile Include="Binding\TypeResolver.vb" />
+    <Compile Include="Binding\__Old\AST\Identifier.vb" />
+    <Compile Include="Binding\__Old\AST\Inline.vb" />
     <Compile Include="Compilation.vb" />
     <Compile Include="Diagnostics\ErrorList.vb" />
     <Compile Include="Diagnostics\ErrorObject.vb" />
