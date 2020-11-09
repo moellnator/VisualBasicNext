@@ -64,7 +64,14 @@ Namespace Parsing
         Private Function _MatchStatement() As StatementNode
             Select Case Me._current.Kind
                 'TODO -> Assignment
-                'TODO -> More Statements
+                'TODO -> Redim and Erase
+                'TODO -> Define Delegates
+                'TODO -> More Statements... 
+                '        if, else, elseif, end if
+                '        select case, case, case is, case else, end select
+                '        for, each in, next
+                '        while, end while
+                '        do, until, while, loop
                 Case SyntaxKind.EndOfLineToken
                     Return New EmptyStatementNode(Me._next_token)
                 Case SyntaxKind.DimKeywordToken
@@ -164,9 +171,8 @@ Namespace Parsing
         End Function
 
         Private Function _MatchAtomicExpression() As ExpressionNode
-            'TODO -> Add nameOf Operator
-            'TODO -> Try to add the addressOf operator?
-            'TODO -> Add Await operator?
+            'TODO -> Add the AddressOf operator -> Delegates
+            'TODO -> Add Await operator
             Select Case Me._current.Kind
                 Case SyntaxKind.OpenBraceToken
                     Return Me._MatchArrayExpression
@@ -196,7 +202,7 @@ Namespace Parsing
                     Return Me._MatchExtrapolatedString
                 Case Else
                     Dim identifier As SyntaxToken = Me._MatchToken(SyntaxKind.IdentifierToken)
-                    'TODO -> Match full quallifiers!
+                    'TODO -> Match full quallifiers + Members + Access/Index, Nullpropagation ?. and Nullindex ?()
                     Return New VariableExpressionNode(identifier)
             End Select
         End Function

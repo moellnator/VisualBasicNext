@@ -97,6 +97,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Compile Include="Syntax\Lexing\LexerTest.vb" />
+    <Compile Include="Syntax\Parsing\ResultTests.vb" />
     <Compile Include="Syntax\Text\SourceTest.vb" />
   </ItemGroup>
   <ItemGroup>

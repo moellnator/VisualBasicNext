@@ -1,0 +1,82 @@
+﻿Imports VisualBasicNext.Syntax
+Imports VisualBasicNext.Syntax.Diagnostics
+Imports VisualBasicNext.Syntax.Evaluating
+
+<TestClass> Public Class ResultTests
+
+    <TestMethod> Public Sub TestParserRounttrip()
+        For Each test As KeyValuePair(Of String, Object) In _Tests
+            Dim state As New VMState
+            Dim compilation As Compilation = Compilation.CreateFromText(Nothing, test.Key)
+            Dim diagnostics As New ErrorList(compilation.Diagnostics)
+            Dim result As EvaluationResult = Nothing
+            Assert.IsFalse(diagnostics.HasErrors)
+            result = compilation.Evaluate(state)
+            diagnostics &= result.Diagnostics
+            Assert.IsFalse(diagnostics.HasErrors)
+            Assert.AreEqual(test.Value, result.Value)
+        Next
+    End Sub
+
+    Private Shared ReadOnly _Tests As New Dictionary(Of String, Object) From {
+        {"", Nothing},
+        {"1", 1},
+        {"-1", -1},
+        {"+1", 1},
+        {"1.0f", 1.0F},
+        {"1.0e-10", 0.0000000001},
+        {"true", True},
+        {"false", False},
+        {"not false", True},
+        {"nothing", Nothing},
+        {"""test""", "test"},
+        {"""test""""""", "test"""},
+        {"$""test{42}""", "test42"},
+        {"$""A{$""B{""C""}""}""", "ABC"},
+        {"""a"" & ""b""", "ab"},
+        {"1+2", 3},
+        {"1+-2", -1},
+        {"not 1", -2},
+        {"1-3", -2},
+        {"2*3", 6},
+        {"4\2", 2},
+        {"4/2", 2.0},
+        {"4 mod 3", 1},
+        {"2^2", 4.0},
+        {"2 << 2", 8},
+        {"4 >> 2", 1},
+        {"true and true", True},
+        {"true and false", False},
+        {"true or false", True},
+        {"false or false", False},
+        {"true xor true", False},
+        {"true xor false", True},
+        {"3 xor 1", 2},
+        {"3 and 1", 1},
+        {"3 or 1", 3},
+        {"&HFF", 255},
+        {"&o10", 8},
+        {"&b11", 3},
+        {"&b11US", CUShort(3)},
+        {"3 > 2", True},
+        {"3 < 2", False},
+        {"2 <= 2", True},
+        {"2 >= 2", True},
+        {"2 = 2", True},
+        {"2 <> 2", False},
+        {"1+2*3", 7},
+        {"(1+2)*3", 9},
+        {"if(true,3,5)", 3},
+        {"if(false,3,5)", 5},
+        {"gettype(integer)", GetType(Integer)},
+        {"dim a as object = nothing : a is nothing", True},
+        {"dim a as string = 2 : a", "2"},
+        {"dim a as integer = ""2"" : a", 2},
+        {"CType(""true"", boolean)", True},
+        {"CTypeDynamic(""2"", gettype(integer))", 2},
+        {"TryCast(""2"", integer)", 2},
+        {"TryCast(""a"", integer)", Nothing},
+        {"if(nothing, ""a"")", "a"}
+    }
+
+End Class

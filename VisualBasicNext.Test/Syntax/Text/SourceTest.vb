@@ -1,6 +1,5 @@
 ﻿Imports VisualBasicNext.Syntax.Text
 
-
 <TestClass> Public Class SourceTest
 
     <TestMethod> Public Sub TestSourceCreation()
