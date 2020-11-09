@@ -17,6 +17,8 @@
         BoundUnaryExpression
         BoundBinaryOperator
         BoundUnaryOperator
+        BoundExtrapolatedStringExpression
+        BoundTryCastExpression
     End Enum
 
 End Namespace

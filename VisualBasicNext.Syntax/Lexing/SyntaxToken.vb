@@ -95,6 +95,13 @@ Namespace Lexing
         BinaryExpressionNode
         UnaryExpressionNode
         AndKeywordToken
+        PartialStringStartToken
+        PartialStringCenterToken
+        PartialStringEndToken
+        ExtrapolatedStringExpressionNode
+        ExtrapolatedStringSubNode
+        GetTryCastKeywordToken
+        TryCastExpressionNode
     End Enum
 
     Public Class SyntaxToken : Inherits SyntaxNode

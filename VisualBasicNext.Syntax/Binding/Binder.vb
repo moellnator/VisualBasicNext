@@ -152,6 +152,10 @@ Namespace Binding
                     Return Me._BindUnaryExpression(expression)
                 Case Lexing.SyntaxKind.BinaryExpressionNode
                     Return Me._BindBinaryExpression(expression)
+                Case Lexing.SyntaxKind.ExtrapolatedStringExpressionNode
+                    Return Me._BindExtrapolatedStringExpression(expression)
+                Case Lexing.SyntaxKind.TryCastExpressionNode
+                    Return Me._BindTryCastExpression(expression)
                 Case Else
                     Throw New Exception($"Syntax node <{expression.Kind.ToString}> is not an expression.")
             End Select
@@ -164,6 +168,19 @@ Namespace Binding
                 Return New BoundErrorExpression(expression)
             End If
             Return retval
+        End Function
+
+        Private Function _BindTryCastExpression(expression As TryCastExpressionNode) As BoundTryCastExpression
+            Dim expr As BoundExpression = Me._BindExpression(expression.Expression)
+            Dim target As Type = Me._BindTypeClause(expression.Target)
+            Return New BoundTryCastExpression(expression, expr, target)
+        End Function
+
+        Private Function _BindExtrapolatedStringExpression(expression As ExtrapolatedStringExpressionNode) As BoundExtrapolatedStringExpression
+            Dim start As String = expression.PartialStringStart.Value
+            Dim expressions As BoundExpression() = expression.Subnodes.Select(Function(e) Me._BindExpression(Of String)(e.Expression)).ToArray
+            Dim remainders As String() = expression.Subnodes.Select(Function(e) CStr(e.TerminatorSyntax.Value)).ToArray
+            Return New BoundExtrapolatedStringExpression(expression, start, expressions, remainders)
         End Function
 
         Private Function _BindArrayExpression(expression As ArrayExpressionNode) As BoundArrayExpression

@@ -11,6 +11,9 @@ Namespace Lexing
 
         Private _index As Integer
 
+        Private ReadOnly _partial_string_brace_ballance As New Stack(Of Integer)
+        Private _open_brace_ballance As Integer = 0
+
         Public Sub New(source As Source)
             Me._source = source
             Me._text = source.ToString
@@ -66,6 +69,10 @@ Namespace Lexing
                 Case Char.IsDigit(Me._current)
                     value = _read_number()
                     kind = SyntaxKind.NumberValueToken
+                Case Me._current = "$"
+                    Dim partial_string_count = Me._partial_string_brace_ballance.Count
+                    value = Me._read_partial_string
+                    kind = If(partial_string_count <> Me._partial_string_brace_ballance.Count, SyntaxKind.PartialStringStartToken, SyntaxKind.StringValueToken)
                 Case Me._current = "#"
                     value = _read_date()
                     kind = SyntaxKind.DateValueToken
@@ -92,9 +99,17 @@ Namespace Lexing
                 Case Me._current = "{"c
                     kind = SyntaxKind.OpenBraceToken
                     Me._move_next()
+                    Me._open_brace_ballance += 1
                 Case Me._current = "}"c
                     kind = SyntaxKind.CloseBraceToken
-                    Me._move_next()
+                    Me._open_brace_ballance -= 1
+                    If Me._open_brace_ballance = Me._partial_string_brace_ballance.Peek Then
+                        Dim partial_string_count = Me._partial_string_brace_ballance.Count
+                        value = Me._read_partial_string
+                        kind = If(Me._partial_string_brace_ballance.Count = partial_string_count, SyntaxKind.PartialStringCenterToken, SyntaxKind.PartialStringEndToken)
+                    Else
+                        Me._move_next()
+                    End If
                 Case Me._current = "="c
                     kind = SyntaxKind.EqualsToken
                     Me._move_next()
@@ -200,6 +215,49 @@ Namespace Lexing
             End Select
             Dim span As Span = Span.FromBounds(Me._source, start, Me._index)
             Return New SyntaxToken(kind, span, value)
+        End Function
+
+        Private Function _read_partial_string() As Object
+            Dim start As Integer = Me._index
+            Dim isinital As Boolean = False
+            If Me._current = "$" Then
+                Me._move_next()
+                If Me._current <> """"c Then Me.Diagnostics.ReportBadCharakter(Me._current, New Span(Me._source, Me._index, 1))
+                Me._move_next()
+                isinital = True
+            ElseIf Me._current = "}" Then
+                Me._move_next()
+            Else
+                Throw New Exception("No partial extrapolated string found.")
+            End If
+            Dim done As Boolean = False
+            Dim text As New System.Text.StringBuilder
+            While Not done
+                Select Case Me._current
+                    Case "{"c
+                        Me._move_next()
+                        done = True
+                        If Not isinital Then Me._partial_string_brace_ballance.Pop()
+                        Me._partial_string_brace_ballance.Push(Me._open_brace_ballance)
+                        Me._open_brace_ballance += 1
+                    Case """"
+                        If Me._next = """"c Then
+                            text.Append(""""c)
+                            Me._move(2)
+                        Else
+                            If Not isinital Then Me._partial_string_brace_ballance.Pop()
+                            Me._move_next()
+                            done = True
+                        End If
+                    Case vbNullChar
+                        Me.Diagnostics.ReportMissing("""", New Span(Me._source, Me._index, 1))
+                        Return Nothing
+                    Case Else
+                        text.Append(Me._current)
+                        Me._move_next()
+                End Select
+            End While
+            Return text.ToString
         End Function
 
         Private Sub _read_whitespace()
@@ -554,6 +612,8 @@ Namespace Lexing
                     retval = SyntaxKind.ImportsKeywordToken
                 Case "gettype"
                     retval = SyntaxKind.GetTypeKeywordToken
+                Case "trycast"
+                    retval = SyntaxKind.GetTryCastKeywordToken
                 Case "_"
                     Me.Diagnostics.ReportBadCharakter("_", New Span(Me._source, start, 1))
                 Case Else

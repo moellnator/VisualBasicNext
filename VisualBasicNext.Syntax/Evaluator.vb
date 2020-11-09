@@ -94,9 +94,40 @@ Public Class Evaluator
                 Return Me.EvaluateUnaryExpression(expression)
             Case BoundNodeKinds.BoundBinaryExpression
                 Return Me.EvaluateBinaryExpression(expression)
+            Case BoundNodeKinds.BoundExtrapolatedStringExpression
+                Return Me.EvaluateExtrapolatedStringExpression(expression)
+            Case BoundNodeKinds.BoundTryCastExpression
+                Return Me.EvaluateTryCastExpression(expression)
             Case Else
                 Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
         End Select
+    End Function
+
+    Private Function EvaluateTryCastExpression(expression As BoundTryCastExpression) As Object
+        Dim value As Object = Me.EvaluateExpression(expression.Expression)
+        Try
+            Return CTypeDynamic(value, expression.Target)
+        Catch ex As Exception
+            Return Nothing
+        End Try
+    End Function
+
+    Private Function EvaluateExtrapolatedStringExpression(expression As BoundExtrapolatedStringExpression) As Object
+        Dim retval As New System.Text.StringBuilder
+        Dim expr As BoundExpression = Nothing
+        retval.Append(expression.Start)
+        For index As Integer = 0 To expression.Expressions.Length - 1
+            Try
+                expr = expression.Expressions(index)
+                Dim value As String = Me.EvaluateExpression(expr)
+                retval.Append(value)
+                retval.Append(expression.Remainders(index))
+            Catch ex As InvalidCastException
+                Me.Diagnostics.ReportInvalidConversion(expr.BoundType, GetType(String), expr.Syntax.Span)
+                Return Nothing
+            End Try
+        Next
+        Return retval.ToString
     End Function
 
     Private Function EvaluateBinaryExpression(expression As BoundBinaryExpression) As Object

@@ -160,8 +160,6 @@ Namespace Parsing
         End Function
 
         Private Function _MatchAtomicExpression() As ExpressionNode
-            'TODO -> Add extrapolated strings $" ... { Expression } ... "
-            'TODO -> Add TryCast Operator
             'TODO -> Add nameOf Operator
             'TODO -> Try to add the addressOf operator?
             'TODO -> Add Await operator?
@@ -174,6 +172,8 @@ Namespace Parsing
                     Return Me._MatchCastExpression
                 Case SyntaxKind.CTypeDynamicKeywordToken
                     Return Me._MatchCastDynamicExpression
+                Case SyntaxKind.GetTryCastKeywordToken
+                    Return Me._MatchTryCastExpression
                 Case SyntaxKind.GetTypeKeywordToken
                     Return Me._MatchGetTypeExpression
                 Case SyntaxKind.IfKeywordToken
@@ -188,11 +188,43 @@ Namespace Parsing
                     Return Me._MatchDateExpression
                 Case SyntaxKind.NothingValueToken
                     Return Me._MatchNothingExpression
+                Case SyntaxKind.PartialStringStartToken
+                    Return Me._MatchExtrapolatedString
                 Case Else
                     Dim identifier As SyntaxToken = Me._MatchToken(SyntaxKind.IdentifierToken)
                     'TODO -> Match full quallifiers!
                     Return New VariableExpressionNode(identifier)
             End Select
+        End Function
+
+        Private Function _MatchTryCastExpression() As TryCastExpressionNode
+            Return New TryCastExpressionNode(
+                Me._MatchToken(SyntaxKind.GetTryCastKeywordToken),
+                Me._MatchToken(SyntaxKind.OpenBracketToken),
+                Me._MatchExpression,
+                Me._MatchToken(SyntaxKind.CommaToken),
+                Me._MatchTypeName,
+                Me._MatchToken(SyntaxKind.CloseBracketToken)
+            )
+        End Function
+
+        Private Function _MatchExtrapolatedString() As ExtrapolatedStringExpressionNode
+            Dim start As SyntaxToken = Me._MatchToken(SyntaxKind.PartialStringStartToken)
+            Dim items As ImmutableArray(Of ExtrapolatedStringSubNode).Builder = ImmutableArray.CreateBuilder(Of ExtrapolatedStringSubNode)
+            Dim done As Boolean = False
+            While Not done
+                Dim sub_expression As ExpressionNode = Me._MatchExpression
+                Dim terminator As SyntaxToken
+                Select Case Me._current.Kind
+                    Case SyntaxKind.PartialStringCenterToken
+                        terminator = Me._MatchToken(SyntaxKind.PartialStringCenterToken)
+                    Case Else
+                        terminator = Me._MatchToken(SyntaxKind.PartialStringEndToken)
+                        done = True
+                End Select
+                items.Add(New ExtrapolatedStringSubNode(sub_expression, terminator))
+            End While
+            Return New ExtrapolatedStringExpressionNode(start, items.ToImmutableArray)
         End Function
 
         Private Function _MatchArrayExpression() As ArrayExpressionNode

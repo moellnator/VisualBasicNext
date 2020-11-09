@@ -75,6 +75,7 @@
     <Compile Include="Binding\BoundErrorExpression.vb" />
     <Compile Include="Binding\BoundExpression.vb" />
     <Compile Include="Binding\BoundExpressionStatement.vb" />
+    <Compile Include="Binding\BoundExtrapolatedStringExpression.vb" />
     <Compile Include="Binding\BoundGetTypeExpression.vb" />
     <Compile Include="Binding\BoundGlobalScope.vb" />
     <Compile Include="Binding\BoundImportStatement.vb" />
@@ -86,6 +87,7 @@
     <Compile Include="Binding\BoundScript.vb" />
     <Compile Include="Binding\BoundStatement.vb" />
     <Compile Include="Binding\BoundTernaryExpression.vb" />
+    <Compile Include="Binding\BoundTryCastExpression.vb" />
     <Compile Include="Binding\BoundUnaryExpression.vb" />
     <Compile Include="Binding\BoundUnaryOperator.vb" />
     <Compile Include="Binding\BoundVariableDeclarationStatement.vb" />
@@ -124,6 +126,7 @@
     <Compile Include="Parsing\EmptyStatementNode.vb" />
     <Compile Include="Parsing\ExpressionNode.vb" />
     <Compile Include="Parsing\ExpressionStatementNode.vb" />
+    <Compile Include="Parsing\ExtrapolatedStringNode.vb" />
     <Compile Include="Parsing\GenericListItemNode.vb" />
     <Compile Include="Parsing\GenericsListNode.vb" />
     <Compile Include="Parsing\GetTypeExpressionNode.vb" />
@@ -131,6 +134,7 @@
     <Compile Include="Parsing\NullCheckExpressionNode.vb" />
     <Compile Include="Parsing\SyntaxFacts.vb" />
     <Compile Include="Parsing\TernaryExpressionNode.vb" />
+    <Compile Include="Parsing\TryCastExpressionNode.vb" />
     <Compile Include="Parsing\UnaryExpressionNode.vb" />
     <Compile Include="Parsing\VariableExpressionNode.vb" />
     <Compile Include="Parsing\LiteralExpressionNode.vb" />
