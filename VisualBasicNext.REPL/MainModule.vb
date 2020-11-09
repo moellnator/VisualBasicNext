@@ -6,6 +6,7 @@ Module MainModule
     Private Engine As New ScriptingEngine
 
     Sub Main()
+        Engine.Import("System")
         Dim is_exit As Boolean = False
         Dim multiline As String = ""
         While Not is_exit
@@ -17,7 +18,7 @@ Module MainModule
                 Case "clear"
                     Console.Clear()
                 Case "reset"
-                    engine.Reset()
+                    Engine.Reset()
                 Case Else
                     If input.Trim.EndsWith(" _") Then
                         multiline &= input.Substring(0, input.LastIndexOf(" _"))

@@ -8,6 +8,13 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using CSharpBinder = Microsoft.CSharp.RuntimeBinder.Binder;
 
+/// <summary>
+/// Code extracted from Github MedallionUtilities by madelson
+/// https://github.com/madelson/MedallionUtilities/tree/master/MedallionReflection
+/// Published under MIT License:
+/// https://github.com/madelson/MedallionUtilities/blob/master/License.txt
+/// </summary>
+
 namespace VisualBasicNext.TypeExtensions
 {
     public static partial class Reflect
