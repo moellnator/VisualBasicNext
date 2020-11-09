@@ -4,7 +4,7 @@ Namespace Binding
     Public Class BoundUnaryExpression : Inherits BoundExpression
 
         Public Sub New(syntax As SyntaxNode, op As BoundUnaryOperator, right As BoundExpression)
-            MyBase.New(syntax, BoundNodeKinds.BoundUnaryExpression, op.ReturnType)
+            MyBase.New(syntax, BoundNodeKind.BoundUnaryExpression, op.ReturnType)
             Me.Op = op
             Me.Right = right
         End Sub

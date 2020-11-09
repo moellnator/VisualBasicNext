@@ -103,7 +103,7 @@ Namespace Lexing
                 Case Me._current = "}"c
                     kind = SyntaxKind.CloseBraceToken
                     Me._open_brace_ballance -= 1
-                    If Me._open_brace_ballance = Me._partial_string_brace_ballance.Peek Then
+                    If Me._partial_string_brace_ballance.Count <> 0 AndAlso Me._open_brace_ballance = Me._partial_string_brace_ballance.Peek Then
                         Dim partial_string_count = Me._partial_string_brace_ballance.Count
                         value = Me._read_partial_string
                         kind = If(Me._partial_string_brace_ballance.Count = partial_string_count, SyntaxKind.PartialStringCenterToken, SyntaxKind.PartialStringEndToken)

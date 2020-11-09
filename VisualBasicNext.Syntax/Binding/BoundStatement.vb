@@ -3,7 +3,7 @@
 Namespace Binding
     Public MustInherit Class BoundStatement : Inherits BoundNode
 
-        Protected Sub New(syntax As SyntaxNode, kind As BoundNodeKinds)
+        Protected Sub New(syntax As SyntaxNode, kind As BoundNodeKind)
             MyBase.New(syntax, kind)
         End Sub
 

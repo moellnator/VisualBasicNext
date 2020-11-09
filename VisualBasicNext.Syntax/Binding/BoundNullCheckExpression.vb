@@ -4,7 +4,7 @@ Namespace Binding
     Public Class BoundNullCheckExpression : Inherits BoundExpression
 
         Public Sub New(syntaxNode As SyntaxNode, expression As BoundExpression, fallbackExpression As BoundExpression, boundType As Type)
-            MyBase.New(syntaxNode, BoundNodeKinds.BoundNullCheckExpression, boundType)
+            MyBase.New(syntaxNode, BoundNodeKind.BoundNullCheckExpression, boundType)
             Me.Expression = expression
             Me.FallbackExpression = fallbackExpression
         End Sub

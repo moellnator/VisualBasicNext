@@ -7,7 +7,7 @@ Namespace Binding
         Public ReadOnly Property Variable As VariableSymbol
 
         Public Sub New(expression As ExpressionNode, variable As VariableSymbol)
-            MyBase.New(expression, BoundNodeKinds.BoundVariableExpression, variable.Type)
+            MyBase.New(expression, BoundNodeKind.BoundVariableExpression, variable.Type)
             Me.Variable = variable
         End Sub
 

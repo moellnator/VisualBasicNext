@@ -9,7 +9,7 @@ Namespace Binding
         Private ReadOnly _internal_op As Func(Of Object, Object)
 
         Private Sub New(syntax As SyntaxNode, internal As Func(Of Object, Object), returnType As Type)
-            MyBase.New(syntax, BoundNodeKinds.BoundUnaryOperator)
+            MyBase.New(syntax, BoundNodeKind.BoundUnaryOperator)
             Me._internal_op = internal
             Me.ReturnType = returnType
         End Sub

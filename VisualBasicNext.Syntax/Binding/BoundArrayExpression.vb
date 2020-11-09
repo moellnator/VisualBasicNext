@@ -5,7 +5,7 @@ Namespace Binding
     Public Class BoundArrayExpression : Inherits BoundExpression
 
         Public Sub New(syntaxNode As SyntaxNode, items As IEnumerable(Of BoundExpression), boundType As Type, Optional rank As Integer = 1)
-            MyBase.New(syntaxNode, BoundNodeKinds.BoundArrayExpression, boundType)
+            MyBase.New(syntaxNode, BoundNodeKind.BoundArrayExpression, boundType)
             Me.Items = items.ToImmutableArray
             Me.Rank = rank
         End Sub

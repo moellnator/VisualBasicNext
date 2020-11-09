@@ -3,7 +3,7 @@
 Namespace Binding
     Public MustInherit Class BoundExpression : Inherits BoundNode
 
-        Protected Sub New(syntax As SyntaxNode, kind As BoundNodeKinds, boundType As Type)
+        Protected Sub New(syntax As SyntaxNode, kind As BoundNodeKind, boundType As Type)
             MyBase.New(syntax, kind)
             Me.BoundType = boundType
         End Sub

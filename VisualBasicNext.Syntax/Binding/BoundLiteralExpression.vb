@@ -4,7 +4,7 @@ Namespace Binding
     Public Class BoundLiteralExpression : Inherits BoundExpression
 
         Public Sub New(syntax As SyntaxNode, value As Object)
-            MyBase.New(syntax, BoundNodeKinds.BoundLiteral, If(value IsNot Nothing, value.GetType, GetType(Object)))
+            MyBase.New(syntax, BoundNodeKind.BoundLiteral, If(value IsNot Nothing, value.GetType, GetType(Object)))
             Me.Value = value
         End Sub
 

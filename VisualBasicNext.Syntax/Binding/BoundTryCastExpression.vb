@@ -4,7 +4,7 @@ Namespace Binding
     Public Class BoundTryCastExpression : Inherits BoundExpression
 
         Public Sub New(syntax As SyntaxNode, expression As BoundExpression, target As Type)
-            MyBase.New(syntax, BoundNodeKinds.BoundTryCastExpression, target)
+            MyBase.New(syntax, BoundNodeKind.BoundTryCastExpression, target)
             Me.Expression = expression
             Me.Target = target
         End Sub

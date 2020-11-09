@@ -6,7 +6,7 @@ Namespace Binding
     Public Class BoundScript : Inherits BoundNode
 
         Public Sub New(previous As BoundScript, syntax As SyntaxNode, statements As IEnumerable(Of BoundStatement), diagnostics As ErrorList)
-            MyBase.New(syntax, BoundNodeKinds.BoundScript)
+            MyBase.New(syntax, BoundNodeKind.BoundScript)
             Me.Statements = statements.ToImmutableArray
             Me.Previous = previous
             Me.Diagnostics = diagnostics

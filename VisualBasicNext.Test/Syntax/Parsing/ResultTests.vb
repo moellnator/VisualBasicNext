@@ -2,21 +2,37 @@
 Imports VisualBasicNext.Syntax.Diagnostics
 Imports VisualBasicNext.Syntax.Evaluating
 
-<TestClass> Public Class ResultTests
+<TestClass> Public Class EvaluationTest
+
+    <TestMethod> Public Sub TestArray()
+        Dim test As String = "{1,2,3}"
+        Dim expected As Integer() = {1, 2, 3}
+        Dim value As Object = AssertEvaluates(test)
+        Assert.IsInstanceOfType(value, GetType(Integer()))
+        Assert.AreEqual(expected.Length, value.Length)
+        For index As Integer = 0 To expected.Count - 1
+            Assert.AreEqual(expected(index), value(index))
+        Next
+    End Sub
 
     <TestMethod> Public Sub TestParserRounttrip()
         For Each test As KeyValuePair(Of String, Object) In _Tests
-            Dim state As New VMState
-            Dim compilation As Compilation = Compilation.CreateFromText(Nothing, test.Key)
-            Dim diagnostics As New ErrorList(compilation.Diagnostics)
-            Dim result As EvaluationResult = Nothing
-            Assert.IsFalse(diagnostics.HasErrors)
-            result = compilation.Evaluate(state)
-            diagnostics &= result.Diagnostics
-            Assert.IsFalse(diagnostics.HasErrors)
-            Assert.AreEqual(test.Value, result.Value)
+            Dim value As Object = AssertEvaluates(test.Key)
+            Assert.AreEqual(test.Value, value)
         Next
     End Sub
+
+    Private Shared Function AssertEvaluates(text As String) As Object
+        Dim state As New VMState
+        Dim compilation As Compilation = Compilation.CreateFromText(Nothing, text)
+        Dim diagnostics As New ErrorList(compilation.Diagnostics)
+        Dim result As EvaluationResult = Nothing
+        Assert.IsFalse(diagnostics.HasErrors)
+        result = compilation.Evaluate(state)
+        diagnostics &= result.Diagnostics
+        Assert.IsFalse(diagnostics.HasErrors)
+        Return result.Value
+    End Function
 
     Private Shared ReadOnly _Tests As New Dictionary(Of String, Object) From {
         {"", Nothing},
@@ -25,6 +41,7 @@ Imports VisualBasicNext.Syntax.Evaluating
         {"+1", 1},
         {"1.0f", 1.0F},
         {"1.0e-10", 0.0000000001},
+        {"1e+3", 1000.0},
         {"true", True},
         {"false", False},
         {"not false", True},

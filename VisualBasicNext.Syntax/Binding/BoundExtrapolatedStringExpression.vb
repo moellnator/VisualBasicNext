@@ -5,7 +5,7 @@ Namespace Binding
     Public Class BoundExtrapolatedStringExpression : Inherits BoundExpression
 
         Public Sub New(syntax As SyntaxNode, start As String, expressions As IEnumerable(Of BoundExpression), remainders As IEnumerable(Of String))
-            MyBase.New(syntax, BoundNodeKinds.BoundExtrapolatedStringExpression, GetType(String))
+            MyBase.New(syntax, BoundNodeKind.BoundExtrapolatedStringExpression, GetType(String))
             Me.Start = start
             Me.Expressions = expressions.ToImmutableArray
             Me.Remainders = remainders.ToImmutableArray

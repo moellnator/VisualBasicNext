@@ -11,7 +11,7 @@ Namespace Binding
 
 
         Public Sub New(syntax As SyntaxNode, internal As Func(Of Object, Object, Object), returnType As Type)
-            MyBase.New(syntax, BoundNodeKinds.BoundBinaryOperator)
+            MyBase.New(syntax, BoundNodeKind.BoundBinaryOperator)
             Me._internal = internal
             Me.ReturnType = returnType
         End Sub

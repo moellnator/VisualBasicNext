@@ -34,11 +34,11 @@ Namespace Evaluating
             Dim retval As Object = Nothing
 
             Select Case statement.Kind
-                Case BoundNodeKinds.BoundVariableDeclarationStatement
+                Case BoundNodeKind.BoundVariableDeclarationStatement
                     Me.EvaluateVariableDeclarationStatement(statement)
-                Case BoundNodeKinds.BoundExpressionStatement
+                Case BoundNodeKind.BoundExpressionStatement
                     retval = Me.EvaluateExpressionStatement(statement)
-                Case BoundNodeKinds.BoundImportStatement
+                Case BoundNodeKind.BoundImportStatement
                 Case Else
                     Throw New Exception($"Unknown statement in evaluator: '{statement.Kind.ToString}'.")
             End Select
@@ -81,29 +81,29 @@ Namespace Evaluating
         Private Function EvaluateExpression(expression As BoundExpression) As Object
             If expression.Constant IsNot Nothing Then Return expression.Constant.Value
             Select Case expression.Kind
-                Case BoundNodeKinds.BoundLiteral
+                Case BoundNodeKind.BoundLiteral
                     Return Me.EvaluateLiteralExpression(expression)
-                Case BoundNodeKinds.BoundVariableExpression
+                Case BoundNodeKind.BoundVariableExpression
                     Return Me.EvaluateVariableExpression(expression)
-                Case BoundNodeKinds.BoundCastExpression
+                Case BoundNodeKind.BoundCastExpression
                     Return Me.EvaluateCastExpression(expression)
-                Case BoundNodeKinds.BoundCastDynamicExpression
+                Case BoundNodeKind.BoundCastDynamicExpression
                     Return Me.EvaluateCastDynamicExpression(expression)
-                Case BoundNodeKinds.BoundGetTypeExpression
+                Case BoundNodeKind.BoundGetTypeExpression
                     Return Me.EvaluateGetTypeExpression(expression)
-                Case BoundNodeKinds.BoundTernaryExpression
+                Case BoundNodeKind.BoundTernaryExpression
                     Return Me.EvaluateTernaryExpression(expression)
-                Case BoundNodeKinds.BoundNullCheckExpression
+                Case BoundNodeKind.BoundNullCheckExpression
                     Return Me.EvaluateNullCheckExpression(expression)
-                Case BoundNodeKinds.BoundArrayExpression
+                Case BoundNodeKind.BoundArrayExpression
                     Return Me.EvaluateArrayExpression(expression)
-                Case BoundNodeKinds.BoundUnaryExpression
+                Case BoundNodeKind.BoundUnaryExpression
                     Return Me.EvaluateUnaryExpression(expression)
-                Case BoundNodeKinds.BoundBinaryExpression
+                Case BoundNodeKind.BoundBinaryExpression
                     Return Me.EvaluateBinaryExpression(expression)
-                Case BoundNodeKinds.BoundExtrapolatedStringExpression
+                Case BoundNodeKind.BoundExtrapolatedStringExpression
                     Return Me.EvaluateExtrapolatedStringExpression(expression)
-                Case BoundNodeKinds.BoundTryCastExpression
+                Case BoundNodeKind.BoundTryCastExpression
                     Return Me.EvaluateTryCastExpression(expression)
                 Case Else
                     Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
