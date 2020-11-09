@@ -112,6 +112,10 @@
       <Project>{433B982D-CF52-406B-A486-53507F478A50}</Project>
       <Name>VisualBasicNext.CodeAnalysis</Name>
     </ProjectReference>
+    <ProjectReference Include="..\VisualBasicNext\VisualBasicNext.vbproj">
+      <Project>{b564de62-b168-4f1d-87a8-9906ef529c18}</Project>
+      <Name>VisualBasicNext</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
 </Project>

@@ -7,7 +7,7 @@ Imports VisualBasicNext.CodeAnalysis.Symbols
 ''' <summary>
 ''' This class represents an encapsulated API entity for VB.NeXt scripting.
 ''' </summary>
-Public Class ScriptEngine
+Public Class ScriptingEngine
 
     Private _state As New VMState
     Private _compilation As Compilation = Nothing
