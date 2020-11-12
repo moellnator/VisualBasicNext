@@ -152,6 +152,7 @@
     <Compile Include="Symbols\GlobalVariableSymbol.vb" />
     <Compile Include="Symbols\Symbol.vb" />
     <Compile Include="Symbols\VariableSymbol.vb" />
+    <Compile Include="Text\CombinedHashCode.vb" />
     <Compile Include="Text\Line.vb" />
     <Compile Include="Text\Position.vb" />
     <Compile Include="Text\Source.vb" />

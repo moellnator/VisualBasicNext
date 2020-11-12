@@ -1,5 +1,5 @@
 ﻿Namespace Text
-    Public Class Span
+    Public Class Span : Implements IEquatable(Of Span)
 
         Public ReadOnly Property Source As Source
         Public ReadOnly Property Start As Integer
@@ -32,6 +32,18 @@
 
         Public Function GetStartPosition() As Position
             Return Position.FromSourceLocation(Me.Source, Me.Start)
+        End Function
+
+        Public Overrides Function Equals(obj As Object) As Boolean
+            Return If(TypeOf obj Is Span, Me._IEquatable_Equals(obj), False)
+        End Function
+
+        Private Function _IEquatable_Equals(other As Span) As Boolean Implements IEquatable(Of Span).Equals
+            Return Me.ToString = other.ToString AndAlso (Me.Start = other.Start And Me.Length = other.Length)
+        End Function
+
+        Public Overrides Function GetHashCode() As Integer
+            Return New CombinedHashCode(Me.ToString, Me.Start, Me.Length).GetHashCode
         End Function
 
     End Class

@@ -196,7 +196,7 @@ Namespace Parsing
                     Return Me._MatchStringExpression
                 Case SyntaxKind.DateValueToken
                     Return Me._MatchDateExpression
-                Case SyntaxKind.NothingValueToken
+                Case SyntaxKind.NothingKeywordToken
                     Return Me._MatchNothingExpression
                 Case SyntaxKind.PartialStringStartToken
                     Return Me._MatchExtrapolatedString
@@ -341,7 +341,7 @@ Namespace Parsing
         End Function
 
         Private Function _MatchNothingExpression() As LiteralExpressionNode
-            Return New LiteralExpressionNode(_MatchToken(SyntaxKind.NothingValueToken))
+            Return New LiteralExpressionNode(_MatchToken(SyntaxKind.NothingKeywordToken))
         End Function
 
         Private Function _MatchTypeName() As TypeNameNode

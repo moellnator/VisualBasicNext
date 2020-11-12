@@ -1,6 +1,6 @@
 ﻿
 Namespace Text
-    Public Class Source : Implements IReadOnlyList(Of Line)
+    Public Class Source : Implements IReadOnlyList(Of Line) : Implements IEquatable(Of Source)
 
         Private ReadOnly _text As String
         Private ReadOnly _lines As Line()
@@ -84,6 +84,18 @@ Namespace Text
 
         Public Overloads Function ToString(start As Integer, length As Integer) As String
             Return Me._text.Substring(start, length)
+        End Function
+
+        Public Overrides Function Equals(obj As Object) As Boolean
+            Return If(TypeOf obj Is Source, Me._IEquatable_Equals(obj), False)
+        End Function
+
+        Private Function _IEquatable_Equals(other As Source) As Boolean Implements IEquatable(Of Source).Equals
+            Return Me._text = other._text
+        End Function
+
+        Public Overrides Function GetHashCode() As Integer
+            Return Me._text.GetHashCode
         End Function
 
     End Class

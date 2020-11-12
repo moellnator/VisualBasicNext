@@ -4,7 +4,7 @@ Imports VisualBasicNext.CodeAnalysis.Diagnostics
 Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Namespace Binding
-    Friend Class TypeResolver
+    Public Class TypeResolver
 
         Private Shared ReadOnly ImplicitNumericConversions As New Dictionary(Of Type, List(Of Type))() From {
            {GetType(SByte), New List(Of Type) From {

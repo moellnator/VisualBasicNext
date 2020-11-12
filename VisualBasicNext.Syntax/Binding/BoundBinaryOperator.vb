@@ -37,9 +37,9 @@ Namespace Binding
                 ElseIf syntax.Kind = SyntaxKind.AmpersandToken AndAlso (left.BoundType.Equals(GetType(String)) Or right.BoundType.Equals(GetType(String))) Then
                     Dim can_cast As Boolean = False
                     If left.BoundType.GetType.Equals(GetType(String)) Then
-                        can_cast = right.BoundType.IsCastableTo(GetType(String))
+                        can_cast = Binder.CanCast(right.BoundType, GetType(String))
                     Else
-                        can_cast = left.BoundType.IsCastableTo(GetType(String))
+                        can_cast = Binder.CanCast(left.BoundType, GetType(String))
                     End If
                     If Not can_cast Then
                         Dim method As MethodInfo = _ResolveCustomOperation(syntax.Kind, left.BoundType, right.BoundType)

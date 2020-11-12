@@ -72,9 +72,12 @@ Namespace Binding
             End Select
         End Function
 
-        Private Function _BindImportStatement(statement As ImportsStatementNode) As BoundImportStatement
+        Private Function _BindImportStatement(statement As ImportsStatementNode) As BoundStatement
             Dim name As String = statement.Identifier.Span.ToString
-            If Not TypeResolver.IsValidNamespace(name) Then Me.Diagnostics.ReportBadNamespace(name, statement.Identifier.Span)
+            If Not TypeResolver.IsValidNamespace(name) Then
+                Me.Diagnostics.ReportBadNamespace(name, statement.Identifier.Span)
+                Return Me._BindErrorStatement(statement)
+            End If
             Me._scope.Import(name)
             Return New BoundImportStatement(statement, name)
         End Function
@@ -90,8 +93,9 @@ Namespace Binding
                 If type Is Nothing Then
                     type = init_type
                 Else
-                    If Not init_type.IsImplicitlyCastableTo(type) Then
+                    If Not CanCast(init_type, type) Then
                         Me.Diagnostics.ReportInvalidConversion(init_type, type, statement.Expression.Span)
+                        Return Me._BindErrorStatement(statement)
                     End If
                 End If
             End If
@@ -119,9 +123,15 @@ Namespace Binding
         Private Function _BindVariableDeclaration(name As Lexing.SyntaxToken, type As Type) As Symbol
             Dim varname As String = name.Span.ToString
             'TODO : check if in lambda -> bind local variable
-            Dim symbol As New GlobalVariableSymbol(varname, type)
-            If Not Me._scope.TryDeclareVariable(symbol) Then Me.Diagnostics.ReportVariableAlreadyDefined(varname, name)
-            Return symbol
+            If varname <> String.Empty And type IsNot Nothing Then
+                Dim symbol As New GlobalVariableSymbol(varname, type)
+                If Not Me._scope.TryDeclareVariable(symbol) Then
+                    Me.Diagnostics.ReportVariableAlreadyDefined(varname, name)
+                    Return Nothing
+                End If
+                Return symbol
+            End If
+            Return Nothing
         End Function
 
         Private Function _BindExpressionStatement(statement As ExpressionStatementNode) As BoundExpressionStatement
@@ -161,9 +171,14 @@ Namespace Binding
             End Select
         End Function
 
+        Friend Shared Function CanCast(fromType As Type, toType As Type) As Boolean
+            If fromType.IsCastableTo(toType) Then Return True
+            Return False
+        End Function
+
         Private Function _BindExpression(Of T)(expression As ExpressionNode) As BoundExpression
             Dim retval As BoundExpression = Me._BindExpression(expression)
-            If Not retval.BoundType.IsCastableTo(GetType(T)) Then
+            If Not CanCast(retval.BoundType, GetType(T)) Then
                 Me.Diagnostics.ReportInvalidConversion(retval.BoundType, GetType(T), expression.Span)
                 Return New BoundErrorExpression(expression)
             End If
@@ -236,7 +251,7 @@ Namespace Binding
         Private Function _BindNullCheckExpression(expression As NullCheckExpressionNode) As BoundExpression
             Dim expressionFirst As BoundExpression = Me._BindExpression(expression.Expression)
             Dim expressionFallBack As BoundExpression = Me._BindExpression(expression.FallbackExpression)
-            If Not expressionFallBack.BoundType.IsCastableTo(expressionFirst.BoundType) Then
+            If Not CanCast(expressionFallBack.BoundType, expressionFirst.BoundType) Then
                 Me.Diagnostics.ReportInvalidConversion(expressionFallBack.BoundType, expressionFirst.BoundType, expression.FallbackExpression.Span)
                 Return New BoundErrorExpression(expression)
             End If
@@ -250,8 +265,9 @@ Namespace Binding
 
         Private Function _BindCastExpression(expression As CastExpressionNode) As BoundExpression
             Dim type As Type = Me._BindTypeClause(expression.Typename)
+            If type Is Nothing Then Return New BoundErrorExpression(expression)
             Dim value As BoundExpression = Me._BindExpression(expression.Expression)
-            If Not value.BoundType.IsCastableTo(type) Then
+            If Not CanCast(value.BoundType, type) Then
                 Me.Diagnostics.ReportInvalidConversion(value.BoundType, type, expression.Typename.Span)
                 Return New BoundErrorExpression(expression)
             End If

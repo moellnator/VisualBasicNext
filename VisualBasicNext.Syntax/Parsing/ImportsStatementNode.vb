@@ -14,7 +14,7 @@ Namespace Parsing
             Get
                 Yield Me.ImportsKeyword
                 Yield Me.Identifier
-                Yield Me.EndOfStatementToken
+                If Not Me.EndOfStatementToken Is Nothing Then Yield Me.EndOfStatementToken
             End Get
         End Property
 

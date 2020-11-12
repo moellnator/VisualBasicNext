@@ -3,9 +3,10 @@ Imports VisualBasicNext.CodeAnalysis.Text
 
 Namespace Parsing
 
-    Public MustInherit Class SyntaxNode
+    Public MustInherit Class SyntaxNode : Implements IEquatable(Of SyntaxNode)
 
         Public MustOverride ReadOnly Property Children As IEnumerable(Of SyntaxNode)
+        Private _parents As Dictionary(Of SyntaxNode, SyntaxNode)
 
         Public Overridable ReadOnly Property Span As Span
             Get
@@ -23,6 +24,30 @@ Namespace Parsing
 
         Protected Sub New(kind As SyntaxKind)
             Me.Kind = kind
+        End Sub
+
+        Public Function GetParent(node As SyntaxNode) As SyntaxNode
+            Dim retval As SyntaxNode = Nothing
+            If Me._parents Is Nothing Then
+                Me._parents = _CreateParentDictionary(Me)
+            End If
+            Me._parents.TryGetValue(node, retval)
+            Return retval
+        End Function
+
+        Private Shared Function _CreateParentDictionary(root As SyntaxNode) As Dictionary(Of SyntaxNode, SyntaxNode)
+            Dim retval As New Dictionary(Of SyntaxNode, SyntaxNode) From {
+                {root, Nothing}
+            }
+            _CreateParentDictionary(retval, root)
+            Return retval
+        End Function
+
+        Private Shared Sub _CreateParentDictionary(result As Dictionary(Of SyntaxNode, SyntaxNode), root As SyntaxNode)
+            For Each child As SyntaxNode In root.Children
+                If Not result.ContainsKey(child) Then result.Add(child, root)
+                _CreateParentDictionary(result, child)
+            Next
         End Sub
 
         Public ReadOnly Property IsToken() As Boolean
@@ -74,6 +99,18 @@ Namespace Parsing
                 Me.WriteTo(writer)
                 Return writer.ToString
             End Using
+        End Function
+
+        Public Overrides Function Equals(obj As Object) As Boolean
+            Return If(TypeOf obj Is SyntaxNode, Me._IEquatable_Equals(obj), False)
+        End Function
+
+        Private Function _IEquatable_Equals(other As SyntaxNode) As Boolean Implements IEquatable(Of SyntaxNode).Equals
+            Return Me.Span.Equals(other.Span) And Me.Kind.Equals(other.Kind)
+        End Function
+
+        Public Overrides Function GetHashCode() As Integer
+            Return New CombinedHashCode(Me.Span, Me.Kind).GetHashCode
         End Function
 
     End Class

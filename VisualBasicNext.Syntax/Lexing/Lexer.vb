@@ -65,14 +65,18 @@ Namespace Lexing
                     kind = SyntaxKind.StringValueToken
                 Case Me._current = "&"c AndAlso {"b"c, "o"c, "h"c}.Contains(Char.ToLower(Me._next))
                     value = _read_base_number()
-                    kind = SyntaxKind.NumberValueToken
+                    kind = If(value IsNot Nothing, SyntaxKind.NumberValueToken, SyntaxKind.BadToken)
                 Case Char.IsDigit(Me._current)
                     value = _read_number()
                     kind = SyntaxKind.NumberValueToken
                 Case Me._current = "$"
                     Dim partial_string_count = Me._partial_string_brace_ballance.Count
                     value = Me._read_partial_string
-                    kind = If(partial_string_count <> Me._partial_string_brace_ballance.Count, SyntaxKind.PartialStringStartToken, SyntaxKind.StringValueToken)
+                    If Me._index - start < 2 Then
+                        kind = SyntaxKind.BadToken
+                    Else
+                        kind = If(partial_string_count <> Me._partial_string_brace_ballance.Count, SyntaxKind.PartialStringStartToken, SyntaxKind.StringValueToken)
+                    End If
                 Case Me._current = "#"
                     value = _read_date()
                     kind = SyntaxKind.DateValueToken
@@ -222,7 +226,10 @@ Namespace Lexing
             Dim isinital As Boolean = False
             If Me._current = "$" Then
                 Me._move_next()
-                If Me._current <> """"c Then Me.Diagnostics.ReportBadCharakter(Me._current, New Span(Me._source, Me._index, 1))
+                If Me._current <> """"c Then
+                    Me.Diagnostics.ReportBadCharakter(Me._current, New Span(Me._source, Me._index, 1))
+                    Return Nothing
+                End If
                 Me._move_next()
                 isinital = True
             ElseIf Me._current = "}" Then
@@ -261,7 +268,7 @@ Namespace Lexing
         End Function
 
         Private Sub _read_whitespace()
-            While Char.IsWhiteSpace(Me._current)
+            While Char.IsWhiteSpace(Me._current) And Not (Me._current = vbCr Or Me._current = vbLf)
                 Me._move_next()
             End While
         End Sub
@@ -308,7 +315,7 @@ Namespace Lexing
                     Case "0", "1"
                         builder.Append(Me._current)
                     Case "u", "s", "i", "l"
-                        If Me._read_int_type_suffix(unsigned, width) Then
+                        If builder.Length >= 1 AndAlso Me._read_int_type_suffix(unsigned, width) Then
                             done = True
                         Else
                             badchar = True
@@ -317,12 +324,23 @@ Namespace Lexing
                         done = True
                 End Select
                 If badchar Then
-                    Dim span As New Span(Me._source, Me._index, 1)
-                    Me.Diagnostics.ReportBadCharakter(Me._current, span)
+                    Dim span As Span
+                    If builder.Length > 0 Then
+                        span = New Span(Me._source, Me._index, 1)
+                        Me.Diagnostics.ReportBadCharakter(Me._current.ToString, span)
+                        Return 0
+                    End If
                     Me._move_next()
+                    span = New Span(Me._source, start, Me._index - start)
+                    Me.Diagnostics.ReportBadLiteral(Me._current.ToString, GetType(Integer), span)
                     Return Nothing
                 End If
             End While
+            If builder.Length = 0 Then
+                Dim span As New Span(Me._source, start, Me._index - start)
+                Me.Diagnostics.ReportBadLiteral(Me._current.ToString, GetType(Integer), span)
+                Return Nothing
+            End If
             Me._TryConvertToInteger(New Span(Me._source, start, Me._index - start), builder.ToString, unsigned, width, base, value)
             Return value
         End Function
@@ -330,8 +348,10 @@ Namespace Lexing
         Private Function _read_int_type_suffix(ByRef unsigned As Boolean, ByRef width As Integer) As Boolean
             Dim result As Boolean = True
             If Char.ToLower(Me._current) = "u"c Then
-                If {"i"c, "l"c, "s"c, "b"c}.Contains(Char.ToLower(Me._next)) Then unsigned = True
-                Me._move_next()
+                If {"i"c, "l"c, "s"c, "b"c}.Contains(Char.ToLower(Me._next)) Then
+                    unsigned = True
+                    Me._move_next()
+                End If
             End If
             Select Case Char.ToLower(Me._current)
                 Case "s"c
@@ -409,6 +429,7 @@ Namespace Lexing
         End Function
 
         Private Function _read_number() As Object
+            'TODO -> check if digits are present before special char like . e or typeletter
             Dim float As Boolean = False
             Dim value As Object = Nothing
             Dim exponent As Boolean = False
@@ -444,10 +465,16 @@ Namespace Lexing
                         End If
                     Case "f"
                         If Not Single.TryParse(builder.ToString, Globalization.NumberStyles.AllowDecimalPoint Or Globalization.NumberStyles.AllowExponent, c, value) Then badtype = GetType(Single)
+                        Me._move_next()
+                        done = True
                     Case "r"
                         If Not Double.TryParse(builder.ToString, Globalization.NumberStyles.AllowDecimalPoint Or Globalization.NumberStyles.AllowExponent, c, value) Then badtype = GetType(Double)
+                        Me._move_next()
+                        done = True
                     Case "d"
                         If exponent OrElse Not Decimal.TryParse(builder.ToString, Globalization.NumberStyles.AllowDecimalPoint, c, value) Then badtype = GetType(Decimal)
+                        Me._move_next()
+                        done = True
                     Case "u", "s", "i", "l"
                         Dim unsigned As Boolean = False
                         Dim width As Integer = 4
@@ -567,7 +594,7 @@ Namespace Lexing
                     retval = SyntaxKind.BoolValueToken
                 Case "nothing"
                     value = Nothing
-                    retval = SyntaxKind.NothingValueToken
+                    retval = SyntaxKind.NothingKeywordToken
                 Case "and"
                     retval = SyntaxKind.AndKeywordToken
                 Case "andalso"

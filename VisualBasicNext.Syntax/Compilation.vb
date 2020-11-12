@@ -43,7 +43,12 @@ Public Class Compilation
         If program.Diagnostics.HasErrors Then Return New EvaluationResult(Nothing, program.Diagnostics)
         Dim evaluator As New Evaluator(program, state)
         Dim result As Object = evaluator.Evaluate
-        Return New EvaluationResult(result, program.Diagnostics & evaluator.Diagnostics)
+        Return New EvaluationResult(result, evaluator.Diagnostics)
+    End Function
+
+    Public Function TryBindProgram() As BoundGlobalScope
+        Dim program As BoundScript = Me._GetScript()
+        Return Me._GetGlobalScope
     End Function
 
 End Class

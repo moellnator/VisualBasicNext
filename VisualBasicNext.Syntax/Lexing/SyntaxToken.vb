@@ -46,7 +46,7 @@ Namespace Lexing
         LowerToken
         IdentifierToken
         BoolValueToken
-        NothingValueToken
+        NothingKeywordToken
         NotKeywordToken
         OrKeywordToken
         XorKeywordToken

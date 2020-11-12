@@ -21,8 +21,7 @@ namespace VisualBasicNext.TypeExtensions
     {
         public static bool IsCastableTo(this Type from, Type to)
         {
-            if (from == null) { throw new ArgumentNullException(nameof(from)); }
-            if (to == null) { throw new ArgumentNullException(nameof(to)); }
+            if (from == null || to == null) { return false; }
 
             return ConversionHelper.CanExplicitCast(from, to);
         }
@@ -40,6 +39,7 @@ namespace VisualBasicNext.TypeExtensions
             #region ---- Explicit casts ----
             public static bool CanExplicitCast(Type from, Type to)
             {
+                if (from == null || to == null) { return false; }
                 // explicit conversion always works if there's implicit conversion
                 if (CanImplicitCast(from, to))
                 {
@@ -62,24 +62,15 @@ namespace VisualBasicNext.TypeExtensions
 
                 bool result;
 
+                if ((from == typeof(string) && to.IsValueType && to.IsPrimitive) || (to == typeof(string) && from.IsValueType && from.IsPrimitive)) return true;
+
                 if (from.IsValueType)
                 {
-                    try
-                    {
-                        GetMethod(() => AttemptExplicitCast<object, object>())
+                    if (to.IsValueType && to.IsPrimitive) return true;
+                    result = (bool) GetMethod(() => AttemptExplicitCast<object, object>())
                             .GetGenericMethodDefinition()
                             .MakeGenericMethod(from, to)
                             .Invoke(null, new object[0]);
-                        result = true;
-                    }
-                    catch (TargetInvocationException ex)
-                    {
-                        result = !(
-                            ex.InnerException is RuntimeBinderException
-                            // if the code runs in an environment where this message is localized, we could attempt a known failure first and base the regex on it's message
-                            && Regex.IsMatch(ex.InnerException.Message, @"^Cannot convert type '.*' to '.*'$")
-                        );
-                    }
                 }
                 else
                 {
@@ -156,15 +147,23 @@ namespace VisualBasicNext.TypeExtensions
                 return conversionMethods.Any(m => m.ReturnType == to);
             }
 
-            private static void AttemptExplicitCast<TFrom, TTo>()
+            private static bool AttemptExplicitCast<TFrom, TTo>()
             {
                 // based on the IL generated from
                 // var x = (TTo)(dynamic)default(TFrom);
+                try
+                {
 
-                var binder = CSharpBinder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(TTo), typeof(ConversionHelper));
-                var callSite = CallSite<Func<CallSite, TFrom, TTo>>.Create(binder);
-                callSite.Target(callSite, default(TFrom));
-            }
+                    var binder = CSharpBinder.Convert(CSharpBinderFlags.ConvertExplicit, typeof(TTo), typeof(ConversionHelper));
+                        var callSite = CallSite<Func<CallSite, TFrom, TTo>>.Create(binder);
+                        callSite.Target(callSite, default(TFrom));
+                    return true;
+                }
+                catch (RuntimeBinderException ex)
+                {
+                    return !ex.Message.EndsWith(" konvertiert werden.");
+                }
+            }   
             #endregion
 
             #region ---- Implicit casts ----
@@ -225,7 +224,7 @@ namespace VisualBasicNext.TypeExtensions
                 }
                 catch (RuntimeBinderException ex)
                 {
-                    return ex.Message.StartsWith("Die beste Übereinstimmung");
+                    return !ex.Message.StartsWith("Die beste Übereinstimmung");
                 }
             }
             #endregion

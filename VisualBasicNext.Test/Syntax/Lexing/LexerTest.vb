@@ -90,7 +90,7 @@ Imports VisualBasicNext.CodeAnalysis.Text
         {"<<", SyntaxKind.LowerLowerToken},
         {"<<=", SyntaxKind.LowerLowerEqualsToken},
         {"<=", SyntaxKind.LowerEqualsToken},
-        {"Nothing", SyntaxKind.NothingValueToken},
+        {"Nothing", SyntaxKind.NothingKeywordToken},
         {"True", SyntaxKind.BoolValueToken},
         {"False", SyntaxKind.BoolValueToken},
         {"abs", SyntaxKind.IdentifierToken},

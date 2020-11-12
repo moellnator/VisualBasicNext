@@ -3,8 +3,7 @@ Public Class Experiments
 
     <TestMethod>
     Public Sub Experiment()
-        Dim a As String = "1"
-        a = a & 2
+        Dim a As Integer = "1"
 
     End Sub
 
