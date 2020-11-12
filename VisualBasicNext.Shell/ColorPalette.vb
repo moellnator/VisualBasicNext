@@ -3,6 +3,8 @@
     'Visual Studio	    
     Public Shared ReadOnly ColorPlainText As Color = Color.FromArgb(255, 220, 220, 220)
     Public Shared ReadOnly ColorBackground As Color = Color.FromArgb(255, 30, 30, 30)
+    Public Shared ReadOnly ColorFrame As Color = Color.FromArgb(255, 62, 62, 66)
+    Public Shared ReadOnly ColorScrollbar As Color = Color.FromArgb(255, 104, 104, 104)
     Public Shared ReadOnly ColorHighlight As Color = Color.FromArgb(255, 51, 153, 255)
     Public Shared ReadOnly ColorLinenumber As Color = Color.FromArgb(255, 43, 145, 175)
     Public Shared ReadOnly ColorComment As Color = Color.FromArgb(255, 87, 166, 74)

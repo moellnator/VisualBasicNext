@@ -1,4 +1,5 @@
-﻿Imports VisualBasicNext.CodeAnalysis
+﻿Imports System.Reflection
+Imports VisualBasicNext.CodeAnalysis
 Imports VisualBasicNext.CodeAnalysis.Diagnostics
 Imports VisualBasicNext.CodeAnalysis.Evaluating
 Imports VisualBasicNext.CodeAnalysis.Lexing
@@ -30,20 +31,43 @@ Public Class InputElement
     Private _latest_scope As Binding.BoundGlobalScope
     Private _state As VMState = New VMState
     Private _last_text As String = ""
-
     Private _type_cache As New Dictionary(Of String, Type)
+
+    Private _scroll_location As Single = 0
+    Private _scroll_start As Integer = 0
+    Private _scroll_down As Boolean = False
+    Private _scroll_size As Single
+    Private _scroll_is_hover_left As Boolean
+    Private _scroll_is_hover_right As Boolean
+    Private _scroll_is_hover_bar As Boolean
 
     Public Sub New()
         InitializeComponent()
         Me.BackColor = ColorPalette.ColorBackground
         Me.ForeColor = ColorPalette.ColorPlainText
+        Me.PanelScroll.BackColor = ColorPalette.ColorFrame
+        Me.PanelFrame.BackColor = ColorPalette.ColorFrame
+        Me.Font = New Font("Consolas", 9.75!, FontStyle.Regular, GraphicsUnit.Point, 0)
+        MakeDoubleBuffered(Me.PanelLineNumbers)
+        MakeDoubleBuffered(Me.PanelTextContent)
+        MakeDoubleBuffered(Me.PanelScroll)
         AddHandler Me._document.DocumentChanged, AddressOf Me._DocumentChangedHandler
         Me.TimerCompile.Enabled = True
     End Sub
 
+    Private Shared Sub MakeDoubleBuffered(control As Panel)
+        Dim type As Type = GetType(Panel)
+        type.InvokeMember(
+            "DoubleBuffered",
+            BindingFlags.SetProperty Or BindingFlags.Instance Or BindingFlags.NonPublic,
+            Nothing,
+            control,
+            New Object() {True}
+        )
+    End Sub
+
     Private Sub InputElement_Resize(sender As Object, e As EventArgs) Handles Me.Resize
-        If Not Me._suppress_resize Then Me.Height = Me.Font.SizeInPoints / 72 * 96 * (1 + _LineSeparation) * (Me._document.Lines.Count + 1) + _Padding.Vertical
-        Me.Invalidate()
+        If Not Me._suppress_resize Then Me._AutoSizeElement()
         Me._suppress_resize = False
     End Sub
 
@@ -52,13 +76,53 @@ Public Class InputElement
     End Sub
 
     Private Sub _DocumentChangedHandler(sender As Object, e As EventArgs)
-        Me._suppress_resize = True
-        Me.Height = Me.Font.SizeInPoints / 72 * 96 * (1 + _LineSeparation) * (Me._document.Lines.Count + 1) + _Padding.Vertical
+        Me._AutoSizeElement()
         Me._text = New FormattedText(Me._GetFormattedTextChars)
-        Me.Invalidate()
+        Me._FocusCursor()
+        Me.Invalidate(True)
     End Sub
 
-    Private Sub InputElement_Paint(sender As Object, e As PaintEventArgs) Handles Me.Paint
+    Private Sub _FocusCursor()
+        Dim text_size As New SizeF(Me.Font.SizeInPoints / 72 * 96 * _CharRatio, Me.Font.SizeInPoints / 72 * 96)
+        Dim cursor As New PointF(
+            text_size.Width * Me._document.CursorPosition.X + _Padding.Left,
+            text_size.Height * (Me._document.CursorPosition.Y + 1) + _Padding.Top
+        )
+        Dim right_edge As Integer = Me.PanelText.Width + Me._scroll_location
+        Dim left_edge As Integer = Me._scroll_location
+        If cursor.X + 3 * text_size.Width > right_edge Then
+            Me._scroll_location = cursor.X + 3 * text_size.Width - Me.PanelText.Width
+        ElseIf cursor.X < left_edge Then
+            Me._scroll_location = cursor.X
+        End If
+        Me.PanelTextContent.Location = New Point(-Me._scroll_location, Me.PanelTextContent.Location.Y)
+    End Sub
+
+    Private Sub _AutoSizeElement()
+        Me._suppress_resize = True
+        Dim text_size As New SizeF(Me.Font.SizeInPoints / 72 * 96 * _CharRatio, Me.Font.SizeInPoints / 72 * 96)
+        Dim max_width As Integer = text_size.Width * (3 + Me._document.Lines.Max(Function(l) l.Count)) + _Padding.Left
+        Me.PanelTextContent.Width = Math.Max(max_width, Me.PanelText.Width)
+        Me.PanelTextContent.Height = Me.PanelText.Height
+        Me.Height = text_size.Height * (1 + _LineSeparation) * (Me._document.Lines.Count + 1) + _Padding.Vertical + 16
+        Me.PanelLineNumbers.Width = 4 * text_size.Width + _Padding.Horizontal
+        Me.Invalidate(True)
+    End Sub
+
+    Private Sub PanelTextContent_Paint(sender As Object, e As PaintEventArgs) Handles PanelTextContent.Paint
+        Dim g As Graphics = e.Graphics
+        Dim r As Rectangle = Me.PanelTextContent.ClientRectangle
+        g.Clear(Me.BackColor)
+        g.TextRenderingHint = Drawing.Text.TextRenderingHint.ClearTypeGridFit
+        g.SmoothingMode = Drawing2D.SmoothingMode.HighQuality
+        g.CompositingQuality = Drawing2D.CompositingQuality.HighQuality
+        Dim text_size As SizeF = New SizeF(Me.Font.SizeInPoints / 72 * g.DpiX * _CharRatio, Me.Font.SizeInPoints / 72 * g.DpiY * (1 + _LineSeparation))
+        Me._PrintText(r, g, text_size)
+        Me._PrintDiagnostics(r, g, text_size)
+        Me._PrintCursor(r, g, text_size)
+    End Sub
+
+    Private Sub PanelLineNumbers_Paint(sender As Object, e As PaintEventArgs) Handles PanelLineNumbers.Paint
         Dim g As Graphics = e.Graphics
         Dim r As Rectangle = Me.ClientRectangle
         g.Clear(Me.BackColor)
@@ -67,10 +131,50 @@ Public Class InputElement
         g.CompositingQuality = Drawing2D.CompositingQuality.HighQuality
         Dim text_size As SizeF = New SizeF(Me.Font.SizeInPoints / 72 * g.DpiX * _CharRatio, Me.Font.SizeInPoints / 72 * g.DpiY * (1 + _LineSeparation))
         Dim offset As Single = Me._PrintLineNumbers(r, g, text_size)
-        Dim text_rect As New Rectangle(offset, r.Top, r.Width - offset, r.Height)
-        Me._PrintText(text_rect, g, text_size)
-        Me._PrintDiagnostics(text_rect, g, text_size)
-        Me._PrintCursor(text_rect, g, text_size)
+    End Sub
+
+
+    Private Sub PanelScroll_Paint(sender As Object, e As PaintEventArgs) Handles PanelScroll.Paint
+        Dim g As Graphics = e.Graphics
+        Dim r As Rectangle = Me.PanelScroll.ClientRectangle
+        g.Clear(Me.PanelScroll.BackColor)
+        g.TextRenderingHint = Drawing.Text.TextRenderingHint.ClearTypeGridFit
+        g.SmoothingMode = Drawing2D.SmoothingMode.HighQuality
+        g.CompositingQuality = Drawing2D.CompositingQuality.HighQuality
+        Me._PrintScrollbar(r, g)
+    End Sub
+
+    Private Sub _PrintScrollbar(r As Rectangle, g As Graphics)
+        If Me.PanelTextContent.Width > Me.PanelText.Width Then
+            Dim button_offset As Integer = 20
+            Dim scroll_size As Single = (Me.PanelTextContent.Width - Me.PanelText.Width)
+            Dim scroll_rect As New RectangleF
+            If scroll_size >= Me.PanelScroll.Width - 2 * button_offset - 8 Then
+                Dim offset As Single = Me._scroll_location / scroll_size
+                Me._scroll_size = 8
+                scroll_rect = New RectangleF(button_offset + offset * (Me.PanelScroll.Width - 2 * button_offset - 8), 4, 8, 8)
+            Else
+                Me._scroll_size = Me.PanelScroll.Width - 2 * button_offset - scroll_size
+                scroll_rect = New RectangleF(button_offset + Me._scroll_location, 4, Me._scroll_size, 8)
+            End If
+            g.FillRectangle(New SolidBrush(ColorPalette.ColorScrollbar), scroll_rect)
+            g.FillPolygon(
+                New SolidBrush(If(Me._scroll_is_hover_left, ColorPalette.ColorHighlight, ColorPalette.ColorOperator)),
+                {
+                    New Point(button_offset / 2 - 2, 8),
+                    New Point(button_offset / 2 + 2, 4),
+                    New Point(button_offset / 2 + 2, 12)
+                }
+            )
+            g.FillPolygon(
+                New SolidBrush(If(Me._scroll_is_hover_right, ColorPalette.ColorHighlight, ColorPalette.ColorOperator)),
+                {
+                    New Point(r.Width - button_offset / 2 + 2, 8),
+                    New Point(r.Width - button_offset / 2 - 2, 4),
+                    New Point(r.Width - button_offset / 2 - 2, 12)
+                }
+            )
+        End If
     End Sub
 
     Private Shared Function _MakeUnderlineTexture() As Pen
@@ -261,7 +365,7 @@ Public Class InputElement
         If Not returnvalue.Diagnostics.HasErrors Then submitted_value = returnvalue.Value
         Me._ClearAll()
         Me.TimerCompile.Enabled = True
-        Me.Invalidate()
+        Me.Invalidate(True)
         RaiseEvent SubmittedDocument(Me, New SubmittedDocumentEventArgs(submitted_text, submitted_diagnostics, submitted_value))
     End Sub
 
@@ -283,7 +387,7 @@ Public Class InputElement
                     Sub()
                         TimerCompile.Enabled = True
                         Me._text = New FormattedText(Me._GetFormattedTextChars)
-                        Me.Invalidate()
+                        Me.Invalidate(True)
                     End Sub
                 )
             End Sub
@@ -291,7 +395,7 @@ Public Class InputElement
         task.Start()
         TimerCompile.Enabled = False
         Me._last_text = Me._document.Text
-        Me.Invalidate()
+        Me.Invalidate(True)
     End Sub
 
     Private Sub _PerformCompilation()
@@ -302,6 +406,66 @@ Public Class InputElement
             Me._latest_scope = scope
             Me._latest_diagnostics = New ErrorList(Me._latest.Diagnostics & Me._latest_scope.Diagnostics)
         End SyncLock
+    End Sub
+
+    Private Sub PanelScroll_MouseMove(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseMove
+        If Me.PanelTextContent.Width > Me.PanelText.Width Then
+            If Me._scroll_down Then
+                Dim delta As Integer = e.Location.X - Me._scroll_start
+                Me._scroll_start = e.Location.X
+                Dim max As Integer = (Me.PanelScroll.Width - 40) - Me._scroll_size
+                Dim scroll_max As Integer = Me.PanelTextContent.Width - Me.PanelText.Width
+                Me._scroll_location = Math.Max(0, Math.Min(scroll_max, Me._scroll_location + delta / max * scroll_max))
+                Me.PanelTextContent.Left = -Me._scroll_location
+                Me.PanelScroll.Invalidate()
+            Else
+                If e.Location.X < 20 Then
+                    Me._scroll_is_hover_left = True
+                    Me.PanelScroll.Invalidate()
+                ElseIf e.Location.X > Me.PanelScroll.Width - 20 Then
+                    Me._scroll_is_hover_right = True
+                    Me.PanelScroll.Invalidate()
+                Else
+                    Me._scroll_is_hover_right = False
+                    Me._scroll_is_hover_right = False
+                    Me._scroll_is_hover_bar = True
+                    Me.PanelScroll.Invalidate()
+                End If
+            End If
+        End If
+    End Sub
+
+    Private Sub PanelScroll_MouseDown(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseDown
+        If e.Location.X > 20 And e.Location.X < Me.PanelScroll.Width - 20 Then
+            Me._scroll_start = e.Location.X
+            Me._scroll_down = True
+        End If
+    End Sub
+
+    Private Sub PanelScroll_MouseUp(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseUp
+        Me._scroll_down = False
+    End Sub
+
+    Private Sub PanelScroll_MouseClick(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseClick
+        If Me.PanelTextContent.Width > Me.PanelText.Width Then
+            Dim scroll_max As Integer = Me.PanelTextContent.Width - Me.PanelText.Width
+            If e.Location.X < 20 Then
+                Me._scroll_location = Math.Max(0, Math.Min(scroll_max, Me._scroll_location - 0.05 * scroll_max))
+                Me.PanelTextContent.Left = -Me._scroll_location
+                Me.PanelScroll.Invalidate()
+            ElseIf e.Location.X > Me.PanelScroll.Width - 20 Then
+                Me._scroll_location = Math.Max(0, Math.Min(scroll_max, Me._scroll_location + 0.05 * scroll_max))
+                Me.PanelTextContent.Left = -Me._scroll_location
+                Me.PanelScroll.Invalidate()
+            End If
+        End If
+    End Sub
+
+    Private Sub PanelScroll_MouseLeave(sender As Object, e As EventArgs) Handles PanelScroll.MouseLeave
+        Me._scroll_is_hover_bar = False
+        Me._scroll_is_hover_left = False
+        Me._scroll_is_hover_right = False
+        Me.PanelScroll.Invalidate()
     End Sub
 
 End Class

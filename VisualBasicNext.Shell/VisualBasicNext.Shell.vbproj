@@ -16,7 +16,7 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <DefineDebug>true</DefineDebug>
@@ -107,10 +107,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="OutputElement.Designer.vb">
-      <DependentUpon>OutputElement.vb</DependentUpon>
+    <Compile Include="ReadOnlyElement.Designer.vb">
+      <DependentUpon>ReadOnlyElement.vb</DependentUpon>
     </Compile>
-    <Compile Include="OutputElement.vb">
+    <Compile Include="ReadOnlyElement.vb">
       <SubType>UserControl</SubType>
     </Compile>
   </ItemGroup>
@@ -127,8 +127,8 @@
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="OutputElement.resx">
-      <DependentUpon>OutputElement.vb</DependentUpon>
+    <EmbeddedResource Include="ReadOnlyElement.resx">
+      <DependentUpon>ReadOnlyElement.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

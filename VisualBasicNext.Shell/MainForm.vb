@@ -4,4 +4,10 @@
         Me.InputElement.Focus()
     End Sub
 
+    Private Sub FlowLayoutPanel_Resize(sender As Object, e As EventArgs) Handles FlowLayoutPanel.Resize
+        For Each c As Control In Me.FlowLayoutPanel.Controls
+            c.Width = Me.ClientSize.Width - 29
+        Next
+    End Sub
+
 End Class

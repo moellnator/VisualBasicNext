@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
-Partial Class OutputElement
+Partial Class ReadOnlyElement
     Inherits System.Windows.Forms.UserControl
 
     'UserControl overrides dispose to clean up the component list.
@@ -24,12 +24,12 @@ Partial Class OutputElement
     Private Sub InitializeComponent()
         Me.SuspendLayout()
         '
-        'OutputElement
+        'ReadOnlyElement
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.Name = "OutputElement"
-        Me.Size = New System.Drawing.Size(764, 111)
+        Me.Name = "ReadOnlyElement"
+        Me.Size = New System.Drawing.Size(696, 93)
         Me.ResumeLayout(False)
 
     End Sub
