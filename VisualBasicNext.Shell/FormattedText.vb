@@ -4,10 +4,12 @@ Public Class FormattedText : Implements IEnumerable(Of FormattedChar)
 
     Private ReadOnly _chars As FormattedChar()
     Public ReadOnly Property MaxLines As Integer
+    Public ReadOnly Property MaxPos As Integer
 
     Public Sub New(chars As IEnumerable(Of FormattedChar))
         Me._chars = chars.ToArray
         Me.MaxLines = If(Me._chars.Count > 1, Me._chars.Max(Function(c) c.Location.Y), 0)
+        Me.MaxPos = If(Me._chars.Count > 1, Me._chars.Max(Function(c) c.Location.X), 0)
     End Sub
 
     Public Function GetEnumerator() As IEnumerator(Of FormattedChar) Implements IEnumerable(Of FormattedChar).GetEnumerator
