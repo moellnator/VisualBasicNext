@@ -11,6 +11,7 @@ Public Class ReadOnlyElement
     Protected _Text As FormattedText = FormattedText.Empty
 
     Private _suppress_resize As Boolean = False
+
     Private _scroll_location As Single = 0
     Private _scroll_start As Integer = 0
     Private _scroll_down As Boolean = False
@@ -18,6 +19,26 @@ Public Class ReadOnlyElement
     Private _scroll_is_hover_left As Boolean
     Private _scroll_is_hover_right As Boolean
     Private _scroll_is_hover_bar As Boolean
+
+    Private _highlight As Color = ColorPalette.ColorBackground
+    Protected _hide_linenumber As Boolean = False
+    Protected _line_overhead As Integer = 1
+    Protected _small_scroll As Boolean = True
+
+    Public Sub SetHightlight(color As Color)
+        Me._highlight = color
+        Me.PanelLineNumbers.Invalidate()
+    End Sub
+
+    Public Sub RemoveLineOverhead()
+        Me._line_overhead = 0
+        Me.AutoSizeElement()
+    End Sub
+
+    Public Sub RemoveLineNumbers()
+        Me._hide_linenumber = True
+        Me.PanelLineNumbers.Invalidate()
+    End Sub
 
     Public Sub New()
         InitializeComponent()
@@ -29,6 +50,12 @@ Public Class ReadOnlyElement
         MakeDoubleBuffered(Me.PanelLineNumbers)
         MakeDoubleBuffered(Me.PanelTextContent)
         MakeDoubleBuffered(Me.PanelScroll)
+    End Sub
+
+    Public Sub SetText(text As FormattedText)
+        Me._Text = text
+        Me.AutoSizeElement()
+        Me.Invalidate(True)
     End Sub
 
     Private Shared Sub MakeDoubleBuffered(control As Panel)
@@ -63,9 +90,14 @@ Public Class ReadOnlyElement
         Me._suppress_resize = True
         Dim text_size As New SizeF(Me.Font.SizeInPoints / 72 * 96 * _CharRatio, Me.Font.SizeInPoints / 72 * 96)
         Dim max_width As Integer = text_size.Width * (3 + Me._Text.MaxPos) + _Padding.Left
+        If Me._small_scroll And Not Me._IsVerticalScrolling Then
+            Me.PanelScroll.Height = 2
+        Else
+            Me.PanelScroll.Height = 16
+        End If
         Me.PanelTextContent.Width = Math.Max(max_width, Me.PanelText.Width)
         Me.PanelTextContent.Height = Me.PanelText.Height
-        Me.Height = text_size.Height * (1 + _LineSeparation) * (Math.Max(1, Me._Text.MaxLines) + 1) + _Padding.Vertical + 16
+        Me.Height = text_size.Height * (1 + _LineSeparation) * (Math.Max(0, Me._Text.MaxLines) + 1 + Me._line_overhead) + _Padding.Vertical + Me.PanelScroll.Height
         Me.PanelLineNumbers.Width = 4 * text_size.Width + _Padding.Horizontal
         Me.Invalidate(True)
     End Sub
@@ -142,15 +174,18 @@ Public Class ReadOnlyElement
     Private Function _PrintLineNumbers(r As Rectangle, g As Graphics, textSize As SizeF) As Single
         Dim width As Single = textSize.Width * 4 + _Padding.Horizontal
         g.FillRectangle(_LineNumber_BG_Color, New Rectangle(r.Left, r.Top, width, r.Height))
-        Dim padding_left As Single = r.Left + _Padding.Horizontal / 2 + textSize.Width / 2
-        For i = 0 To Math.Max(0, Me._Text.MaxLines - 1)
-            g.DrawString(
+        If Not Me._hide_linenumber Then
+            Dim padding_left As Single = r.Left + _Padding.Horizontal / 2 + textSize.Width / 2
+            For i = 0 To Math.Max(0, Me._Text.MaxLines)
+                g.DrawString(
                         i.ToString.PadLeft(3, " "c),
                         Me.Font,
                         _LineNumber_FG_Color,
                         New PointF(padding_left, i * textSize.Height + _Padding.Top)
                     )
-        Next
+            Next
+        End If
+        g.FillRectangle(New SolidBrush(Me._highlight), New Rectangle(0, _Padding.Top, _Padding.Left, (Me._Text.MaxLines + 1) * textSize.Height))
         Return width
     End Function
 
@@ -169,7 +204,7 @@ Public Class ReadOnlyElement
     End Sub
 
     Private Sub PanelScroll_MouseMove(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseMove
-        If Me.PanelTextContent.Width > Me.PanelText.Width Then
+        If Me._IsVerticalScrolling Then
             If Me._scroll_down Then
                 Dim delta As Integer = e.Location.X - Me._scroll_start
                 Me._scroll_start = e.Location.X
@@ -194,9 +229,11 @@ Public Class ReadOnlyElement
     End Sub
 
     Private Sub PanelScroll_MouseDown(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseDown
-        If e.Location.X > 20 And e.Location.X < Me.PanelScroll.Width - 20 Then
-            Me._scroll_start = e.Location.X
-            Me._scroll_down = True
+        If Me._IsVerticalScrolling Then
+            If e.Location.X > 20 And e.Location.X < Me.PanelScroll.Width - 20 Then
+                Me._scroll_start = e.Location.X
+                Me._scroll_down = True
+            End If
         End If
     End Sub
 
@@ -205,7 +242,7 @@ Public Class ReadOnlyElement
     End Sub
 
     Private Sub PanelScroll_MouseClick(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseClick
-        If Me.PanelTextContent.Width > Me.PanelText.Width Then
+        If Me._IsVerticalScrolling Then
             Dim scroll_max As Integer = Me.PanelTextContent.Width - Me.PanelText.Width
             If e.Location.X < 20 Then
                 Me.ScrollLocation = Me._scroll_location - 0.05 * scroll_max
@@ -221,5 +258,9 @@ Public Class ReadOnlyElement
         Me._scroll_is_hover_right = False
         Me.PanelScroll.Invalidate()
     End Sub
+
+    Private Function _IsVerticalScrolling() As Boolean
+        Return Me.PanelTextContent.Width > Me.PanelText.Width
+    End Function
 
 End Class

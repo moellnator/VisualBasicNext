@@ -79,6 +79,7 @@
     <Compile Include="Document.vb" />
     <Compile Include="FormattedChar.vb" />
     <Compile Include="FormattedText.vb" />
+    <Compile Include="FormattedTextBuilder.vb" />
     <Compile Include="InputElement.Designer.vb">
       <DependentUpon>InputElement.vb</DependentUpon>
     </Compile>
@@ -107,6 +108,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="OutputElement.Designer.vb">
+      <DependentUpon>OutputElement.vb</DependentUpon>
+    </Compile>
+    <Compile Include="OutputElement.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="ReadOnlyElement.Designer.vb">
       <DependentUpon>ReadOnlyElement.vb</DependentUpon>
     </Compile>
@@ -126,6 +133,9 @@
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
       <CustomToolNamespace>My.Resources</CustomToolNamespace>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OutputElement.resx">
+      <DependentUpon>OutputElement.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ReadOnlyElement.resx">
       <DependentUpon>ReadOnlyElement.vb</DependentUpon>

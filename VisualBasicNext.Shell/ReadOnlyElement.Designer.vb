@@ -22,20 +22,18 @@ Partial Class ReadOnlyElement
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Me.components = New System.ComponentModel.Container()
         Me.PanelLineNumbers = New System.Windows.Forms.Panel()
         Me.PanelText = New System.Windows.Forms.Panel()
         Me.PanelTextContent = New System.Windows.Forms.Panel()
         Me.PanelScroll = New System.Windows.Forms.Panel()
         Me.PanelFrame = New System.Windows.Forms.Panel()
-        Me.PanelLineNumbers.SuspendLayout()
         Me.PanelText.SuspendLayout()
         Me.SuspendLayout()
         '
         'PanelLineNumbers
         '
         Me.PanelLineNumbers.Dock = System.Windows.Forms.DockStyle.Left
-        Me.PanelLineNumbers.Location = New System.Drawing.Point(0, 0)
+        Me.PanelLineNumbers.Location = New System.Drawing.Point(8, 0)
         Me.PanelLineNumbers.Name = "PanelLineNumbers"
         Me.PanelLineNumbers.Size = New System.Drawing.Size(57, 157)
         Me.PanelLineNumbers.TabIndex = 0
@@ -45,9 +43,9 @@ Partial Class ReadOnlyElement
         Me.PanelText.BackColor = System.Drawing.SystemColors.Control
         Me.PanelText.Controls.Add(Me.PanelTextContent)
         Me.PanelText.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.PanelText.Location = New System.Drawing.Point(57, 0)
+        Me.PanelText.Location = New System.Drawing.Point(65, 0)
         Me.PanelText.Name = "PanelText"
-        Me.PanelText.Size = New System.Drawing.Size(618, 157)
+        Me.PanelText.Size = New System.Drawing.Size(610, 157)
         Me.PanelText.TabIndex = 1
         '
         'PanelTextContent
@@ -57,26 +55,26 @@ Partial Class ReadOnlyElement
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PanelTextContent.Location = New System.Drawing.Point(0, 0)
         Me.PanelTextContent.Name = "PanelTextContent"
-        Me.PanelTextContent.Size = New System.Drawing.Size(564, 157)
+        Me.PanelTextContent.Size = New System.Drawing.Size(556, 157)
         Me.PanelTextContent.TabIndex = 0
         '
         'PanelScroll
         '
         Me.PanelScroll.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.PanelScroll.Location = New System.Drawing.Point(0, 157)
+        Me.PanelScroll.Location = New System.Drawing.Point(8, 157)
         Me.PanelScroll.Name = "PanelScroll"
-        Me.PanelScroll.Size = New System.Drawing.Size(16, 16)
+        Me.PanelScroll.Size = New System.Drawing.Size(667, 16)
         Me.PanelScroll.TabIndex = 0
         '
         'PanelFrame
         '
         Me.PanelFrame.Dock = System.Windows.Forms.DockStyle.Left
-        Me.PanelFrame.Location = New System.Drawing.Point(16, 17)
+        Me.PanelFrame.Location = New System.Drawing.Point(0, 0)
         Me.PanelFrame.Name = "PanelFrame"
-        Me.PanelFrame.Size = New System.Drawing.Size(8, 100)
+        Me.PanelFrame.Size = New System.Drawing.Size(8, 173)
         Me.PanelFrame.TabIndex = 0
         '
-        'InputElement
+        'ReadOnlyElement
         '
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(62, Byte), Integer), CType(CType(62, Byte), Integer), CType(CType(66, Byte), Integer))
@@ -86,9 +84,9 @@ Partial Class ReadOnlyElement
         Me.Controls.Add(Me.PanelFrame)
         Me.DoubleBuffered = True
         Me.Font = New System.Drawing.Font("Consolas", 11.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Name = "InputElement"
+        Me.Margin = New System.Windows.Forms.Padding(0)
+        Me.Name = "ReadOnlyElement"
         Me.Size = New System.Drawing.Size(675, 173)
-        Me.PanelLineNumbers.ResumeLayout(False)
         Me.PanelText.ResumeLayout(False)
         Me.ResumeLayout(False)
 

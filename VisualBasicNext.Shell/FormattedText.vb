@@ -7,9 +7,13 @@ Public Class FormattedText : Implements IEnumerable(Of FormattedChar)
     Public ReadOnly Property MaxPos As Integer
 
     Public Sub New(chars As IEnumerable(Of FormattedChar))
+        Me.New(chars, If(chars.Count >= 1, chars.Max(Function(c) c.Location.Y), 0))
+    End Sub
+
+    Public Sub New(chars As IEnumerable(Of FormattedChar), maxlines As Integer)
         Me._chars = chars.ToArray
-        Me.MaxLines = If(Me._chars.Count > 1, Me._chars.Max(Function(c) c.Location.Y), 0)
-        Me.MaxPos = If(Me._chars.Count > 1, Me._chars.Max(Function(c) c.Location.X), 0)
+        Me.MaxLines = maxlines
+        Me.MaxPos = If(Me._chars.Count >= 1, Me._chars.Max(Function(c) c.Location.X), 0)
     End Sub
 
     Public Function GetEnumerator() As IEnumerator(Of FormattedChar) Implements IEnumerable(Of FormattedChar).GetEnumerator

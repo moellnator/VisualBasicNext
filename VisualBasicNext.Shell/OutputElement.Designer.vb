@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
-Partial Class InputElement
+Partial Class OutputElement
     Inherits VisualBasicNext.Shell.ReadOnlyElement
 
     'UserControl overrides dispose to clean up the component list.
@@ -22,26 +22,16 @@ Partial Class InputElement
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
-        Me.components = New System.ComponentModel.Container()
-        Me.TimerCompile = New System.Windows.Forms.Timer(Me.components)
         Me.SuspendLayout()
         '
-        'TimerCompile
+        'OutputElement
         '
-        Me.TimerCompile.Enabled = True
-        Me.TimerCompile.Interval = 500
-        '
-        'InputElement
-        '
-        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None
-        Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(62, Byte), Integer), CType(CType(62, Byte), Integer), CType(CType(66, Byte), Integer))
-        Me.Font = New System.Drawing.Font("Consolas", 11.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.Margin = New System.Windows.Forms.Padding(0)
-        Me.Name = "InputElement"
+        Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
+        Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
+        Me.Name = "OutputElement"
+        Me.Size = New System.Drawing.Size(715, 150)
         Me.ResumeLayout(False)
 
     End Sub
-
-    Friend WithEvents TimerCompile As Timer
 
 End Class

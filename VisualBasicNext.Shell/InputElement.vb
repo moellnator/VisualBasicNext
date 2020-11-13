@@ -29,8 +29,10 @@ Public Class InputElement
     Public Sub New()
         MyBase.New
         InitializeComponent()
+        Me.SetHightlight(ColorPalette.ColorKeyword)
+        Me._small_scroll = False
         AddHandler Me._document.DocumentChanged, AddressOf Me._DocumentChangedHandler
-        Me._Text = New FormattedText(Me._GetFormattedTextChars)
+        Me._Text = New FormattedText(Me._GetFormattedTextChars, 0)
         Me.TimerCompile.Enabled = True
     End Sub
 
@@ -39,7 +41,7 @@ Public Class InputElement
     End Sub
 
     Private Sub _DocumentChangedHandler(sender As Object, e As EventArgs)
-        Me._Text = New FormattedText(Me._GetFormattedTextChars)
+        Me._Text = New FormattedText(Me._GetFormattedTextChars, Me._document.Lines.Count - 1)
         Me.AutoSizeElement()
         Me._FocusCursor()
         Me.Invalidate(True)
@@ -218,11 +220,14 @@ Public Class InputElement
         Me.TimerCompile.Enabled = False
         Me._PerformCompilation()
         Dim submitted_text As New FormattedText(Me._GetFormattedTextChars())
+        Dim submitted_diagnostics As ErrorList = Me._latest.Diagnostics
         Dim returnvalue As EvaluationResult = Me._latest.Evaluate(Me._state)
-        Dim submitted_diagnostics As ErrorList
-        submitted_diagnostics = returnvalue.Diagnostics
+        submitted_diagnostics &= returnvalue.Diagnostics
         Dim submitted_value As Object = Nothing
-        If Not returnvalue.Diagnostics.HasErrors Then submitted_value = returnvalue.Value
+        If Not returnvalue.Diagnostics.HasErrors Then
+            submitted_value = returnvalue.Value
+            Me._previous = Me._latest
+        End If
         Me._ClearAll()
         Me.TimerCompile.Enabled = True
         Me.Invalidate(True)
@@ -230,12 +235,14 @@ Public Class InputElement
     End Sub
 
     Private Sub _ClearAll()
+        Me._Text = FormattedText.Empty
         Me._latest = Nothing
         Me._latest_scope = Nothing
         Me._latest_diagnostics = New ErrorList
         Me._document.Clear()
         Me._last_text = ""
-        Me._Text = FormattedText.Empty
+        Me.AutoSizeElement()
+        Me._FocusCursor()
     End Sub
 
     Private Sub TimerCompile_Tick(sender As Object, e As EventArgs) Handles TimerCompile.Tick
@@ -246,7 +253,7 @@ Public Class InputElement
                 Me.Invoke(
                     Sub()
                         TimerCompile.Enabled = True
-                        Me._Text = New FormattedText(Me._GetFormattedTextChars)
+                        Me._Text = New FormattedText(Me._GetFormattedTextChars, Me._document.Lines.Count - 1)
                         Me.Invalidate(True)
                     End Sub
                 )

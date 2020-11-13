@@ -35,6 +35,7 @@ Partial Class MainForm
         Me.FlowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown
         Me.FlowLayoutPanel.Font = New System.Drawing.Font("Consolas", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.FlowLayoutPanel.Location = New System.Drawing.Point(0, 0)
+        Me.FlowLayoutPanel.Margin = New System.Windows.Forms.Padding(0)
         Me.FlowLayoutPanel.Name = "FlowLayoutPanel"
         Me.FlowLayoutPanel.Padding = New System.Windows.Forms.Padding(5, 5, 0, 0)
         Me.FlowLayoutPanel.Size = New System.Drawing.Size(821, 450)
@@ -46,7 +47,8 @@ Partial Class MainForm
         Me.InputElement.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer))
         Me.InputElement.Font = New System.Drawing.Font("Consolas", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.InputElement.ForeColor = System.Drawing.Color.FromArgb(CType(CType(220, Byte), Integer), CType(CType(220, Byte), Integer), CType(CType(220, Byte), Integer))
-        Me.InputElement.Location = New System.Drawing.Point(8, 8)
+        Me.InputElement.Location = New System.Drawing.Point(5, 5)
+        Me.InputElement.Margin = New System.Windows.Forms.Padding(0)
         Me.InputElement.Name = "InputElement"
         Me.InputElement.Size = New System.Drawing.Size(792, 56)
         Me.InputElement.TabIndex = 0
