@@ -89,9 +89,9 @@ Partial Class MainForm
         Me.LabelTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(129, Byte), Integer), CType(CType(129, Byte), Integer), CType(CType(131, Byte), Integer))
         Me.LabelTitle.Location = New System.Drawing.Point(6, 5)
         Me.LabelTitle.Name = "LabelTitle"
-        Me.LabelTitle.Size = New System.Drawing.Size(173, 15)
+        Me.LabelTitle.Size = New System.Drawing.Size(212, 15)
         Me.LabelTitle.TabIndex = 0
-        Me.LabelTitle.Text = " \\VB.Net Interactive - Terminal "
+        Me.LabelTitle.Text = "Visual Basic .NET Interactive - Terminal "
         '
         'TerminalElement
         '

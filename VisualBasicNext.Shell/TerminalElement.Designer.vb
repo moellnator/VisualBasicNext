@@ -22,10 +22,12 @@ Partial Class TerminalElement
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
+        Me.components = New System.ComponentModel.Container()
         Me.FlowLayoutPanel = New System.Windows.Forms.FlowLayoutPanel()
+        Me.InputElement = New VisualBasicNext.Shell.InputElement()
         Me.PanelContent = New System.Windows.Forms.Panel()
         Me.PanelScroll = New System.Windows.Forms.Panel()
-        Me.InputElement = New VisualBasicNext.Shell.InputElement()
+        Me.TimerUpdate = New System.Windows.Forms.Timer(Me.components)
         Me.FlowLayoutPanel.SuspendLayout()
         Me.PanelContent.SuspendLayout()
         Me.SuspendLayout()
@@ -44,6 +46,17 @@ Partial Class TerminalElement
         Me.FlowLayoutPanel.Size = New System.Drawing.Size(520, 56)
         Me.FlowLayoutPanel.TabIndex = 3
         Me.FlowLayoutPanel.WrapContents = False
+        '
+        'InputElement
+        '
+        Me.InputElement.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer))
+        Me.InputElement.Font = New System.Drawing.Font("Consolas", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.InputElement.ForeColor = System.Drawing.Color.FromArgb(CType(CType(220, Byte), Integer), CType(CType(220, Byte), Integer), CType(CType(220, Byte), Integer))
+        Me.InputElement.Location = New System.Drawing.Point(0, 0)
+        Me.InputElement.Margin = New System.Windows.Forms.Padding(0)
+        Me.InputElement.Name = "InputElement"
+        Me.InputElement.Size = New System.Drawing.Size(535, 56)
+        Me.InputElement.TabIndex = 1
         '
         'PanelContent
         '
@@ -65,16 +78,8 @@ Partial Class TerminalElement
         Me.PanelScroll.Size = New System.Drawing.Size(16, 409)
         Me.PanelScroll.TabIndex = 0
         '
-        'InputElement
+        'TimerUpdate
         '
-        Me.InputElement.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer))
-        Me.InputElement.Font = New System.Drawing.Font("Consolas", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.InputElement.ForeColor = System.Drawing.Color.FromArgb(CType(CType(220, Byte), Integer), CType(CType(220, Byte), Integer), CType(CType(220, Byte), Integer))
-        Me.InputElement.Location = New System.Drawing.Point(0, 0)
-        Me.InputElement.Margin = New System.Windows.Forms.Padding(0)
-        Me.InputElement.Name = "InputElement"
-        Me.InputElement.Size = New System.Drawing.Size(535, 56)
-        Me.InputElement.TabIndex = 1
         '
         'TerminalElement
         '
@@ -95,4 +100,5 @@ Partial Class TerminalElement
     Friend WithEvents PanelContent As Panel
     Friend WithEvents InputElement As InputElement
     Friend WithEvents PanelScroll As Panel
+    Friend WithEvents TimerUpdate As Timer
 End Class

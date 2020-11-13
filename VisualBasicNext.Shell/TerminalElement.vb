@@ -5,6 +5,7 @@
     Private Sub InputElement_Load(sender As Object, e As EventArgs) Handles InputElement.Load
         Me.ActiveControl = Me.InputElement
         Me.InputElement.Focus()
+        If Not IsDesignTime() Then Me.TimerUpdate.Enabled = False
     End Sub
 
     Private Sub FlowLayoutPanel_Resize(sender As Object, e As EventArgs) Handles FlowLayoutPanel.Resize
@@ -45,7 +46,16 @@
     End Sub
 
     Private Function _IsVerticalScroll()
-        Return Me.FlowLayoutPanel.Height < Me.PanelContent.ClientSize.Height
+        Return Me.FlowLayoutPanel.Height > Me.PanelContent.ClientSize.Height
+    End Function
+
+    Private Sub TimerUpdate_Tick(sender As Object, e As EventArgs) Handles TimerUpdate.Tick
+        Me.ActiveControl = Me.InputElement
+        Me.InputElement.Focus()
+    End Sub
+
+    Private Shared Function IsDesignTime() As Boolean
+        Return System.ComponentModel.LicenseManager.UsageMode = System.ComponentModel.LicenseUsageMode.Designtime
     End Function
 
 End Class
