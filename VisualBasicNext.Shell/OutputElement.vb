@@ -2,7 +2,7 @@
 
 Public Class OutputElement
 
-    'TODO add more object formatting, i.e. arrays, enumerables, sturcts, etc...
+    'TODO -> add more object formatting, i.e. arrays, enumerables, sturcts, etc...
 
     Public Sub New()
         InitializeComponent()

@@ -76,6 +76,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ColorPalette.vb" />
+    <Compile Include="ControlButton.Designer.vb">
+      <DependentUpon>ControlButton.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ControlButton.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Document.vb" />
     <Compile Include="FormattedChar.vb" />
     <Compile Include="FormattedText.vb" />
@@ -122,6 +128,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="ControlButton.resx">
+      <DependentUpon>ControlButton.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="InputElement.resx">
       <DependentUpon>InputElement.vb</DependentUpon>
     </EmbeddedResource>

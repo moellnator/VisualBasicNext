@@ -44,6 +44,8 @@ Public Class ReadOnlyElement
         InitializeComponent()
         Me.BackColor = ColorPalette.ColorBackground
         Me.ForeColor = ColorPalette.ColorPlainText
+        Me.PanelText.BackColor = Me.BackColor
+        Me.PanelTextContent.BackColor = Me.BackColor
         Me.PanelScroll.BackColor = ColorPalette.ColorFrame
         Me.PanelFrame.BackColor = ColorPalette.ColorFrame
         Me.Font = New Font("Consolas", 9.75!, FontStyle.Regular, GraphicsUnit.Point, 0)
