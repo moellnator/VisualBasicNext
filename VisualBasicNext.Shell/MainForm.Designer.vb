@@ -22,32 +22,15 @@ Partial Class MainForm
     'Do not modify it using the code editor.
     <System.Diagnostics.DebuggerStepThrough()>
     Private Sub InitializeComponent()
-        Me.FlowLayoutPanel = New System.Windows.Forms.FlowLayoutPanel()
         Me.PanelHead = New System.Windows.Forms.Panel()
         Me.PanelTitle = New System.Windows.Forms.Panel()
-        Me.LabelTitle = New System.Windows.Forms.Label()
-        Me.InputElement = New VisualBasicNext.Shell.InputElement()
         Me.ControlButtonMinimize = New VisualBasicNext.Shell.ControlButton()
         Me.ControlButtonClose = New VisualBasicNext.Shell.ControlButton()
-        Me.FlowLayoutPanel.SuspendLayout()
+        Me.LabelTitle = New System.Windows.Forms.Label()
+        Me.TerminalElement = New VisualBasicNext.Shell.TerminalElement()
         Me.PanelHead.SuspendLayout()
         Me.PanelTitle.SuspendLayout()
         Me.SuspendLayout()
-        '
-        'FlowLayoutPanel
-        '
-        Me.FlowLayoutPanel.AutoSize = True
-        Me.FlowLayoutPanel.Controls.Add(Me.InputElement)
-        Me.FlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.FlowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown
-        Me.FlowLayoutPanel.Font = New System.Drawing.Font("Consolas", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.FlowLayoutPanel.Location = New System.Drawing.Point(1, 49)
-        Me.FlowLayoutPanel.Margin = New System.Windows.Forms.Padding(0)
-        Me.FlowLayoutPanel.Name = "FlowLayoutPanel"
-        Me.FlowLayoutPanel.Padding = New System.Windows.Forms.Padding(5, 0, 5, 0)
-        Me.FlowLayoutPanel.Size = New System.Drawing.Size(798, 400)
-        Me.FlowLayoutPanel.TabIndex = 2
-        Me.FlowLayoutPanel.WrapContents = False
         '
         'PanelHead
         '
@@ -68,28 +51,6 @@ Partial Class MainForm
         Me.PanelTitle.Name = "PanelTitle"
         Me.PanelTitle.Size = New System.Drawing.Size(798, 24)
         Me.PanelTitle.TabIndex = 0
-        '
-        'LabelTitle
-        '
-        Me.LabelTitle.AutoSize = True
-        Me.LabelTitle.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.LabelTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(129, Byte), Integer), CType(CType(129, Byte), Integer), CType(CType(131, Byte), Integer))
-        Me.LabelTitle.Location = New System.Drawing.Point(6, 5)
-        Me.LabelTitle.Name = "LabelTitle"
-        Me.LabelTitle.Size = New System.Drawing.Size(173, 15)
-        Me.LabelTitle.TabIndex = 0
-        Me.LabelTitle.Text = " \\VB.Net Interactive - Terminal "
-        '
-        'InputElement
-        '
-        Me.InputElement.BackColor = System.Drawing.Color.FromArgb(CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer), CType(CType(30, Byte), Integer))
-        Me.InputElement.Font = New System.Drawing.Font("Consolas", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.InputElement.ForeColor = System.Drawing.Color.FromArgb(CType(CType(220, Byte), Integer), CType(CType(220, Byte), Integer), CType(CType(220, Byte), Integer))
-        Me.InputElement.Location = New System.Drawing.Point(5, 0)
-        Me.InputElement.Margin = New System.Windows.Forms.Padding(0)
-        Me.InputElement.Name = "InputElement"
-        Me.InputElement.Size = New System.Drawing.Size(809, 56)
-        Me.InputElement.TabIndex = 0
         '
         'ControlButtonMinimize
         '
@@ -121,6 +82,26 @@ Partial Class MainForm
         Me.ControlButtonClose.Size = New System.Drawing.Size(32, 24)
         Me.ControlButtonClose.TabIndex = 1
         '
+        'LabelTitle
+        '
+        Me.LabelTitle.AutoSize = True
+        Me.LabelTitle.Font = New System.Drawing.Font("Segoe UI", 9.0!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.LabelTitle.ForeColor = System.Drawing.Color.FromArgb(CType(CType(129, Byte), Integer), CType(CType(129, Byte), Integer), CType(CType(131, Byte), Integer))
+        Me.LabelTitle.Location = New System.Drawing.Point(6, 5)
+        Me.LabelTitle.Name = "LabelTitle"
+        Me.LabelTitle.Size = New System.Drawing.Size(173, 15)
+        Me.LabelTitle.TabIndex = 0
+        Me.LabelTitle.Text = " \\VB.Net Interactive - Terminal "
+        '
+        'TerminalElement
+        '
+        Me.TerminalElement.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.TerminalElement.Location = New System.Drawing.Point(1, 49)
+        Me.TerminalElement.Name = "TerminalElement"
+        Me.TerminalElement.Padding = New System.Windows.Forms.Padding(5, 0, 5, 5)
+        Me.TerminalElement.Size = New System.Drawing.Size(798, 400)
+        Me.TerminalElement.TabIndex = 2
+        '
         'MainForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -128,7 +109,7 @@ Partial Class MainForm
         Me.BackColor = System.Drawing.Color.FromArgb(CType(CType(45, Byte), Integer), CType(CType(45, Byte), Integer), CType(CType(48, Byte), Integer))
         Me.ClientSize = New System.Drawing.Size(800, 450)
         Me.ControlBox = False
-        Me.Controls.Add(Me.FlowLayoutPanel)
+        Me.Controls.Add(Me.TerminalElement)
         Me.Controls.Add(Me.PanelHead)
         Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
@@ -136,20 +117,16 @@ Partial Class MainForm
         Me.Name = "MainForm"
         Me.Padding = New System.Windows.Forms.Padding(1)
         Me.ShowIcon = False
-        Me.FlowLayoutPanel.ResumeLayout(False)
         Me.PanelHead.ResumeLayout(False)
         Me.PanelTitle.ResumeLayout(False)
         Me.PanelTitle.PerformLayout()
         Me.ResumeLayout(False)
-        Me.PerformLayout()
 
     End Sub
-
-    Friend WithEvents FlowLayoutPanel As FlowLayoutPanel
-    Friend WithEvents InputElement As InputElement
     Friend WithEvents PanelHead As Panel
     Friend WithEvents PanelTitle As Panel
     Friend WithEvents LabelTitle As Label
     Friend WithEvents ControlButtonClose As ControlButton
     Friend WithEvents ControlButtonMinimize As ControlButton
+    Friend WithEvents TerminalElement As TerminalElement
 End Class

@@ -33,7 +33,7 @@ Partial Class ReadOnlyElement
         'PanelLineNumbers
         '
         Me.PanelLineNumbers.Dock = System.Windows.Forms.DockStyle.Left
-        Me.PanelLineNumbers.Location = New System.Drawing.Point(8, 0)
+        Me.PanelLineNumbers.Location = New System.Drawing.Point(2, 0)
         Me.PanelLineNumbers.Name = "PanelLineNumbers"
         Me.PanelLineNumbers.Size = New System.Drawing.Size(57, 157)
         Me.PanelLineNumbers.TabIndex = 0
@@ -43,9 +43,9 @@ Partial Class ReadOnlyElement
         Me.PanelText.BackColor = System.Drawing.SystemColors.Control
         Me.PanelText.Controls.Add(Me.PanelTextContent)
         Me.PanelText.Dock = System.Windows.Forms.DockStyle.Fill
-        Me.PanelText.Location = New System.Drawing.Point(65, 0)
+        Me.PanelText.Location = New System.Drawing.Point(59, 0)
         Me.PanelText.Name = "PanelText"
-        Me.PanelText.Size = New System.Drawing.Size(610, 157)
+        Me.PanelText.Size = New System.Drawing.Size(616, 157)
         Me.PanelText.TabIndex = 1
         '
         'PanelTextContent
@@ -55,15 +55,15 @@ Partial Class ReadOnlyElement
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.PanelTextContent.Location = New System.Drawing.Point(0, 0)
         Me.PanelTextContent.Name = "PanelTextContent"
-        Me.PanelTextContent.Size = New System.Drawing.Size(556, 157)
+        Me.PanelTextContent.Size = New System.Drawing.Size(562, 157)
         Me.PanelTextContent.TabIndex = 0
         '
         'PanelScroll
         '
         Me.PanelScroll.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.PanelScroll.Location = New System.Drawing.Point(8, 157)
+        Me.PanelScroll.Location = New System.Drawing.Point(2, 157)
         Me.PanelScroll.Name = "PanelScroll"
-        Me.PanelScroll.Size = New System.Drawing.Size(667, 16)
+        Me.PanelScroll.Size = New System.Drawing.Size(673, 16)
         Me.PanelScroll.TabIndex = 0
         '
         'PanelFrame
@@ -71,7 +71,7 @@ Partial Class ReadOnlyElement
         Me.PanelFrame.Dock = System.Windows.Forms.DockStyle.Left
         Me.PanelFrame.Location = New System.Drawing.Point(0, 0)
         Me.PanelFrame.Name = "PanelFrame"
-        Me.PanelFrame.Size = New System.Drawing.Size(8, 173)
+        Me.PanelFrame.Size = New System.Drawing.Size(2, 173)
         Me.PanelFrame.TabIndex = 0
         '
         'ReadOnlyElement

@@ -26,42 +26,6 @@ Public Class MainForm
         Me.SetStyle(ControlStyles.UserPaint Or ControlStyles.AllPaintingInWmPaint Or ControlStyles.OptimizedDoubleBuffer, True)
     End Sub
 
-    Private Sub InputElement_Load(sender As Object, e As EventArgs) Handles InputElement.Load
-        Me.ActiveControl = Me.InputElement
-        Me.InputElement.Focus()
-    End Sub
-
-    Private Sub FlowLayoutPanel_Resize(sender As Object, e As EventArgs) Handles FlowLayoutPanel.Resize
-        For Each c As Control In Me.FlowLayoutPanel.Controls
-            c.Width = Me.FlowLayoutPanel.ClientSize.Width - Me.FlowLayoutPanel.Padding.Horizontal
-        Next
-    End Sub
-
-    Private Sub InputElement_SubmittedDocument(sender As Object, e As SubmittedDocumentEventArgs) Handles InputElement.SubmittedDocument
-        If e.Text.Count <> 0 Then
-            Me.FlowLayoutPanel.Controls.Remove(Me.InputElement)
-            Dim history_element As New ReadOnlyElement With {
-                .Visible = True,
-                .Width = Me.FlowLayoutPanel.Width - Me.FlowLayoutPanel.Padding.Horizontal
-            }
-            history_element.SetText(e.Text)
-            history_element.RemoveLineOverhead()
-            history_element.SetHightlight(ColorPalette.ColorOperator)
-            Me.FlowLayoutPanel.Controls.Add(history_element)
-            If e.Value IsNot Nothing OrElse e.Diagnostics.HasErrors Then
-                Dim output_element As New OutputElement With {
-                .Visible = True,
-                .Width = Me.FlowLayoutPanel.Width - Me.FlowLayoutPanel.Padding.Horizontal
-            }
-                output_element.SetValue(e.Value, e.Diagnostics)
-                Me.FlowLayoutPanel.Controls.Add(output_element)
-            End If
-            Me.FlowLayoutPanel.Controls.Add(Me.InputElement)
-        End If
-        Me.ActiveControl = Me.InputElement
-        Me.InputElement.Focus()
-    End Sub
-
     Private Sub ControlButtonClose_Click(sender As Object, e As EventArgs) Handles ControlButtonClose.Click
         Me.Close()
     End Sub
@@ -90,18 +54,14 @@ Public Class MainForm
         e.Graphics.DrawRectangle(New Pen(Color.FromArgb(255, 83, 83, 85)), New Rectangle(0, 0, Me.ClientSize.Width - 1, Me.ClientSize.Height - 1))
     End Sub
 
-    Private Sub MainForm_MouseDown(sender As Object, e As MouseEventArgs) Handles Me.MouseDown
-
-    End Sub
-
-    Private Sub FlowLayoutPanel_MouseDown(sender As Object, e As MouseEventArgs) Handles FlowLayoutPanel.MouseDown
-        If e.Location.X + FlowLayoutPanel.Location.X > Me.ClientSize.Width - 5 Then
-            If e.Location.Y + FlowLayoutPanel.Location.Y > Me.ClientSize.Height - 5 Then
+    Private Sub TerminalElement_MouseDown(sender As Object, e As MouseEventArgs) Handles TerminalElement.MouseDown
+        If e.Location.X + TerminalElement.Location.X > Me.ClientSize.Width - 5 Then
+            If e.Location.Y + TerminalElement.Location.Y > Me.ClientSize.Height - 5 Then
                 Me._direction_drag = _DragDirection.BottomRight
             Else
                 Me._direction_drag = _DragDirection.Right
             End If
-        ElseIf e.Location.Y + FlowLayoutPanel.Location.Y > Me.ClientSize.Height - 5 Then
+        ElseIf e.Location.Y + TerminalElement.Location.Y > Me.ClientSize.Height - 5 Then
             Me._direction_drag = _DragDirection.Bottom
         End If
         If Me._direction_drag <> _DragDirection.None Then
@@ -109,15 +69,15 @@ Public Class MainForm
         End If
     End Sub
 
-    Private Sub FlowLayoutPanel_MouseMove(sender As Object, e As MouseEventArgs) Handles FlowLayoutPanel.MouseMove
+    Private Sub TerminalElement_MouseMove(sender As Object, e As MouseEventArgs) Handles TerminalElement.MouseMove
         If Not Me._direction_drag <> _DragDirection.None Then
-            If e.Location.X + FlowLayoutPanel.Location.X > Me.ClientSize.Width - 5 Then
-                If e.Location.Y + FlowLayoutPanel.Location.Y > Me.ClientSize.Height - 5 Then
+            If e.Location.X + TerminalElement.Location.X > Me.ClientSize.Width - 5 Then
+                If e.Location.Y + TerminalElement.Location.Y > Me.ClientSize.Height - 5 Then
                     Me.Cursor = Cursors.SizeNWSE
                 Else
                     Me.Cursor = Cursors.SizeWE
                 End If
-            ElseIf e.Location.Y + FlowLayoutPanel.Location.Y > Me.ClientSize.Height - 5 Then
+            ElseIf e.Location.Y + TerminalElement.Location.Y > Me.ClientSize.Height - 5 Then
                 Me.Cursor = Cursors.SizeNS
             Else
                 Me.Cursor = Cursors.Default
@@ -136,17 +96,22 @@ Public Class MainForm
         End If
     End Sub
 
-    Private Sub FlowLayoutPanel_MouseLeave(sender As Object, e As EventArgs) Handles FlowLayoutPanel.MouseLeave
+    Private Sub FlowLayoutPanel_MouseLeave(sender As Object, e As EventArgs) Handles TerminalElement.MouseLeave
         Me.Cursor = Cursors.Default
     End Sub
 
-    Private Sub FlowLayoutPanel_MouseUp(sender As Object, e As MouseEventArgs) Handles FlowLayoutPanel.MouseUp
+    Private Sub FlowLayoutPanel_MouseUp(sender As Object, e As MouseEventArgs) Handles TerminalElement.MouseUp
         Me._direction_drag = _DragDirection.None
         Me.Invalidate(True)
     End Sub
 
     Private Sub MainForm_Resize(sender As Object, e As EventArgs) Handles Me.Resize
         Me.Refresh()
+    End Sub
+
+    Private Sub TerminalElement_Load(sender As Object, e As EventArgs) Handles TerminalElement.Load
+        Me.ActiveControl = Me.TerminalElement
+        Me.TerminalElement.Focus()
     End Sub
 
 End Class

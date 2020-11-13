@@ -92,7 +92,7 @@ Public Class ReadOnlyElement
         Me._suppress_resize = True
         Dim text_size As New SizeF(Me.Font.SizeInPoints / 72 * 96 * _CharRatio, Me.Font.SizeInPoints / 72 * 96)
         Dim max_width As Integer = text_size.Width * (3 + Me._Text.MaxPos) + _Padding.Left
-        If Me._small_scroll And Not Me._IsVerticalScrolling Then
+        If Me._small_scroll And Not Me._IsHorizontalScrolling Then
             Me.PanelScroll.Height = 2
         Else
             Me.PanelScroll.Height = 16
@@ -206,7 +206,7 @@ Public Class ReadOnlyElement
     End Sub
 
     Private Sub PanelScroll_MouseMove(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseMove
-        If Me._IsVerticalScrolling Then
+        If Me._IsHorizontalScrolling Then
             If Me._scroll_down Then
                 Dim delta As Integer = e.Location.X - Me._scroll_start
                 Me._scroll_start = e.Location.X
@@ -231,7 +231,7 @@ Public Class ReadOnlyElement
     End Sub
 
     Private Sub PanelScroll_MouseDown(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseDown
-        If Me._IsVerticalScrolling Then
+        If Me._IsHorizontalScrolling Then
             If e.Location.X > 20 And e.Location.X < Me.PanelScroll.Width - 20 Then
                 Me._scroll_start = e.Location.X
                 Me._scroll_down = True
@@ -244,7 +244,7 @@ Public Class ReadOnlyElement
     End Sub
 
     Private Sub PanelScroll_MouseClick(sender As Object, e As MouseEventArgs) Handles PanelScroll.MouseClick
-        If Me._IsVerticalScrolling Then
+        If Me._IsHorizontalScrolling Then
             Dim scroll_max As Integer = Me.PanelTextContent.Width - Me.PanelText.Width
             If e.Location.X < 20 Then
                 Me.ScrollLocation = Me._scroll_location - 0.05 * scroll_max
@@ -261,7 +261,7 @@ Public Class ReadOnlyElement
         Me.PanelScroll.Invalidate()
     End Sub
 
-    Private Function _IsVerticalScrolling() As Boolean
+    Private Function _IsHorizontalScrolling() As Boolean
         Return Me.PanelTextContent.Width > Me.PanelText.Width
     End Function
 

@@ -126,6 +126,12 @@
     <Compile Include="ReadOnlyElement.vb">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="TerminalElement.Designer.vb">
+      <DependentUpon>TerminalElement.vb</DependentUpon>
+    </Compile>
+    <Compile Include="TerminalElement.vb">
+      <SubType>UserControl</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="ControlButton.resx">
@@ -148,6 +154,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ReadOnlyElement.resx">
       <DependentUpon>ReadOnlyElement.vb</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TerminalElement.resx">
+      <DependentUpon>TerminalElement.vb</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
