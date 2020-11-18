@@ -97,6 +97,14 @@ Namespace Diagnostics
             Me.ReportMessage($"Type <{target.Name}> must be value type in order to be defined nullable.", syntax.Span)
         End Sub
 
+        Friend Sub ReportMismatchingDimensions(actual As Integer, expected As Integer, span As Span)
+            Me.ReportMessage($"Mismatching array dimension {actual.ToString}, expected {If(expected = 0, "'any'", expected.ToString)}", span)
+        End Sub
+
+        Friend Sub ReportVariableCannotBeGeneric(name As String, span As Span)
+            Me.ReportMessage($"Variable '{name}' cannot have generic arguments", span)
+        End Sub
+
         Default Public ReadOnly Property Item(index As Integer) As ErrorObject Implements IReadOnlyList(Of ErrorObject).Item
             Get
                 Return Me._content.Item(index)

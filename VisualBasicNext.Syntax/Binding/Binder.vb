@@ -140,12 +140,14 @@ Namespace Binding
 
         Private Function _BindExpression(expression As ExpressionNode) As BoundExpression
             Select Case expression.Kind
+                Case Lexing.SyntaxKind.MemberAccessListNode
+                    Return Me._BindMemberAccessExpression(expression)
+                Case Lexing.SyntaxKind.MemberAccessItemNode
+                    Return Me._BindMemberAccessItemExpression(expression)
                 Case Lexing.SyntaxKind.BlockExpressionNode
                     Return Me._BindBlockExpression(expression)
                 Case Lexing.SyntaxKind.LiteralNode
                     Return Me._BindLiteralExpression(expression)
-                Case Lexing.SyntaxKind.VariableExpressionNode
-                    Return Me._BindVariableExpression(expression)
                 Case Lexing.SyntaxKind.CastExpressionNode
                     Return Me._BindCastExpression(expression)
                 Case Lexing.SyntaxKind.CastDynamicExpressionNode
@@ -184,6 +186,59 @@ Namespace Binding
             End If
             Return retval
         End Function
+
+        Private Function _BindMemberAccessExpression(expression As MemberAccessListNode) As BoundExpression
+            Dim source As BoundExpression = Nothing
+            Dim source_type As Type = Nothing
+            If expression.Source.Kind = Lexing.SyntaxKind.MemberAccessItemNode Then
+                If Me._scope.TryLookupSymbol(DirectCast(expression.Source, MemberAccessItemNode).Identifier.Span.ToString) IsNot Nothing Then
+                    source = Me._BindMemberAccessItemExpression(expression.Source)
+                Else
+                    'TODO [implementation] -> member items until is type + while nested type (only generics, no access allowed) -> bind first member static -> source
+                End If
+            Else
+                    source = Me._BindExpression(expression.Source)
+                source_type = source.BoundType
+            End If
+            For Each memberaccess As MemberAccessItemNode In expression.Items
+                If memberaccess.Identifier.Span.ToString.Equals(String.Empty) Then Return New BoundErrorExpression(expression)
+                source = Me._BindMemberAccessItemExpression(memberaccess, source)
+            Next
+            Return source
+        End Function
+
+        Private Function _BindMemberAccessItemExpression(expression As MemberAccessItemNode, Optional source As BoundExpression = Nothing) As BoundExpression
+            If expression.Delimeter Is Nothing Then
+                If source IsNot Nothing Then Throw New ArgumentException("First member item cannot have a source type.")
+                Dim name As String = expression.Identifier.Span.ToString
+                Dim symbol As VariableSymbol = Me._scope.TryLookupSymbol(name)
+                If symbol IsNot Nothing Then
+                    If expression.Generics IsNot Nothing Then Me.Diagnostics.ReportVariableCannotBeGeneric(symbol.Name, expression.Generics.Span)
+                    Dim retval As BoundExpression = New BoundVariableExpression(expression, symbol)
+                    If expression.Access IsNot Nothing Then
+                        If retval.BoundType.Equals(GetType(Object)) Then
+                            'TODO [implementation] -> Return late bound array indexing -> then regular access
+                        End If
+                        'TODO [implementation] -> Return regular access
+                    Else
+                        Return retval
+                    End If
+                Else
+                    Me.Diagnostics.ReportVariableNotDeclared(expression.Identifier)
+                    Return New BoundErrorExpression(expression)
+                End If
+            Else
+                Dim retval As BoundExpression = Nothing
+                If source Is Nothing Then Throw New ArgumentException("Source type cannot be nothing for member access.")
+                If source.BoundType.Equals(GetType(Object)) Then
+                    'TODO [implementation] -> Object late binding via 'Microsoft.VisualBasic.CompilerServices.NewLateBinding::LateCall'/'LateGet'/'LateIndexGet'/...
+                Else
+                    'TODO [implementation] -> Get members -> make generic or infer from arguments -> call function / property by argumentlist OR access array -> source type
+                End If
+                'TODO [implementation] -> Bind access
+            End If
+        End Function
+
 
         Private Function _BindTryCastExpression(expression As TryCastExpressionNode) As BoundTryCastExpression
             Dim expr As BoundExpression = Me._BindExpression(expression.Expression)
@@ -278,12 +333,6 @@ Namespace Binding
             Dim type As BoundExpression = Me._BindExpression(Of Type)(expression.TypeNode)
             Dim value As BoundExpression = Me._BindExpression(expression.Expression)
             Return New BoundCastDynamicExpression(expression, value, type)
-        End Function
-
-        Private Function _BindVariableExpression(expression As VariableExpressionNode) As BoundExpression
-            Dim variable As VariableSymbol = Me._BindVariableReference(expression.Identifier)
-            If variable Is Nothing Then Return New BoundErrorExpression(expression)
-            Return New BoundVariableExpression(expression, variable)
         End Function
 
         Private Function _BindVariableReference(syntax As Lexing.SyntaxToken) As VariableSymbol

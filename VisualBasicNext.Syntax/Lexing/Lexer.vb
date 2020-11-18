@@ -87,6 +87,9 @@ Namespace Lexing
                     If Me._next = "." Then
                         kind = SyntaxKind.QuestionmarkDotToken
                         Me._move(2)
+                    ElseIf Me._next = "(" Then
+                        kind = SyntaxKind.QuestionmarkOpenBracketToken
+                        Me._move(2)
                     Else
                         kind = SyntaxKind.QuestionmarkToken
                         Me._move_next()
@@ -429,7 +432,6 @@ Namespace Lexing
         End Function
 
         Private Function _read_number() As Object
-            'TODO -> check if digits are present before special char like . e or typeletter
             Dim float As Boolean = False
             Dim value As Object = Nothing
             Dim exponent As Boolean = False
@@ -451,7 +453,7 @@ Namespace Lexing
                             badchar = True
                         End If
                     Case "e"
-                        If Not exponent Then
+                        If Not exponent Or builder.Length = 0 Then
                             float = True
                             exponent = True
                             builder.Append(Me._current)
@@ -464,16 +466,25 @@ Namespace Lexing
                             badchar = True
                         End If
                     Case "f"
-                        If Not Single.TryParse(builder.ToString, Globalization.NumberStyles.AllowDecimalPoint Or Globalization.NumberStyles.AllowExponent, c, value) Then badtype = GetType(Single)
-                        Me._move_next()
+                        If Not Single.TryParse(builder.ToString, Globalization.NumberStyles.AllowDecimalPoint Or Globalization.NumberStyles.AllowExponent, c, value) Then
+                            badtype = GetType(Single)
+                        Else
+                            Me._move_next()
+                        End If
                         done = True
                     Case "r"
-                        If Not Double.TryParse(builder.ToString, Globalization.NumberStyles.AllowDecimalPoint Or Globalization.NumberStyles.AllowExponent, c, value) Then badtype = GetType(Double)
-                        Me._move_next()
+                        If Not Double.TryParse(builder.ToString, Globalization.NumberStyles.AllowDecimalPoint Or Globalization.NumberStyles.AllowExponent, c, value) Then
+                            badtype = GetType(Double)
+                        Else
+                            Me._move_next()
+                        End If
                         done = True
                     Case "d"
-                        If exponent OrElse Not Decimal.TryParse(builder.ToString, Globalization.NumberStyles.AllowDecimalPoint, c, value) Then badtype = GetType(Decimal)
-                        Me._move_next()
+                        If exponent OrElse Not Decimal.TryParse(builder.ToString, Globalization.NumberStyles.AllowDecimalPoint, c, value) Then
+                            badtype = GetType(Decimal)
+                        Else
+                            Me._move_next()
+                        End If
                         done = True
                     Case "u", "s", "i", "l"
                         Dim unsigned As Boolean = False

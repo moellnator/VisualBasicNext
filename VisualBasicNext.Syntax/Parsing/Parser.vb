@@ -63,10 +63,10 @@ Namespace Parsing
 
         Private Function _MatchStatement() As StatementNode
             Select Case Me._current.Kind
-                'TODO -> Assignment
-                'TODO -> Redim and Erase
-                'TODO -> Define Delegates
-                'TODO -> More Statements... 
+                'TODO [implementation] -> Assignment
+                'TODO [implementation] -> Redim and Erase
+                'TODO [implementation] -> Define Delegates
+                'TODO [implementation] -> More Statements... 
                 '        if, else, elseif, end if
                 '        select case, case, case is, case else, end select
                 '        for, each in, next
@@ -143,10 +143,10 @@ Namespace Parsing
         End Function
 
         Private Function _MatchExpression() As ExpressionNode
-            'TODO -> Lambda, MultilineLambda
-            'TODO -> Action, MultilineAction
-            'TODO -> New (including from and array notation)
-            'TODO -> TypeOf ... Is ...
+            'TODO [implementation] -> Lambda, MultilineLambda
+            'TODO [implementation] -> Action, MultilineAction
+            'TODO [implementation] -> New (including from and array notation)
+            'TODO [implementation] -> TypeOf ... Is ...
             Return Me._MatchBinaryExpression
         End Function
 
@@ -158,7 +158,7 @@ Namespace Parsing
                 Dim operand As ExpressionNode = Me._MatchBinaryExpression(unary_operator_precedence)
                 left = New UnaryExpressionNode(operatorToken, operand)
             Else
-                left = Me._MatchAtomicExpression
+                left = Me._MatchMemberAccessExpression
             End If
             While True
                 Dim precedence As Integer = Me._current.Kind.GetBinaryOperatorPrecedence
@@ -170,9 +170,67 @@ Namespace Parsing
             Return left
         End Function
 
+        Private Function _MatchMemberAccessExpression() As ExpressionNode
+            Dim left As ExpressionNode = Me._MatchAtomicExpression
+            Dim items As New List(Of MemberAccessItemNode)
+            While (Me._current.Kind = SyntaxKind.DotToken Or Me._current.Kind = SyntaxKind.QuestionmarkDotToken)
+                items.Add(Me._MatchMemberAccessItemExpression(False))
+            End While
+            If items.Count = 0 Then Return left
+            Return New MemberAccessListNode(left, items.ToImmutableList)
+        End Function
+
+        Private Function _MatchMemberAccessItemExpression(Optional isFirst As Boolean = False) As ExpressionNode
+            Dim delimeter As SyntaxToken = If(isFirst, Nothing, Me._MatchToken(Me._current.Kind))
+            Dim identifier As SyntaxToken = Me._MatchToken(SyntaxKind.IdentifierToken)
+            Dim generics As GenericsListNode = Nothing
+            If Me._current.Kind = SyntaxKind.OpenBracketToken AndAlso Me._peek(1).Kind = SyntaxKind.OfKeywordToken Then generics = Me._MatchGenericsList()
+            Dim access As AccessListNode = Nothing
+            If Me._current.Kind = SyntaxKind.OpenBracketToken Or Me._current.Kind = SyntaxKind.QuestionmarkOpenBracketToken Then Me._MatchAccessList()
+            Return New MemberAccessItemNode(delimeter, identifier, generics, access)
+        End Function
+
+        Private Function _MatchAccessList() As AccessListNode
+            Dim items As New List(Of ArgumentListNode)
+            While (Me._current.Kind = SyntaxKind.OpenBracketToken Or Me._current.Kind = SyntaxKind.QuestionmarkOpenBracketToken)
+                items.Add(Me._MatchArgumentList)
+            End While
+            Return New AccessListNode(items.ToImmutableList)
+        End Function
+
+        Private Function _MatchArgumentList() As ArgumentListNode
+            Dim openBracket As SyntaxToken = Me._MatchToken(
+                If(
+                    Me._current.Kind = SyntaxKind.OpenBracketToken,
+                    SyntaxKind.OpenBracketToken,
+                    SyntaxKind.QuestionmarkOpenBracketToken
+                )
+            )
+            Dim arguments As New List(Of ArgumentNode)
+            Dim closeBracket As SyntaxToken = Nothing
+            If Me._current.Kind = SyntaxKind.CloseBracketToken Then
+                closeBracket = Me._MatchToken(SyntaxKind.CloseBracketToken)
+                If openBracket.Kind = SyntaxKind.QuestionmarkOpenBracketToken Then _
+                    Me.Diagnostics.ReportMismatchingDimensions(0, 0, closeBracket.Span)
+                Return New ArgumentListNode(openBracket, ImmutableList(Of ArgumentNode).Empty, closeBracket)
+            End If
+            arguments.Add(Me._MatchArgument(True))
+            While Me._current.Kind = SyntaxKind.CommaToken
+                arguments.Add(Me._MatchArgument)
+            End While
+            closeBracket = Me._MatchToken(SyntaxKind.CloseBracketToken)
+            Return New ArgumentListNode(openBracket, arguments.ToImmutableList, closeBracket)
+        End Function
+
+        Private Function _MatchArgument(Optional isFirst As Boolean = False) As ArgumentNode
+            Dim delimeter As SyntaxToken = If(isFirst, Nothing, Me._MatchToken(SyntaxKind.CommaToken))
+            Dim argument As ExpressionNode = Me._MatchExpression
+            Return New ArgumentNode(delimeter, argument)
+        End Function
+
         Private Function _MatchAtomicExpression() As ExpressionNode
-            'TODO -> Add the AddressOf operator -> Delegates
-            'TODO -> Add Await operator
+            'TODO [suggestion] -> Add the AddressOf operator -> Delegates
+            'TODO [suggestion] -> Add Await operator
             Select Case Me._current.Kind
                 Case SyntaxKind.OpenBraceToken
                     Return Me._MatchArrayExpression
@@ -201,9 +259,7 @@ Namespace Parsing
                 Case SyntaxKind.PartialStringStartToken
                     Return Me._MatchExtrapolatedString
                 Case Else
-                    Dim identifier As SyntaxToken = Me._MatchToken(SyntaxKind.IdentifierToken)
-                    'TODO -> Match full quallifiers + Members + Access/Index, Nullpropagation ?. and Nullindex ?()
-                    Return New VariableExpressionNode(identifier)
+                    Return Me._MatchMemberAccessItemExpression(True)
             End Select
         End Function
 

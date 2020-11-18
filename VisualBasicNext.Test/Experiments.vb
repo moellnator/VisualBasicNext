@@ -3,15 +3,18 @@ Public Class Experiments
 
     <TestMethod>
     Public Sub Experiment()
-        Dim a As Integer = "1"
-
+        Dim a As Object = New TestClass
+        a = a.TestFunction(0)
     End Sub
+
 
     Public Class TestClass
 
-        Public Shared Operator ^(a As TestClass, b As TestClass) As TestClass
+        Public ReadOnly Property TestProperty As Integer() = {1, 2, 3}
+
+        Public Function TestFunction(a As Integer) As Integer
             Return a
-        End Operator
+        End Function
 
     End Class
 

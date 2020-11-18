@@ -77,7 +77,6 @@ Namespace Lexing
         ArrayDimensionsListItemNode
         VariableDeclarationStatementNode
         DimKeywordToken
-        VariableExpressionNode
         ImportsKeywordToken
         ImportsStatementNode
         NamespaceNode
@@ -101,6 +100,12 @@ Namespace Lexing
         ExtrapolatedStringSubNode
         GetTryCastKeywordToken
         TryCastExpressionNode
+        MemberAccessListNode
+        MemberAccessItemNode
+        ArgumentNode
+        AccessListNode
+        ArgumentListNode
+        QuestionmarkOpenBracketToken
     End Enum
 
     Public Class SyntaxToken : Inherits SyntaxNode

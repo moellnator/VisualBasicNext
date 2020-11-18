@@ -7,11 +7,13 @@ Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Public Class InputElement
 
-    'TODO -> Add History of submitted documents
-    'TODO -> Add auto completition?
-    'TODO -> Add auto indenting?
+    'TODO [implement] -> Add History of submitted documents
+    'TODO [suggestion] -> Add auto completition?
+    'TODO [suggestion] -> Add auto indenting?
 
     Public Event SubmittedDocument As SubmittedDocumentEventHandler
+    Public Event CursorPositionChanged As CursorPositionChangedEventHandler
+
     Private ReadOnly _document As New Document
 
     Private Shared ReadOnly _ErrorPen As Pen = _MakeUnderlineTexture()
@@ -48,7 +50,7 @@ Public Class InputElement
     End Sub
 
     Private Sub _FocusCursor()
-        Dim text_size As New SizeF(Me.Font.SizeInPoints / 72 * 96 * _CharRatio, Me.Font.SizeInPoints / 72 * 96)
+        Dim text_size As New SizeF(Me.Font.SizeInPoints / 72 * 96 * _CharRatio, Me.Font.SizeInPoints / 72 * 96 * (1 + _LineSeparation))
         Dim cursor As New PointF(
             text_size.Width * Me._document.CursorPosition.X + _Padding.Left,
             text_size.Height * (Me._document.CursorPosition.Y + 1) + _Padding.Top
@@ -60,6 +62,7 @@ Public Class InputElement
         ElseIf cursor.X < left_edge Then
             Me.ScrollLocation = cursor.X
         End If
+        RaiseEvent CursorPositionChanged(Me, New CursorPositionChangedEventArgs(cursor, text_size))
     End Sub
 
     Protected Overrides Sub PaintTextContent(r As Rectangle, g As Graphics, textSize As SizeF)
@@ -290,5 +293,19 @@ Public Class SubmittedDocumentEventArgs : Inherits EventArgs
     Public ReadOnly Property Text As FormattedText
     Public ReadOnly Property Diagnostics As ErrorList
     Public ReadOnly Property Value As Object
+
+End Class
+
+Public Delegate Sub CursorPositionChangedEventHandler(sender As Object, e As CursorPositionChangedEventArgs)
+
+Public Class CursorPositionChangedEventArgs : Inherits EventArgs
+
+    Public Sub New(newCursorLocation As PointF, textSize As SizeF)
+        Me.NewCursorLocation = newCursorLocation
+        Me.TextSize = textSize
+    End Sub
+
+    Public ReadOnly Property NewCursorLocation As PointF
+    Public ReadOnly Property TextSize As SizeF
 
 End Class

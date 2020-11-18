@@ -60,7 +60,7 @@ Public Class ReadOnlyElement
         Me.Invalidate(True)
     End Sub
 
-    Private Shared Sub MakeDoubleBuffered(control As Panel)
+    Public Shared Sub MakeDoubleBuffered(control As Panel)
         Dim type As Type = GetType(Panel)
         type.InvokeMember(
             "DoubleBuffered",
@@ -222,7 +222,7 @@ Public Class ReadOnlyElement
                     Me.PanelScroll.Invalidate()
                 Else
                     Me._scroll_is_hover_right = False
-                    Me._scroll_is_hover_right = False
+                    Me._scroll_is_hover_left = False
                     Me._scroll_is_hover_bar = True
                     Me.PanelScroll.Invalidate()
                 End If

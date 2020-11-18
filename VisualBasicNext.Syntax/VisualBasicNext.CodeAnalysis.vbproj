@@ -118,6 +118,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Parsing\AccessListNode.vb" />
+    <Compile Include="Parsing\ArgumentListNode.vb" />
+    <Compile Include="Parsing\ArgumentNode.vb" />
     <Compile Include="Parsing\ArrayDimensionsListItemNode.vb" />
     <Compile Include="Parsing\ArrayDimensionsListNode.vb" />
     <Compile Include="Parsing\ArrayExpressionNode.vb" />
@@ -135,12 +138,13 @@
     <Compile Include="Parsing\GenericsListNode.vb" />
     <Compile Include="Parsing\GetTypeExpressionNode.vb" />
     <Compile Include="Parsing\ImportsStatementNode.vb" />
+    <Compile Include="Parsing\MemberAccessItemNode.vb" />
+    <Compile Include="Parsing\MemberAccessListNode.vb" />
     <Compile Include="Parsing\NullCheckExpressionNode.vb" />
     <Compile Include="Parsing\SyntaxFacts.vb" />
     <Compile Include="Parsing\TernaryExpressionNode.vb" />
     <Compile Include="Parsing\TryCastExpressionNode.vb" />
     <Compile Include="Parsing\UnaryExpressionNode.vb" />
-    <Compile Include="Parsing\VariableExpressionNode.vb" />
     <Compile Include="Parsing\LiteralExpressionNode.vb" />
     <Compile Include="Parsing\ScriptNode.vb" />
     <Compile Include="Parsing\StatementNode.vb" />

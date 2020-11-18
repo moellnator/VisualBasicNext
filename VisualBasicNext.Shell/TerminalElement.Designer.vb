@@ -37,13 +37,12 @@ Partial Class TerminalElement
         Me.FlowLayoutPanel.AutoSize = True
         Me.FlowLayoutPanel.BackColor = System.Drawing.Color.Transparent
         Me.FlowLayoutPanel.Controls.Add(Me.InputElement)
-        Me.FlowLayoutPanel.Dock = System.Windows.Forms.DockStyle.Top
         Me.FlowLayoutPanel.FlowDirection = System.Windows.Forms.FlowDirection.TopDown
         Me.FlowLayoutPanel.Font = New System.Drawing.Font("Consolas", 9.75!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
         Me.FlowLayoutPanel.Location = New System.Drawing.Point(0, 0)
         Me.FlowLayoutPanel.Margin = New System.Windows.Forms.Padding(0)
         Me.FlowLayoutPanel.Name = "FlowLayoutPanel"
-        Me.FlowLayoutPanel.Size = New System.Drawing.Size(520, 56)
+        Me.FlowLayoutPanel.Size = New System.Drawing.Size(535, 56)
         Me.FlowLayoutPanel.TabIndex = 3
         Me.FlowLayoutPanel.WrapContents = False
         '
