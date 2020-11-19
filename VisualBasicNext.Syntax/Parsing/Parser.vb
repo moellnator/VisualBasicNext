@@ -186,7 +186,7 @@ Namespace Parsing
             Dim generics As GenericsListNode = Nothing
             If Me._current.Kind = SyntaxKind.OpenBracketToken AndAlso Me._peek(1).Kind = SyntaxKind.OfKeywordToken Then generics = Me._MatchGenericsList()
             Dim access As AccessListNode = Nothing
-            If Me._current.Kind = SyntaxKind.OpenBracketToken Or Me._current.Kind = SyntaxKind.QuestionmarkOpenBracketToken Then Me._MatchAccessList()
+            If Me._current.Kind = SyntaxKind.OpenBracketToken Or Me._current.Kind = SyntaxKind.QuestionmarkOpenBracketToken Then access = Me._MatchAccessList()
             Return New MemberAccessItemNode(delimeter, identifier, generics, access)
         End Function
 

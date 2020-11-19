@@ -19,6 +19,10 @@
         BoundUnaryOperator
         BoundExtrapolatedStringExpression
         BoundTryCastExpression
+        BoundArrayAccessExpression
+        BoundInstancePropertyGetExpression
+        BoundInstanceMethodInvokationExpression
+        BoundInstanceFieldGetExpression
     End Enum
 
 End Namespace

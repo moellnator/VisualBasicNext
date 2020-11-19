@@ -3,10 +3,10 @@ Public Class Experiments
 
     <TestMethod>
     Public Sub Experiment()
-        Dim a As Object = New TestClass
-        a = a.TestFunction(0)
+        Dim a As Func(Of Integer) = Function() 0
+        Dim t As Type = a.GetType
+        Stop
     End Sub
-
 
     Public Class TestClass
 
