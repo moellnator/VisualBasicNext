@@ -1,5 +1,6 @@
 ﻿Imports System.Collections.Immutable
 Imports System.Reflection
+Imports System.Runtime.CompilerServices
 Imports VisualBasicNext.CodeAnalysis.Diagnostics
 Imports VisualBasicNext.CodeAnalysis.Parsing
 Imports VisualBasicNext.CodeAnalysis.Symbols
@@ -221,10 +222,11 @@ Namespace Binding
                     'TODO [implementation] -> Object late binding via 'Microsoft.VisualBasic.CompilerServices.NewLateBinding::LateCall'/'LateGet'/'LateIndexGet'/...
                 Else
                     Dim name As String = expression.Identifier.Span.ToString
-                    Dim members As MemberInfo() = source.BoundType.GetMembers(BindingFlags.Public Or BindingFlags.Instance)
+                    Dim members As MemberInfo() = source.BoundType.GetMembers(
+                        BindingFlags.Public Or BindingFlags.Instance
+                    ).Concat(TypeResolver.GetExtensions(source.BoundType)).ToArray
                     members = members.Where(Function(m) m.Name.ToLower.Equals(name.ToLower)).ToArray
                     If members.Count = 0 Then
-                        'TODO [implementation] -> Test for extension methods if no instance members were found
                         Me.Diagnostics.ReportMemberNotFound(name, source.BoundType, expression.Identifier.Span)
                         Return New BoundErrorExpression(expression)
                     End If
@@ -237,17 +239,22 @@ Namespace Binding
                             Dim arguments As BoundExpression() = Array.Empty(Of BoundExpression)
                             If access_count = 0 Then
                                 member = members.FirstOrDefault(Function(m) _GetParameters(m).Count = 0)
+                                If member Is Nothing Then member = _FindMatchingExtension(members, source, arguments)
                             Else
-                                arguments = expression.Access.Items(0).Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray
+                                arguments = expression.Access.Items(access_offset).Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray
                                 member = _FindMatchingMember(members, arguments)
+                                If member Is Nothing Then member = _FindMatchingExtension(members, source, arguments)
                                 access_offset += 1
                             End If
                             If member Is Nothing Then
+
                                 Me.Diagnostics.ReportInvalidArguments(name, source.BoundType, expression.Span)
                                 Return New BoundErrorExpression(expression)
                             End If
                             If member.MemberType = MemberTypes.Property Then
                                 retval = New BoundInstancePropertyGetExpression(expression, source, member, arguments)
+                            ElseIf DirectCast(member, MethodInfo).IsStatic Then
+                                Stop
                             Else
                                 retval = New BoundInstanceMethodInvokationExpression(expression, source, member, arguments)
                             End If
@@ -316,6 +323,13 @@ Namespace Binding
             End If
             Me.Diagnostics.ReportDoesNotAcceptArguments(expression.Access.Span)
             Return New BoundErrorExpression(expression)
+        End Function
+
+        Private Function _FindMatchingExtension(members As IEnumerable(Of MemberInfo), obj As BoundExpression, arguments As IEnumerable(Of BoundExpression)) As MemberInfo
+            Dim extensions As MethodInfo() = members.Where(
+                Function(m) m.MemberType = MemberTypes.Method AndAlso m.IsDefined(GetType(ExtensionAttribute), False)
+            ).Cast(Of MethodInfo).ToArray
+            Return _FindMatchingMember(extensions, {obj}.Concat(arguments))
         End Function
 
         Private Function _FindMatchingMember(members As IEnumerable(Of MemberInfo), arguments As IEnumerable(Of BoundExpression)) As MemberInfo
