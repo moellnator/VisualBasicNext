@@ -1,4 +1,6 @@
 ﻿Imports System.Collections.Immutable
+Imports System.Reflection
+Imports System.Runtime.CompilerServices
 Imports VisualBasicNext.CodeAnalysis.Diagnostics
 Imports VisualBasicNext.CodeAnalysis.Parsing
 Imports VisualBasicNext.CodeAnalysis.Symbols
@@ -197,7 +199,7 @@ Namespace Binding
                     'TODO [implementation] -> member items until is type + while nested type (only generics, no access allowed) -> bind first member static -> source
                 End If
             Else
-                    source = Me._BindExpression(expression.Source)
+                source = Me._BindExpression(expression.Source)
                 source_type = source.BoundType
             End If
             For Each memberaccess As MemberAccessItemNode In expression.Items
@@ -210,35 +212,159 @@ Namespace Binding
         Private Function _BindMemberAccessItemExpression(expression As MemberAccessItemNode, Optional source As BoundExpression = Nothing) As BoundExpression
             If expression.Delimeter Is Nothing Then
                 If source IsNot Nothing Then Throw New ArgumentException("First member item cannot have a source type.")
-                Dim name As String = expression.Identifier.Span.ToString
-                Dim symbol As VariableSymbol = Me._scope.TryLookupSymbol(name)
-                If symbol IsNot Nothing Then
-                    If expression.Generics IsNot Nothing Then Me.Diagnostics.ReportVariableCannotBeGeneric(symbol.Name, expression.Generics.Span)
-                    Dim retval As BoundExpression = New BoundVariableExpression(expression, symbol)
-                    If expression.Access IsNot Nothing Then
-                        If retval.BoundType.Equals(GetType(Object)) Then
-                            'TODO [implementation] -> Return late bound array indexing -> then regular access
-                        End If
-                        'TODO [implementation] -> Return regular access
-                    Else
-                        Return retval
-                    End If
-                Else
-                    Me.Diagnostics.ReportVariableNotDeclared(expression.Identifier)
-                    Return New BoundErrorExpression(expression)
-                End If
+                Return Me._BindVariableAccess(expression)
             Else
-                Dim retval As BoundExpression = Nothing
                 If source Is Nothing Then Throw New ArgumentException("Source type cannot be nothing for member access.")
+                Dim retval As BoundExpression = Nothing
+                Dim access_offset As Integer = 0
+                Dim access_count As Integer = If(expression.Access IsNot Nothing, expression.Access.Items.Count, 0)
                 If source.BoundType.Equals(GetType(Object)) Then
                     'TODO [implementation] -> Object late binding via 'Microsoft.VisualBasic.CompilerServices.NewLateBinding::LateCall'/'LateGet'/'LateIndexGet'/...
                 Else
-                    'TODO [implementation] -> Get members -> make generic or infer from arguments -> call function / property by argumentlist OR access array -> source type
+                    Dim name As String = expression.Identifier.Span.ToString
+                    Dim members As MemberInfo() = source.BoundType.GetMembers(
+                        BindingFlags.Public Or BindingFlags.Instance
+                    ).Concat(TypeResolver.GetExtensions(source.BoundType)).ToArray
+                    members = members.Where(Function(m) m.Name.ToLower.Equals(name.ToLower)).ToArray
+                    If members.Count = 0 Then
+                        Me.Diagnostics.ReportMemberNotFound(name, source.BoundType, expression.Identifier.Span)
+                        Return New BoundErrorExpression(expression)
+                    End If
+                    Select Case members.First.MemberType
+                        Case MemberTypes.Field
+                            retval = New BoundInstanceFieldGetExpression(expression, source, members.First)
+                        Case MemberTypes.Property, MemberTypes.Method
+                            'TODO [implementation] -> Make member generic with arguments or inferred types...
+                            Dim member As MemberInfo = Nothing
+                            Dim arguments As BoundExpression() = Array.Empty(Of BoundExpression)
+                            If access_count = 0 Then
+                                member = members.FirstOrDefault(Function(m) _GetParameters(m).Count = 0)
+                                If member Is Nothing Then member = _FindMatchingExtension(members, source, arguments)
+                            Else
+                                arguments = expression.Access.Items(access_offset).Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray
+                                member = _FindMatchingMember(members, arguments)
+                                If member Is Nothing Then member = _FindMatchingExtension(members, source, arguments)
+                                access_offset += 1
+                            End If
+                            If member Is Nothing Then
+
+                                Me.Diagnostics.ReportInvalidArguments(name, source.BoundType, expression.Span)
+                                Return New BoundErrorExpression(expression)
+                            End If
+                            If member.MemberType = MemberTypes.Property Then
+                                retval = New BoundInstancePropertyGetExpression(expression, source, member, arguments)
+                            ElseIf DirectCast(member, MethodInfo).IsStatic Then
+                                Stop
+                            Else
+                                retval = New BoundInstanceMethodInvokationExpression(expression, source, member, arguments)
+                            End If
+                        Case Else
+                            Me.Diagnostics.ReportMemberTypeNotValid(members.First.MemberType, expression.Identifier.Span)
+                            Return New BoundErrorExpression(expression)
+                    End Select
                 End If
-                'TODO [implementation] -> Bind access
+                For index As Integer = access_offset To access_count - 1
+                    retval = _ResolveAccess(expression, retval, index)
+                    If retval.Kind.Equals(BoundNodeKind.BoundErrorExpression) Then Return retval
+                Next
+                Return retval
             End If
         End Function
 
+        Private Function _BindVariableAccess(expression As MemberAccessItemNode) As BoundExpression
+            Dim name As String = expression.Identifier.Span.ToString
+            Dim symbol As VariableSymbol = Me._scope.TryLookupSymbol(name)
+            If symbol IsNot Nothing Then
+                If expression.Generics IsNot Nothing Then Me.Diagnostics.ReportVariableCannotBeGeneric(symbol.Name, expression.Generics.Span)
+                Dim retval As BoundExpression = New BoundVariableExpression(expression, symbol)
+                If expression.Access IsNot Nothing Then
+                    For index As Integer = 0 To expression.Access.Items.Count - 1
+                        retval = _ResolveAccess(expression, retval, index)
+                        If retval.Kind.Equals(BoundNodeKind.BoundErrorExpression) Then Return retval
+                    Next
+                End If
+                Return retval
+            Else
+                Me.Diagnostics.ReportVariableNotDeclared(expression.Identifier)
+                Return New BoundErrorExpression(expression)
+            End If
+        End Function
+
+        Private Function _ResolveAccess(expression As MemberAccessItemNode, source As BoundExpression, index As Integer) As BoundExpression
+            If source.BoundType.Equals(GetType(Object)) Then
+                'TODO [implementation] -> Return late bound array indexing
+            ElseIf source.BoundType.IsArray Then
+                Dim arguments As BoundExpression() = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(Of Integer)(arg.Argument)).ToArray
+                Dim elementType As Type = source.BoundType.GetElementType
+                Return New BoundArrayAccessExpression(expression.Access.Items(index), source, arguments, elementType)
+            ElseIf GetType(MulticastDelegate).IsAssignableFrom(source.BoundType) Then
+                Dim members As MemberInfo() = source.BoundType.GetMembers(BindingFlags.Public And BindingFlags.Instance).Where(Function(m) m.Name = "Invoke")
+                Dim arguments As BoundExpression() = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray
+                Dim member As MemberInfo = _FindMatchingMember(members, arguments)
+                If member Is Nothing Then
+                    Me.Diagnostics.ReportInvalidArguments("Invoke", source.BoundType, expression.Access.Items(index).Span)
+                    Return New BoundErrorExpression(expression)
+                End If
+                Return New BoundInstanceMethodInvokationExpression(expression.Access.Items(index), source, member, arguments)
+            ElseIf source.BoundType.GetDefaultMembers.Any Then
+                Dim arguments As BoundExpression() = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray
+                Dim members As MemberInfo() = source.BoundType.GetDefaultMembers
+                Dim member As MemberInfo = _FindMatchingMember(members, arguments)
+                If member IsNot Nothing Then
+                    Select Case member.MemberType
+                        Case MemberTypes.Property
+                            Return New BoundInstancePropertyGetExpression(expression.Access.Items(index), source, member, arguments)
+                        Case MemberTypes.Method
+                            If DirectCast(member, MethodInfo).ReturnType.Equals(GetType(Void)) Then _
+                                Me.Diagnostics.ReportDoesNotProduceAValue(member, expression.Access.Items(index).Span)
+                            Return New BoundInstanceMethodInvokationExpression(expression.Access.Items(index), source, member, arguments)
+                    End Select
+                End If
+            End If
+            Me.Diagnostics.ReportDoesNotAcceptArguments(expression.Access.Span)
+            Return New BoundErrorExpression(expression)
+        End Function
+
+        Private Function _FindMatchingExtension(members As IEnumerable(Of MemberInfo), obj As BoundExpression, arguments As IEnumerable(Of BoundExpression)) As MemberInfo
+            Dim extensions As MethodInfo() = members.Where(
+                Function(m) m.MemberType = MemberTypes.Method AndAlso m.IsDefined(GetType(ExtensionAttribute), False)
+            ).Cast(Of MethodInfo).ToArray
+            Return _FindMatchingMember(extensions, {obj}.Concat(arguments))
+        End Function
+
+        Private Function _FindMatchingMember(members As IEnumerable(Of MemberInfo), arguments As IEnumerable(Of BoundExpression)) As MemberInfo
+            Dim retval As MemberInfo = Nothing
+            If Not members.Any Then Return Nothing
+            retval = members.FirstOrDefault(Function(m) _MatchesArgumentsList(m, arguments))
+            If retval Is Nothing Then retval = members.FirstOrDefault(Function(m) _CanMatchArgumentsList(m, arguments))
+            Return retval
+        End Function
+
+        Private Shared Function _MatchesArgumentsList(member As MemberInfo, arguments As IEnumerable(Of BoundExpression)) As Boolean
+            Dim parameters As ParameterInfo() = _GetParameters(member)
+            If parameters Is Nothing OrElse parameters.Count <> arguments.Count Then Return False
+            Return parameters.Select(Function(p) p.ParameterType).SequenceEqual(arguments.Select(Function(a) a.BoundType))
+        End Function
+
+        Private Shared Function _CanMatchArgumentsList(member As MemberInfo, arguments As IEnumerable(Of BoundExpression)) As Boolean
+            Dim parameters As ParameterInfo() = _GetParameters(member)
+            If parameters Is Nothing OrElse parameters.Count <> arguments.Count Then Return False
+            Return parameters.Select(Function(p) p.ParameterType).Zip(
+                arguments.Select(Function(a) a.BoundType),
+                Function(p, a) a.IsCastableTo(p)
+            ).All(Function(b) b)
+        End Function
+
+        Private Shared Function _GetParameters(member As MemberInfo) As ParameterInfo()
+            Select Case member.MemberType
+                Case MemberTypes.Method
+                    Return DirectCast(member, MethodInfo).GetParameters
+                Case MemberTypes.Property
+                    Return DirectCast(member, PropertyInfo).GetIndexParameters
+                Case Else
+                    Return Nothing
+            End Select
+        End Function
 
         Private Function _BindTryCastExpression(expression As TryCastExpressionNode) As BoundTryCastExpression
             Dim expr As BoundExpression = Me._BindExpression(expression.Expression)

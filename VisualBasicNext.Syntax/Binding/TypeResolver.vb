@@ -1,5 +1,6 @@
 ﻿Imports System.Collections.Immutable
 Imports System.Reflection
+Imports System.Runtime.CompilerServices
 Imports VisualBasicNext.CodeAnalysis.Diagnostics
 Imports VisualBasicNext.CodeAnalysis.Parsing
 
@@ -82,6 +83,7 @@ Namespace Binding
 
         Private Shared ReadOnly _DeclaredTypes As ImmutableDictionary(Of String, Type)
         Private Shared ReadOnly _Namespaces As ImmutableArray(Of String)
+        Private Shared ReadOnly _Extensions As MethodInfo()
 
         Shared Sub New()
             Dim declared As New Dictionary(Of String, Type)
@@ -99,6 +101,7 @@ Namespace Binding
             Next
             _DeclaredTypes = declared.ToImmutableDictionary
             _Namespaces = namespaces.ToImmutableArray
+            _Extensions = _GetAllExtensions()
         End Sub
 
         Private Shared Sub _add_partial_namespaces(namespaceName As String, ByRef output As List(Of String))
@@ -118,6 +121,29 @@ Namespace Binding
                 _add_nested_types(nest, nest_key, output)
             Next
         End Sub
+
+        Private Shared Function _GetAllExtensions() As MethodInfo()
+            Dim binding As BindingFlags = BindingFlags.Public Or BindingFlags.Static Or BindingFlags.NonPublic
+            Dim assm As Assembly() = AppDomain.CurrentDomain.GetAssemblies
+            Dim types As Type() = assm.SelectMany(Function(a) a.GetTypes.Where(Function(t) t.IsSealed And Not t.IsGenericType And Not t.IsNested)).ToArray
+            Dim methods As MethodInfo() = types.SelectMany(Function(t) t.GetMethods(binding).Where(Function(m) m.IsDefined(GetType(ExtensionAttribute), False))).ToArray
+            Return methods
+        End Function
+
+        Public Shared Function GetExtensions(t As Type) As MethodInfo()
+            Return _Extensions.Where(Function(m) IsAssignableToGenericType(t, m.GetParameters()(0).ParameterType)).ToArray
+        End Function
+
+        Public Shared Function IsAssignableToGenericType(ByVal givenType As Type, ByVal genericType As Type) As Boolean
+            If givenType = genericType Then Return True
+            For Each it In givenType.GetInterfaces()
+                If it.IsGenericType AndAlso it.GetGenericTypeDefinition().GUID = genericType.GUID Then Return True
+            Next
+            If givenType.IsGenericType AndAlso givenType.GetGenericTypeDefinition().GUID = genericType.GUID Then Return True
+            Dim baseType As Type = givenType.BaseType
+            If baseType Is Nothing Then Return False
+            Return IsAssignableToGenericType(baseType, genericType)
+        End Function
 
         Private Shared Function TryResolveInternal(name As String, ByRef returnType As Type) As Boolean
             Dim retval As Boolean = True

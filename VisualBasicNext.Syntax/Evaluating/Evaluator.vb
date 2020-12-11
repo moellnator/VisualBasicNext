@@ -105,9 +105,56 @@ Namespace Evaluating
                     Return Me._EvaluateExtrapolatedStringExpression(expression)
                 Case BoundNodeKind.BoundTryCastExpression
                     Return Me._EvaluateTryCastExpression(expression)
+                Case BoundNodeKind.BoundArrayAccessExpression
+                    Return Me._EvaluateArrayAccessExpression(expression)
+                Case BoundNodeKind.BoundInstanceFieldGetExpression
+                    Return Me._EvaluateInstanceFieldGetExpression(expression)
+                Case BoundNodeKind.BoundInstanceMethodInvokationExpression
+                    Return Me._EvaluateInstanceMethodInvokationExpression(expression)
+                Case BoundNodeKind.BoundInstancePropertyGetExpression
+                    Return Me._EvaluateInstancePropertyGetExpression(expression)
                 Case Else
                     Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
             End Select
+        End Function
+
+        Private Function _EvaluateInstanceFieldGetExpression(expression As BoundInstanceFieldGetExpression) As Object
+            Try
+                Dim obj As Object = Me._EvaluateExpression(expression.Source)
+                Return expression.Member.GetValue(obj)
+            Catch ex As Exception
+                Throw New EvaluationException(ex, expression.Syntax.Span)
+            End Try
+        End Function
+
+        Private Function _EvaluateInstanceMethodInvokationExpression(expression As BoundInstanceMethodInvokationExpression) As Object
+            Try
+                Dim obj As Object = Me._EvaluateExpression(expression.Source)
+                Dim arguments As Object() = expression.Arguments.Select(Function(arg) Me._EvaluateExpression(arg)).ToArray
+                Return expression.Member.Invoke(obj, arguments)
+            Catch ex As Exception
+                Throw New EvaluationException(ex, expression.Syntax.Span)
+            End Try
+        End Function
+
+        Private Function _EvaluateInstancePropertyGetExpression(expression As BoundInstancePropertyGetExpression) As Object
+            Try
+                Dim obj As Object = Me._EvaluateExpression(expression.Source)
+                Dim arguments As Object() = expression.Arguments.Select(Function(arg) Me._EvaluateExpression(arg)).ToArray
+                Return expression.Member.GetValue(obj, arguments)
+            Catch ex As Exception
+                Throw New EvaluationException(ex, expression.Syntax.Span)
+            End Try
+        End Function
+
+        Private Function _EvaluateArrayAccessExpression(expression As BoundArrayAccessExpression) As Object
+            Try
+                Dim index As Integer() = expression.Index.Select(Function(a) Me._EvaluateExpression(a)).Cast(Of Integer).ToArray
+                Dim source As Array = Me._EvaluateExpression(expression.Source)
+                Return source.GetValue(index)
+            Catch ex As Exception
+                Throw New EvaluationException(ex, expression.Syntax.Span)
+            End Try
         End Function
 
         Private Function _EvaluateTryCastExpression(expression As BoundTryCastExpression) As Object

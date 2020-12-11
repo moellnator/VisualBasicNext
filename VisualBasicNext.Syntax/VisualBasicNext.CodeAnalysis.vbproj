@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Binding\Binder.vb" />
+    <Compile Include="Binding\BoundArrayAccessExpression.vb" />
     <Compile Include="Binding\BoundArrayExpression.vb" />
     <Compile Include="Binding\BoundBinaryExpression.vb" />
     <Compile Include="Binding\BoundBinaryOperator.vb" />
@@ -83,6 +84,7 @@
     <Compile Include="Binding\BoundNode.vb" />
     <Compile Include="Binding\BoundNodeKinds.vb" />
     <Compile Include="Binding\BoundNullCheckExpression.vb" />
+    <Compile Include="Binding\BoundInstancePropertyGetExpression.vb" />
     <Compile Include="Binding\BoundScope.vb" />
     <Compile Include="Binding\BoundScript.vb" />
     <Compile Include="Binding\BoundStatement.vb" />

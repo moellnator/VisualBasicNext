@@ -1,4 +1,5 @@
-﻿Imports VisualBasicNext.CodeAnalysis.Lexing
+﻿Imports System.Reflection
+Imports VisualBasicNext.CodeAnalysis.Lexing
 Imports VisualBasicNext.CodeAnalysis.Parsing
 Imports VisualBasicNext.CodeAnalysis.Text
 
@@ -103,6 +104,26 @@ Namespace Diagnostics
 
         Friend Sub ReportVariableCannotBeGeneric(name As String, span As Span)
             Me.ReportMessage($"Variable '{name}' cannot have generic arguments", span)
+        End Sub
+
+        Friend Sub ReportDoesNotAcceptArguments(span As Span)
+            Me.ReportMessage($"Expression does not accept any arguments", span)
+        End Sub
+
+        Friend Sub ReportInvalidArguments(name As String, type As Type, span As Span)
+            Me.ReportMessage($"Not member '{name}' found in <{type.Name}> with given arguments", span)
+        End Sub
+
+        Friend Sub ReportDoesNotProduceAValue(member As MemberInfo, span As Span)
+            Me.ReportMessage($"Method call to member '{member.Name}' does not produce a value", span)
+        End Sub
+
+        Friend Sub ReportMemberNotFound(member As String, type As Type, span As Span)
+            Me.ReportMessage($"Member '{member}'´not found in <{type.Name}>", span)
+        End Sub
+
+        Friend Sub ReportMemberTypeNotValid(memberType As MemberTypes, span As Span)
+            Me.ReportMessage($"Member type '{memberType.ToString}' not valid in expression", span)
         End Sub
 
         Default Public ReadOnly Property Item(index As Integer) As ErrorObject Implements IReadOnlyList(Of ErrorObject).Item
