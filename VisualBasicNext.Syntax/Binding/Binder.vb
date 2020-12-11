@@ -122,7 +122,7 @@ Namespace Binding
 
         Private Function _BindVariableDeclaration(name As Lexing.SyntaxToken, type As Type) As Symbol
             Dim varname As String = name.Span.ToString
-            'TODO : check if in lambda -> bind local variable
+            'TODO [implementation] -> check if in lambda -> bind local variable
             If varname <> String.Empty And type IsNot Nothing Then
                 Dim symbol As New GlobalVariableSymbol(varname, type)
                 If Not Me._scope.TryDeclareVariable(symbol) Then

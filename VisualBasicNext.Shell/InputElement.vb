@@ -7,7 +7,7 @@ Imports VisualBasicNext.CodeAnalysis.Parsing
 
 Public Class InputElement
 
-    'TODO [implement] -> Add History of submitted documents
+    'TODO [implementation] -> Add History of submitted documents
     'TODO [suggestion] -> Add auto completition?
     'TODO [suggestion] -> Add auto indenting?
 
