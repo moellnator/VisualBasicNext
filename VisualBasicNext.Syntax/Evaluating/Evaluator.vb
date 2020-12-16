@@ -113,9 +113,20 @@ Namespace Evaluating
                     Return Me._EvaluateInstanceMethodInvokationExpression(expression)
                 Case BoundNodeKind.BoundInstancePropertyGetExpression
                     Return Me._EvaluateInstancePropertyGetExpression(expression)
+                Case BoundNodeKind.BoundClassMethodInvokationExpression
+                    Return Me._EvaluateClassMethodInvokationExpression(expression)
                 Case Else
                     Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
             End Select
+        End Function
+
+        Private Function _EvaluateClassMethodInvokationExpression(expression As BoundClassMethodInvokationExpression) As Object
+            Try
+                Dim arguments As Object() = expression.Arguments.Select(Function(arg) Me._EvaluateExpression(arg)).ToArray
+                Return expression.Member.Invoke(Nothing, arguments)
+            Catch ex As Exception
+                Throw New EvaluationException(ex, expression.Syntax.Span)
+            End Try
         End Function
 
         Private Function _EvaluateInstanceFieldGetExpression(expression As BoundInstanceFieldGetExpression) As Object

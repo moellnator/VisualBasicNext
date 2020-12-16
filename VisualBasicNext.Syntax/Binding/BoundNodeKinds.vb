@@ -23,6 +23,7 @@
         BoundInstancePropertyGetExpression
         BoundInstanceMethodInvokationExpression
         BoundInstanceFieldGetExpression
+        BoundClassMethodInvokationExpression
     End Enum
 
 End Namespace

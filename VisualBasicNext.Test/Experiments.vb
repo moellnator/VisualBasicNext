@@ -5,7 +5,8 @@ Public Class Experiments
     Public Sub Experiment()
         Dim a As Func(Of Integer) = Function() 0
         Dim t As Type = a.GetType
-        Stop
+        Dim b As Char() = "hello"
+
     End Sub
 
     Public Class TestClass

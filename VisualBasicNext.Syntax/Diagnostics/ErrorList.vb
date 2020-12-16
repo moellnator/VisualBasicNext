@@ -61,10 +61,22 @@ Namespace Diagnostics
 
         Friend Sub ReportGenericArgumentMissmatch(type As Type, generics As List(Of Type), syntax As TypeNameNode)
             Me.ReportMessage(
-                $"No matching generic type definition found of <{type.Name}> with generic arguments ({String.Join(","c, generics.Select(Function(g) g.Name).ToArray)})",
+                $"No matching generic type definition found of <{type.Name}> with generic arguments ({_GenericsToString(generics)})",
                 syntax.Span
             )
         End Sub
+
+        Friend Sub ReportGenericArgumentMissmatch(method As String, generics As List(Of Type), span As Span)
+            Me.ReportMessage(
+                $"No matching generic method definition found of <{method}> with generic arguments ({_GenericsToString(generics)})",
+                span
+            )
+        End Sub
+
+        Private Shared Function _GenericsToString(generics As List(Of Type)) As String
+            If Not generics Is Nothing Then Return String.Join(","c, generics.Where(Function(g) g IsNot Nothing).Select(Function(g) g.Name).ToArray)
+            Return ""
+        End Function
 
         Friend Sub ReportVariableAlreadyDefined(name As String, statement As SyntaxToken)
             Me.ReportMessage($"Variable '{name}' has already been defines in the current scope ", statement.Span)
@@ -102,8 +114,8 @@ Namespace Diagnostics
             Me.ReportMessage($"Mismatching array dimension {actual.ToString}, expected {If(expected = 0, "'any'", expected.ToString)}", span)
         End Sub
 
-        Friend Sub ReportVariableCannotBeGeneric(name As String, span As Span)
-            Me.ReportMessage($"Variable '{name}' cannot have generic arguments", span)
+        Friend Sub ReportMemberCannotBeGeneric(name As String, span As Span)
+            Me.ReportMessage($"Member '{name}' cannot have generic arguments", span)
         End Sub
 
         Friend Sub ReportDoesNotAcceptArguments(span As Span)

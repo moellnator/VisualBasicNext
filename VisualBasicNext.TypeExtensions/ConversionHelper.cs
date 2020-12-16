@@ -183,11 +183,13 @@ namespace VisualBasicNext.TypeExtensions
 
                 bool result = false;
 
-                result =(bool) GetMethod(() => AttemptImplicitCast<object, object>())
+                try
+                {
+                    result = (bool)GetMethod(() => AttemptImplicitCast<object, object>())
                     .GetGenericMethodDefinition()
                     .MakeGenericMethod(from, to)
                     .Invoke(null, new object[0]);
-                
+                } catch {}
 
                 UpdateCache(ImplicitCastCache, key, result);
                 return result;

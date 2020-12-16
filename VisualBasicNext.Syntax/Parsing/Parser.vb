@@ -171,7 +171,7 @@ Namespace Parsing
         End Function
 
         Private Function _MatchMemberAccessExpression() As ExpressionNode
-            Dim left As ExpressionNode = Me._MatchAtomicExpression
+            Dim left As ExpressionNode = Me._MatchAtomicAccessExpression
             Dim items As New List(Of MemberAccessItemNode)
             While (Me._current.Kind = SyntaxKind.DotToken Or Me._current.Kind = SyntaxKind.QuestionmarkDotToken)
                 items.Add(Me._MatchMemberAccessItemExpression(False))
@@ -226,6 +226,15 @@ Namespace Parsing
             Dim delimeter As SyntaxToken = If(isFirst, Nothing, Me._MatchToken(SyntaxKind.CommaToken))
             Dim argument As ExpressionNode = Me._MatchExpression
             Return New ArgumentNode(delimeter, argument)
+        End Function
+
+        Private Function _MatchAtomicAccessExpression() As ExpressionNode
+            Dim atom As ExpressionNode = Me._MatchAtomicExpression
+            If atom.Kind = SyntaxKind.MemberAccessItemNode Then Return atom
+            Dim access As AccessListNode = Nothing
+            If Me._current.Kind = SyntaxKind.OpenBracketToken Or Me._current.Kind = SyntaxKind.QuestionmarkOpenBracketToken Then access = Me._MatchAccessList()
+            If access Is Nothing Then Return atom
+            Return New MemberAccessItemNode(atom, access)
         End Function
 
         Private Function _MatchAtomicExpression() As ExpressionNode

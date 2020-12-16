@@ -212,6 +212,7 @@ Namespace Binding
         Private Function _BindMemberAccessItemExpression(expression As MemberAccessItemNode, Optional source As BoundExpression = Nothing) As BoundExpression
             If expression.Delimeter Is Nothing Then
                 If source IsNot Nothing Then Throw New ArgumentException("First member item cannot have a source type.")
+                If expression.Identifier Is Nothing Then Return Me._BindAtomicAccess(expression)
                 Return Me._BindVariableAccess(expression)
             Else
                 If source Is Nothing Then Throw New ArgumentException("Source type cannot be nothing for member access.")
@@ -232,29 +233,34 @@ Namespace Binding
                     End If
                     Select Case members.First.MemberType
                         Case MemberTypes.Field
+                            If expression.Generics IsNot Nothing Then
+                                Me.Diagnostics.ReportMemberCannotBeGeneric(name, expression.Span)
+                                Return New BoundErrorExpression(expression)
+                            End If
                             retval = New BoundInstanceFieldGetExpression(expression, source, members.First)
                         Case MemberTypes.Property, MemberTypes.Method
-                            'TODO [implementation] -> Make member generic with arguments or inferred types...
+                            If Not Me._TryPrepareGenericMembers(members, expression.Generics) Then Return New BoundErrorExpression(expression)
                             Dim member As MemberInfo = Nothing
                             Dim arguments As BoundExpression() = Array.Empty(Of BoundExpression)
                             If access_count = 0 Then
+                                members = Me._TryInferGenericMembers(expression, source, members, arguments)
                                 member = members.FirstOrDefault(Function(m) _GetParameters(m).Count = 0)
                                 If member Is Nothing Then member = _FindMatchingExtension(members, source, arguments)
                             Else
                                 arguments = expression.Access.Items(access_offset).Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray
-                                member = _FindMatchingMember(members, arguments)
+                                members = Me._TryInferGenericMembers(expression, source, members, arguments)
+                                member = Me._FindMatchingMember(members, arguments)
                                 If member Is Nothing Then member = _FindMatchingExtension(members, source, arguments)
                                 access_offset += 1
                             End If
                             If member Is Nothing Then
-
                                 Me.Diagnostics.ReportInvalidArguments(name, source.BoundType, expression.Span)
                                 Return New BoundErrorExpression(expression)
                             End If
                             If member.MemberType = MemberTypes.Property Then
                                 retval = New BoundInstancePropertyGetExpression(expression, source, member, arguments)
                             ElseIf DirectCast(member, MethodInfo).IsStatic Then
-                                Stop
+                                retval = New BoundClassMethodInvokationExpression(expression, member, {source}.Concat(arguments))
                             Else
                                 retval = New BoundInstanceMethodInvokationExpression(expression, source, member, arguments)
                             End If
@@ -271,11 +277,107 @@ Namespace Binding
             End If
         End Function
 
+        Private Function _TryInferGenericMembers(expression As MemberAccessItemNode, source As BoundExpression, members() As MemberInfo, arguments() As BoundExpression) As MemberInfo()
+            If expression.Generics Is Nothing And members.First.MemberType = MemberTypes.Method Then
+                Dim genericmethods As New List(Of MemberInfo)
+                For Each m As MethodInfo In members.Cast(Of MethodInfo)
+                    If Not m.IsGenericMethod Then
+                        genericmethods.Add(m)
+                        Continue For
+                    End If
+                    Dim fargs As BoundExpression() = If(m.IsStatic, {source}.Concat(arguments).ToArray, arguments)
+                    Dim gargs As Type() = m.GetGenericArguments
+                    Dim pargs As ParameterInfo() = m.GetParameters
+                    If pargs.Count = fargs.Count Then
+                        For index As Integer = 0 To pargs.Count - 1
+                            Dim param As Type = pargs(index).ParameterType
+                            Dim arg As Type = fargs(index).BoundType
+                            Me._TryInferGenericParameters(param, arg, gargs)
+                        Next
+                    End If
+                    If Not gargs.Any(Function(g) g.IsGenericParameter) Then
+                        genericmethods.Add(m.MakeGenericMethod(gargs))
+                    End If
+                Next
+                Return genericmethods.ToArray
+            End If
+            Return members
+        End Function
+
+        Private Sub _TryInferGenericParameters(parameter As Type, argument As Type, ByRef parameters As Type())
+            If parameter.IsGenericParameter Then
+                Dim index As Integer = Array.IndexOf(parameters, parameter)
+                If Not index = -1 Then parameters(index) = argument
+            ElseIf parameter.IsGenericType Then
+                Dim params As Type() = parameter.GetGenericArguments
+                Dim args As Type()
+                If argument.IsGenericType AndAlso argument.GetGenericArguments.Count = params.Count Then
+                    args = argument.GetGenericArguments
+                Else
+                    Dim interf As Type() = argument.GetInterfaces
+                    Dim bases As New List(Of Type)
+                    Dim base As Type = argument.BaseType
+                    While base IsNot Nothing
+                        bases.Add(base)
+                        base = base.BaseType
+                    End While
+                    interf = interf.Concat(bases).Where(Function(t) t.IsGenericType AndAlso TypeResolver.IsAssignableToGenericType(t, parameter)).ToArray
+                    If interf.Count = 0 Then Exit Sub
+                    args = interf.First.GetGenericArguments
+                End If
+                For index As Integer = 0 To params.Count - 1
+                    Me._TryInferGenericParameters(params(index), args(index), parameters)
+                Next
+            End If
+        End Sub
+
+        Private Function _TryPrepareGenericMembers(ByRef members As MemberInfo(), syntax As GenericsListNode) As Boolean
+            Dim generics As Type() = Array.Empty(Of Type)
+            Dim name As String = members.First.Name
+            If syntax IsNot Nothing Then
+                generics = syntax.ListItems.Select(Function(g) Me._BindTypeClause(g.TypeName)).ToArray
+                If members.First.MemberType = MemberTypes.Property Then
+                    Me.Diagnostics.ReportMemberCannotBeGeneric(name, syntax.Span)
+                    Return False
+                End If
+                members = Me._TryMakeGenericsMethods(members, generics)
+                If members.Count = 0 Then
+                    Me.Diagnostics.ReportGenericArgumentMissmatch(name, generics.ToList, syntax.Span)
+                    Return False
+                End If
+            End If
+            Return True
+        End Function
+
+        Private Function _TryMakeGenericsMethods(members As MemberInfo(), generics As Type()) As MemberInfo()
+            Dim retval As New List(Of MemberInfo)
+            Dim candidates As MemberInfo() = members.Where(
+                Function(m) DirectCast(m, MethodInfo).IsGenericMethod AndAlso DirectCast(m, MethodInfo).GetGenericArguments.Count = generics.Count
+            ).ToArray
+            For Each c As MemberInfo In candidates
+                Try
+                    retval.Add(DirectCast(c, MethodInfo).MakeGenericMethod(generics))
+                Catch : End Try
+            Next
+            Return retval.ToArray
+        End Function
+
+        Private Function _BindAtomicAccess(expression As MemberAccessItemNode) As BoundExpression
+            Dim retval As BoundExpression = Me._BindExpression(expression.Atom)
+            If expression.Access IsNot Nothing Then
+                For index As Integer = 0 To expression.Access.Items.Count - 1
+                    retval = _ResolveAccess(expression, retval, index)
+                    If retval.Kind.Equals(BoundNodeKind.BoundErrorExpression) Then Return retval
+                Next
+            End If
+            Return retval
+        End Function
+
         Private Function _BindVariableAccess(expression As MemberAccessItemNode) As BoundExpression
             Dim name As String = expression.Identifier.Span.ToString
             Dim symbol As VariableSymbol = Me._scope.TryLookupSymbol(name)
             If symbol IsNot Nothing Then
-                If expression.Generics IsNot Nothing Then Me.Diagnostics.ReportVariableCannotBeGeneric(symbol.Name, expression.Generics.Span)
+                If expression.Generics IsNot Nothing Then Me.Diagnostics.ReportMemberCannotBeGeneric(symbol.Name, expression.Generics.Span)
                 Dim retval As BoundExpression = New BoundVariableExpression(expression, symbol)
                 If expression.Access IsNot Nothing Then
                     For index As Integer = 0 To expression.Access.Items.Count - 1
