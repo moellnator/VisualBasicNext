@@ -76,6 +76,7 @@
     <Compile Include="Binding\BoundClassMethodInvokationExpression.vb" />
     <Compile Include="Binding\BoundClassPropertyGetExpression.vb" />
     <Compile Include="Binding\BoundConstant.vb" />
+    <Compile Include="Binding\BoundConstructorExpression.vb" />
     <Compile Include="Binding\BoundEnumerableItemAccessExpression.vb" />
     <Compile Include="Binding\BoundErrorExpression.vb" />
     <Compile Include="Binding\BoundExpression.vb" />
@@ -137,6 +138,7 @@
     <Compile Include="Parsing\BlockExpressionNode.vb" />
     <Compile Include="Parsing\CastExpressionNode.vb" />
     <Compile Include="Parsing\CastDynamicExpressionNode.vb" />
+    <Compile Include="Parsing\ConstructorExpressionNode.vb" />
     <Compile Include="Parsing\EmptyStatementNode.vb" />
     <Compile Include="Parsing\ExpressionNode.vb" />
     <Compile Include="Parsing\ExpressionStatementNode.vb" />

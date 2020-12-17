@@ -10,6 +10,8 @@ Public Class InputElement
     'TODO [implementation] -> Add History of submitted documents
     'TODO [suggestion] -> Add auto completition?
     'TODO [suggestion] -> Add auto indenting?
+    'TODO [implementation] -> Copy/cut/paste
+    'TODO [implementation] -> text selection
 
     Public Event SubmittedDocument As SubmittedDocumentEventHandler
     Public Event CursorPositionChanged As CursorPositionChangedEventHandler

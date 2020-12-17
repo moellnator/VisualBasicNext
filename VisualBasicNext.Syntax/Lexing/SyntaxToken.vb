@@ -98,7 +98,7 @@ Namespace Lexing
         PartialStringEndToken
         ExtrapolatedStringExpressionNode
         ExtrapolatedStringSubNode
-        GetTryCastKeywordToken
+        TryCastKeywordToken
         TryCastExpressionNode
         MemberAccessListNode
         MemberAccessItemNode
@@ -106,6 +106,8 @@ Namespace Lexing
         AccessListNode
         ArgumentListNode
         QuestionmarkOpenBracketToken
+        FromKeywordToken
+        ConstructorExpressionNode
     End Enum
 
     Public Class SyntaxToken : Inherits SyntaxNode

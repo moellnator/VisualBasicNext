@@ -117,9 +117,24 @@ Namespace Evaluating
                     Return Me._EvaluateClassMethodInvokationExpression(expression)
                 Case BoundNodeKind.BoundEnumerableItemAccessExpression
                     Return Me._EvaluateEnumerableItemAccessExpression(expression)
+                Case BoundNodeKind.BoundConstructorExpression
+                    Return Me._EvaluateConstructorExpression(expression)
                 Case Else
                     Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
             End Select
+        End Function
+
+        Private Function _EvaluateConstructorExpression(expression As BoundConstructorExpression) As Object
+            Try
+                Dim args As Object() = expression.Arguments.Select(Function(arg) Me._EvaluateExpression(arg)).ToArray
+                Dim params As Type() = expression.Ctor.GetParameters.Select(Function(p) p.ParameterType).ToArray
+                For i As Integer = 0 To args.Count - 1
+                    args(i) = CTypeDynamic(args(i), params(i))
+                Next
+                Return expression.Ctor.Invoke(args)
+            Catch ex As Exception
+                Throw New EvaluationException(ex, expression.Syntax.Span)
+            End Try
         End Function
 
         Private Function _EvaluateEnumerableItemAccessExpression(expression As BoundEnumerableItemAccessExpression) As Object
@@ -135,6 +150,10 @@ Namespace Evaluating
         Private Function _EvaluateClassMethodInvokationExpression(expression As BoundClassMethodInvokationExpression) As Object
             Try
                 Dim arguments As Object() = expression.Arguments.Select(Function(arg) Me._EvaluateExpression(arg)).ToArray
+                Dim parameters As Type() = expression.Member.GetParameters.Select(Function(p) p.ParameterType).ToArray
+                For i As Integer = 0 To arguments.Count - 1
+                    arguments(i) = CTypeDynamic(arguments(i), parameters(i))
+                Next
                 Return expression.Member.Invoke(Nothing, arguments)
             Catch ex As Exception
                 Throw New EvaluationException(ex, expression.Syntax.Span)
@@ -154,6 +173,10 @@ Namespace Evaluating
             Try
                 Dim obj As Object = Me._EvaluateExpression(expression.Source)
                 Dim arguments As Object() = expression.Arguments.Select(Function(arg) Me._EvaluateExpression(arg)).ToArray
+                Dim parameters As Type() = expression.Member.GetParameters.Select(Function(p) p.ParameterType).ToArray
+                For i As Integer = 0 To arguments.Count - 1
+                    arguments(i) = CTypeDynamic(arguments(i), parameters(i))
+                Next
                 Return expression.Member.Invoke(obj, arguments)
             Catch ex As Exception
                 Throw New EvaluationException(ex, expression.Syntax.Span)
@@ -164,6 +187,10 @@ Namespace Evaluating
             Try
                 Dim obj As Object = Me._EvaluateExpression(expression.Source)
                 Dim arguments As Object() = expression.Arguments.Select(Function(arg) Me._EvaluateExpression(arg)).ToArray
+                Dim parameters As Type() = expression.Member.GetIndexParameters.Select(Function(p) p.ParameterType).ToArray
+                For i As Integer = 0 To arguments.Count - 1
+                    arguments(i) = CTypeDynamic(arguments(i), parameters(i))
+                Next
                 Return expression.Member.GetValue(obj, arguments)
             Catch ex As Exception
                 Throw New EvaluationException(ex, expression.Syntax.Span)

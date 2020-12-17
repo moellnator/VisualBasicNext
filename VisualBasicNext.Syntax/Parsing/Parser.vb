@@ -108,15 +108,21 @@ Namespace Parsing
             Dim identifier As SyntaxToken = Me._MatchToken(SyntaxKind.IdentifierToken)
             Dim as_token As SyntaxToken = Nothing
             Dim typename As TypeNameNode = Nothing
+            Dim expression As ExpressionNode = Nothing
             If Me._current.Kind = SyntaxKind.AsKeywordToken Then
                 as_token = Me._MatchToken(SyntaxKind.AsKeywordToken)
-                typename = Me._MatchTypeName
+                If Me._current.Kind = SyntaxKind.NewKeywordToken Then
+                    expression = Me._MatchConstructorExpression
+                Else
+                    typename = Me._MatchTypeName
+                End If
             End If
             Dim equals_token As SyntaxToken = Nothing
-            Dim expression As ExpressionNode = Nothing
-            If Me._current.Kind = SyntaxKind.EqualsToken Then
-                equals_token = Me._MatchToken(SyntaxKind.EqualsToken)
-                expression = Me._MatchExpression
+            If expression IsNot Nothing Then
+                If Me._current.Kind = SyntaxKind.EqualsToken Then
+                    equals_token = Me._MatchToken(SyntaxKind.EqualsToken)
+                    expression = Me._MatchExpression
+                End If
             End If
             Return New VariableDeclarationStatementNode(
                 dim_keyword,
@@ -143,11 +149,36 @@ Namespace Parsing
         End Function
 
         Private Function _MatchExpression() As ExpressionNode
-            'TODO [implementation] -> Lambda, MultilineLambda
-            'TODO [implementation] -> Action, MultilineAction
-            'TODO [implementation] -> New (including from and array notation)
-            'TODO [implementation] -> TypeOf ... Is ...
-            Return Me._MatchBinaryExpression
+            If Me._current.Kind = SyntaxKind.NewKeywordToken Then
+                Return Me._MatchConstructorExpression
+            ElseIf Me._current.Kind = SyntaxKind.TypeOfKeywordToken Then
+                'TODO [implementation] -> TypeOf ... Is ...
+                Throw New NotImplementedException
+            ElseIf Me._current.Kind = SyntaxKind.FunctionKeywordToken Then
+                'TODO [implementation] -> Lambda, MultilineLambda
+                Throw New NotImplementedException
+            ElseIf Me._current.Kind = SyntaxKind.SubKeywordToken Then
+                'TODO [implementation] -> Action, MultilineAction
+                Throw New NotImplementedException
+            Else
+                Return Me._MatchBinaryExpression
+            End If
+        End Function
+
+        Private Function _MatchConstructorExpression() As ExpressionNode
+            Dim newToken As SyntaxToken = Me._MatchToken(SyntaxKind.NewKeywordToken)
+            Dim typeName As TypeNameNode = Me._MatchTypeName(False)
+            Dim arguments As ArgumentListNode = Nothing
+            Dim arrayarg As ArrayExpressionNode = Nothing
+            If Me._current.Kind = SyntaxKind.OpenBracketToken Then arguments = Me._MatchArgumentList
+            Dim fromToken As SyntaxToken = Nothing
+            If Me._current.Kind = SyntaxKind.FromKeywordToken Then
+                fromToken = Me._MatchToken(SyntaxKind.FromKeywordToken)
+                arrayarg = Me._MatchArrayExpression
+            ElseIf arguments IsNot Nothing Then
+                If Me._current.Kind = SyntaxKind.OpenBraceToken Then arrayarg = Me._MatchArrayExpression
+            End If
+            Return New ConstructorExpressionNode(newToken, typeName, arguments, fromToken, arrayarg)
         End Function
 
         Private Function _MatchBinaryExpression(Optional parentPrecedence As Integer = 0) As ExpressionNode
@@ -249,7 +280,7 @@ Namespace Parsing
                     Return Me._MatchCastExpression
                 Case SyntaxKind.CTypeDynamicKeywordToken
                     Return Me._MatchCastDynamicExpression
-                Case SyntaxKind.GetTryCastKeywordToken
+                Case SyntaxKind.TryCastKeywordToken
                     Return Me._MatchTryCastExpression
                 Case SyntaxKind.GetTypeKeywordToken
                     Return Me._MatchGetTypeExpression
@@ -274,7 +305,7 @@ Namespace Parsing
 
         Private Function _MatchTryCastExpression() As TryCastExpressionNode
             Return New TryCastExpressionNode(
-                Me._MatchToken(SyntaxKind.GetTryCastKeywordToken),
+                Me._MatchToken(SyntaxKind.TryCastKeywordToken),
                 Me._MatchToken(SyntaxKind.OpenBracketToken),
                 Me._MatchExpression,
                 Me._MatchToken(SyntaxKind.CommaToken),
@@ -409,7 +440,7 @@ Namespace Parsing
             Return New LiteralExpressionNode(_MatchToken(SyntaxKind.NothingKeywordToken))
         End Function
 
-        Private Function _MatchTypeName() As TypeNameNode
+        Private Function _MatchTypeName(Optional allowArray As Boolean = True) As TypeNameNode
             Dim items As ImmutableArray(Of TypeNameItemNode).Builder = ImmutableArray.CreateBuilder(Of TypeNameItemNode)
             items.Add(_MatchTypenameItem(True))
             While Me._current.Kind = SyntaxKind.DotToken
@@ -417,7 +448,7 @@ Namespace Parsing
             End While
             Dim nullable_token As SyntaxToken = If(Me._current.Kind = SyntaxKind.QuestionmarkToken, Me._MatchToken(SyntaxKind.QuestionmarkToken), Nothing)
             Dim array_dimensions As ArrayDimensionsListNode = Nothing
-            If Me._current.Kind = SyntaxKind.OpenBracketToken Then array_dimensions = Me._MatchArrayDimensionsList
+            If Me._current.Kind = SyntaxKind.OpenBracketToken And allowArray Then array_dimensions = Me._MatchArrayDimensionsList
             Return New TypeNameNode(items.ToImmutableArray, nullable_token, array_dimensions)
         End Function
 

@@ -25,7 +25,11 @@ Namespace Parsing
                 Yield Me.IdentifierToken
                 If Not Me.AsKeyWordToken Is Nothing Then
                     Yield Me.AsKeyWordToken
-                    Yield Me.Typename
+                    If Me.Typename Is Nothing Then
+                        Yield Me.Expression
+                    Else
+                        Yield Me.Typename
+                    End If
                 End If
                 If Not Me.EqualsToken Is Nothing Then
                     Yield Me.EqualsToken

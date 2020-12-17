@@ -25,6 +25,7 @@
         BoundInstanceFieldGetExpression
         BoundClassMethodInvokationExpression
         BoundEnumerableItemAccessExpression
+        BoundConstructorExpression
     End Enum
 
 End Namespace

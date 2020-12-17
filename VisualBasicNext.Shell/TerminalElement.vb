@@ -21,7 +21,7 @@ Public Class TerminalElement
     Private Sub InputElement_Load(sender As Object, e As EventArgs) Handles InputElement.Load
         Me.ActiveControl = Me.InputElement
         Me.InputElement.Focus()
-        If Not IsDesignTime() Then Me.TimerUpdate.Enabled = False
+        Me.TimerUpdate.Enabled = Not IsDesignTime()
     End Sub
 
     Private Sub FlowLayoutPanel_Resize(sender As Object, e As EventArgs) Handles FlowLayoutPanel.Resize

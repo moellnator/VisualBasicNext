@@ -44,12 +44,14 @@ Namespace Binding
             End While
             While stack.Count > 0
                 previous = stack.Pop
+                Dim scope As New BoundScope(root)
                 For Each v As VariableSymbol In previous.Variables
-                    root.TryDeclareVariable(v)
+                    scope.TryDeclareVariable(v)
                 Next
                 For Each i As String In previous.Imports
-                    root.Import(i)
+                    scope.Import(i)
                 Next
+                root = scope
             End While
             Return root
         End Function
@@ -170,6 +172,8 @@ Namespace Binding
                     Return Me._BindExtrapolatedStringExpression(expression)
                 Case Lexing.SyntaxKind.TryCastExpressionNode
                     Return Me._BindTryCastExpression(expression)
+                Case Lexing.SyntaxKind.ConstructorExpressionNode
+                    Return Me._BindConstructorExpression(expression)
                 Case Else
                     Throw New Exception($"Syntax node <{expression.Kind.ToString}> is not an expression.")
             End Select
@@ -178,6 +182,34 @@ Namespace Binding
         Friend Shared Function CanCast(fromType As Type, toType As Type) As Boolean
             If fromType.IsCastableTo(toType) Then Return True
             Return False
+        End Function
+
+        Private Function _BindConstructorExpression(expression As ConstructorExpressionNode) As BoundExpression
+            Dim type As Type = Me._BindTypeClause(expression.TypeName)
+            If type Is Nothing Then Return New BoundErrorExpression(expression.TypeName)
+            Dim args As BoundExpression() = If(
+                expression.Arguments IsNot Nothing,
+                expression.Arguments.Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray,
+                Array.Empty(Of BoundExpression)
+            )
+            If expression.ArrayNode IsNot Nothing Then
+                'TODO [implementation] -> Array initialisation
+                Throw New NotImplementedException
+            Else
+                Dim ctors As ConstructorInfo() = type.GetConstructors(BindingFlags.Public Or BindingFlags.Instance).Where(
+                    Function(c) Not c.GetParameters.Any(Function(d) d.ParameterType.IsPointer)
+                ).ToArray
+                Dim ctor As ConstructorInfo = Me._FindMatchingMember(ctors, args)
+                If ctor Is Nothing Then
+                    Me.Diagnostics.ReportInvalidArguments("new", type, expression.NewToken.Span)
+                    Return New BoundErrorExpression(expression)
+                End If
+                If expression.FromToken IsNot Nothing Then
+                    'TODO [implementation] -> From list / dict initialization
+                    Throw New NotImplementedException
+                End If
+                Return New BoundConstructorExpression(expression, type, ctor, args)
+            End If
         End Function
 
         Private Function _BindExpression(Of T)(expression As ExpressionNode) As BoundExpression
@@ -596,6 +628,8 @@ Namespace Binding
                     Return DirectCast(member, MethodInfo).GetParameters
                 Case MemberTypes.Property
                     Return DirectCast(member, PropertyInfo).GetIndexParameters
+                Case MemberTypes.Constructor
+                    Return DirectCast(member, ConstructorInfo).GetParameters
                 Case Else
                     Return Nothing
             End Select

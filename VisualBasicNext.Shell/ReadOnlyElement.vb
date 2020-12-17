@@ -2,6 +2,8 @@
 
 Public Class ReadOnlyElement
 
+    'TODO [bugfix] -> scrollbar does not appear when text is printed to OutputElement
+
     Protected Shared ReadOnly _Padding As New Padding(5)
     Protected Shared ReadOnly _LineSeparation As Single = 0.15
     Protected Shared ReadOnly _CharRatio As Single = 9.5 / 17

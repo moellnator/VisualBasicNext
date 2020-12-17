@@ -651,7 +651,9 @@ Namespace Lexing
                 Case "gettype"
                     retval = SyntaxKind.GetTypeKeywordToken
                 Case "trycast"
-                    retval = SyntaxKind.GetTryCastKeywordToken
+                    retval = SyntaxKind.TryCastKeywordToken
+                Case "from"
+                    retval = SyntaxKind.FromKeywordToken
                 Case "_"
                     Me.Diagnostics.ReportBadCharakter("_", New Span(Me._source, start, 1))
                 Case Else
