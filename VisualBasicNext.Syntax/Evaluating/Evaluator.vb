@@ -115,9 +115,21 @@ Namespace Evaluating
                     Return Me._EvaluateInstancePropertyGetExpression(expression)
                 Case BoundNodeKind.BoundClassMethodInvokationExpression
                     Return Me._EvaluateClassMethodInvokationExpression(expression)
+                Case BoundNodeKind.BoundEnumerableItemAccessExpression
+                    Return Me._EvaluateEnumerableItemAccessExpression(expression)
                 Case Else
                     Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
             End Select
+        End Function
+
+        Private Function _EvaluateEnumerableItemAccessExpression(expression As BoundEnumerableItemAccessExpression) As Object
+            Try
+                Dim index As Integer = Me._EvaluateExpression(expression.Index)
+                Dim source As IEnumerable = Me._EvaluateExpression(expression.Source)
+                Return expression.AccessMethod(source, index)
+            Catch ex As Exception
+                Throw New EvaluationException(ex, expression.Syntax.Span)
+            End Try
         End Function
 
         Private Function _EvaluateClassMethodInvokationExpression(expression As BoundClassMethodInvokationExpression) As Object

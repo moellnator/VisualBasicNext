@@ -192,21 +192,145 @@ Namespace Binding
         Private Function _BindMemberAccessExpression(expression As MemberAccessListNode) As BoundExpression
             Dim source As BoundExpression = Nothing
             Dim source_type As Type = Nothing
+            Dim offset As Integer = -1
             If expression.Source.Kind = Lexing.SyntaxKind.MemberAccessItemNode Then
                 If Me._scope.TryLookupSymbol(DirectCast(expression.Source, MemberAccessItemNode).Identifier.Span.ToString) IsNot Nothing Then
                     source = Me._BindMemberAccessItemExpression(expression.Source)
                 Else
-                    'TODO [implementation] -> member items until is type + while nested type (only generics, no access allowed) -> bind first member static -> source
+                    If Not Me._TryResolveFullyQulified(expression, source_type, offset) Then Return New BoundErrorExpression(expression)
+                    If Not Me._TryResolveStaticMember(expression, offset, source, source_type) Then Return New BoundErrorExpression(expression)
                 End If
             Else
                 source = Me._BindExpression(expression.Source)
                 source_type = source.BoundType
             End If
-            For Each memberaccess As MemberAccessItemNode In expression.Items
+            For Each memberaccess As MemberAccessItemNode In expression.Items.Skip(offset + 1)
                 If memberaccess.Identifier.Span.ToString.Equals(String.Empty) Then Return New BoundErrorExpression(expression)
                 source = Me._BindMemberAccessItemExpression(memberaccess, source)
             Next
             Return source
+        End Function
+
+        Private Function _TryResolveStaticMember(expression As MemberAccessListNode, offset As Integer, ByRef source As BoundExpression, ByRef source_type As Type) As Boolean
+            If offset = expression.Items.Count Then
+                Me.Diagnostics.ReportStaticMemberAccessExpected(expression)
+                Return False
+            End If
+            Dim memberitem As MemberAccessItemNode = expression.Items(offset)
+            Dim name As String = memberitem.Identifier.Span.ToString
+            Dim arguments As BoundExpression() = Array.Empty(Of BoundExpression)
+            If memberitem.Access IsNot Nothing Then arguments = memberitem.Access.Items.First.Items.Select(Function(a) Me._BindExpression(a.Argument)).ToArray
+            Dim members As MemberInfo() = source_type.GetMembers(BindingFlags.Static Or BindingFlags.Public).Where(Function(m) m.Name.ToLower = name.ToLower).ToArray
+            Dim member As MemberInfo = Me._FindMatchingMember(members, arguments)
+            If member Is Nothing Then
+                Me.Diagnostics.ReportMemberNotFound(name, source_type, memberitem.Span)
+                Return False
+            End If
+            If member.MemberType = MemberTypes.Method Then
+                Dim m As MethodInfo = member
+                If m.IsGenericMethod Then
+                    If memberitem.Generics Is Nothing Then
+                        Me.Diagnostics.ReportGenericArgumentMissmatch(name, New List(Of Type), memberitem.Span)
+                        Return False
+                    End If
+                    Dim params As Type() = memberitem.Generics.ListItems.Select(Function(g) Me._BindTypeClause(g.TypeName)).ToArray
+                    Try
+                        member = m.MakeGenericMethod(params)
+                    Catch ex As Exception
+                        Me.Diagnostics.ReportGenericArgumentMissmatch(name, params.ToList, memberitem.Span)
+                    End Try
+                End If
+            Else
+                If memberitem.Generics IsNot Nothing Then
+                    Me.Diagnostics.ReportMemberCannotBeGeneric(name, memberitem.Span)
+                    Return False
+                End If
+            End If
+            Select Case member.MemberType
+                Case MemberTypes.Field
+                    source = New BoundClassFieldGetExpression(memberitem, member)
+                Case MemberTypes.Method
+                    source = New BoundClassMethodInvokationExpression(memberitem, member, arguments)
+                Case MemberTypes.Property
+                    source = New BoundClassMethodInvokationExpression(memberitem, member, arguments)
+                Case Else
+                    Me.Diagnostics.ReportMemberTypeNotValid(member.MemberType, memberitem.Span)
+                    Return False
+            End Select
+            source_type = source.BoundType
+            If Not memberitem.Access Is Nothing Then
+                For i = 1 To memberitem.Access.Items.Count - 1
+                    source = _ResolveAccess(memberitem, source, i)
+                    If source.Kind.Equals(BoundNodeKind.BoundErrorExpression) Then Return False
+                    source_type = source.BoundType
+                Next
+            End If
+            Return True
+        End Function
+
+        Private Function _TryResolveFullyQulified(expression As MemberAccessListNode, ByRef type As Type, ByRef offset As Integer) As Boolean
+            Dim qualifier As String = ""
+            type = Nothing
+            offset = -1
+            For i As Integer = -1 To expression.Items.Count - 1
+                Dim item As MemberAccessItemNode = If(i = -1, expression.Source, expression.Items(i))
+                If item.Access IsNot Nothing Then Exit For
+                qualifier &= If(i <> -1, ".", "") & item.Identifier.Span.ToString
+                If item.Generics IsNot Nothing Then qualifier &= "`" & item.Generics.ListItems.Count.ToString
+                If TypeResolver.TryResolveTypeByName(qualifier, type, Me._scope.GetImports) Then
+                    offset = i
+                    Exit For
+                End If
+                If item.Generics IsNot Nothing Then Exit For
+            Next
+            If type Is Nothing Then
+                Me.Diagnostics.ReportUndefinedType(qualifier, expression.Span)
+                Return False
+            End If
+            qualifier = type.FullName
+            While offset < expression.Items.Count - 1
+                Dim nested As Type = Nothing
+                Dim item As MemberAccessItemNode = expression.Items(offset + 1)
+                If item.Access IsNot Nothing Then Exit While
+                Dim name As String = item.Identifier.Span.ToString & If(item.Generics IsNot Nothing, "`" & item.Generics.ListItems.Count, "")
+                If Not TypeResolver.TryResolveTypeByName(qualifier & name, nested, Me._scope.GetImports) Then Exit While
+                type = nested
+                offset += 1
+            End While
+            Dim items As MemberAccessItemNode() = If(
+                offset = -1,
+                {expression.Source},
+                {expression.Source}.Concat(expression.Items.Take(offset + 1))
+            ).Cast(Of MemberAccessItemNode).ToArray
+            If type.IsGenericType Then
+                Dim parameter As Type() = items.SelectMany(
+                    Function(item) If(
+                        item.Generics IsNot Nothing,
+                        item.Generics.ListItems.Select(Function(g) Me._BindTypeClause(g.TypeName)),
+                        Enumerable.Empty(Of Type)
+                    )
+                ).ToArray
+                If type.GetGenericArguments.Count <> parameter.Count OrElse Not _TryMakeGenericType(type, parameter) Then
+                    Me.Diagnostics.ReportGenericArgumentMissmatch(type, parameter.ToList, expression)
+                    Return False
+                End If
+            Else
+                If items.Any(Function(i) i.Generics IsNot Nothing) Then
+                    Me.Diagnostics.ReportTypeNotGeneric(type, expression)
+                    Return False
+                End If
+            End If
+            offset += 1
+            Return True
+        End Function
+
+        Private Shared Function _TryMakeGenericType(ByRef type As Type, parameter As Type()) As Boolean
+            Try
+                type = type.MakeGenericType(parameter)
+                Return True
+            Catch ex As Exception
+                Return False
+            End Try
         End Function
 
         Private Function _BindMemberAccessItemExpression(expression As MemberAccessItemNode, Optional source As BoundExpression = Nothing) As BoundExpression
@@ -399,6 +523,15 @@ Namespace Binding
                 Dim arguments As BoundExpression() = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(Of Integer)(arg.Argument)).ToArray
                 Dim elementType As Type = source.BoundType.GetElementType
                 Return New BoundArrayAccessExpression(expression.Access.Items(index), source, arguments, elementType)
+            ElseIf TypeResolver.IsAssignableToGenericType(source.BoundType, GetType(IEnumerable(Of))) AndAlso expression.Access.Items(index).Items.Count = 1 Then
+                Dim argument As BoundExpression = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(Of Integer)(arg.Argument)).First
+                Dim elementType As Type = GetType(Object)
+                If source.BoundType.Name.StartsWith("IEnumerable`1") Then
+                    elementType = source.BoundType.GetGenericArguments.First
+                ElseIf source.BoundType.GetInterface("IEnumerable`1") IsNot Nothing Then
+                    elementType = source.BoundType.GetInterface("IEnumerable`1").GetGenericArguments.First
+                End If
+                Return New BoundEnumerableItemAccessExpression(expression.Access.Items(index), source, argument, elementType)
             ElseIf GetType(MulticastDelegate).IsAssignableFrom(source.BoundType) Then
                 Dim members As MemberInfo() = source.BoundType.GetMembers(BindingFlags.Public And BindingFlags.Instance).Where(Function(m) m.Name = "Invoke")
                 Dim arguments As BoundExpression() = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray

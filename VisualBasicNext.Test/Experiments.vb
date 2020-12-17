@@ -3,9 +3,6 @@ Public Class Experiments
 
     <TestMethod>
     Public Sub Experiment()
-        Dim a As Func(Of Integer) = Function() 0
-        Dim t As Type = a.GetType
-        Dim b As Char() = "hello"
 
     End Sub
 

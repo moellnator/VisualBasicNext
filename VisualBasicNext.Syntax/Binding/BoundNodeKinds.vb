@@ -24,6 +24,7 @@
         BoundInstanceMethodInvokationExpression
         BoundInstanceFieldGetExpression
         BoundClassMethodInvokationExpression
+        BoundEnumerableItemAccessExpression
     End Enum
 
 End Namespace

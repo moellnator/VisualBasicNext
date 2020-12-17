@@ -55,11 +55,15 @@ Namespace Diagnostics
             Me.ReportMessage($"Undefined or inaccessible type <{typename.Span.ToString()}>", typename.Span)
         End Sub
 
-        Friend Sub ReportTypeNotGeneric(type As Type, syntax As TypeNameNode)
+        Friend Sub ReportUndefinedType(typename As String, span As Span)
+            Me.ReportMessage($"Undefined or inaccessible type <{typename}>", span)
+        End Sub
+
+        Friend Sub ReportTypeNotGeneric(type As Type, syntax As SyntaxNode)
             Me.ReportMessage($"Type <type.Name> is not a generic type", syntax.Span)
         End Sub
 
-        Friend Sub ReportGenericArgumentMissmatch(type As Type, generics As List(Of Type), syntax As TypeNameNode)
+        Friend Sub ReportGenericArgumentMissmatch(type As Type, generics As List(Of Type), syntax As SyntaxNode)
             Me.ReportMessage(
                 $"No matching generic type definition found of <{type.Name}> with generic arguments ({_GenericsToString(generics)})",
                 syntax.Span
@@ -136,6 +140,10 @@ Namespace Diagnostics
 
         Friend Sub ReportMemberTypeNotValid(memberType As MemberTypes, span As Span)
             Me.ReportMessage($"Member type '{memberType.ToString}' not valid in expression", span)
+        End Sub
+
+        Friend Sub ReportStaticMemberAccessExpected(expression As MemberAccessListNode)
+            Me.ReportMessage($"Static member access expected after type name.", expression.Span)
         End Sub
 
         Default Public ReadOnly Property Item(index As Integer) As ErrorObject Implements IReadOnlyList(Of ErrorObject).Item

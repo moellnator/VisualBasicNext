@@ -275,6 +275,19 @@ Namespace Binding
             End Try
         End Function
 
+        Public Shared Function TryResolveTypeByName(name As String, ByRef value As Type, Optional importsList? As ImmutableArray(Of String) = Nothing) As Boolean
+            value = Nothing
+            If _DeclaredTypes.ContainsKey(name.ToLower) Then
+                value = _DeclaredTypes.Item(name.ToLower)
+                Return True
+            End If
+            Dim import As String = importsList.Value.FirstOrDefault(Function(imp) _DeclaredTypes.ContainsKey((imp & "." & name).ToLower))
+            If import Is Nothing Then Return False
+            value = _DeclaredTypes.Item((import & "." & name).ToLower)
+            Return True
+        End Function
+
+
     End Class
 
 End Namespace
