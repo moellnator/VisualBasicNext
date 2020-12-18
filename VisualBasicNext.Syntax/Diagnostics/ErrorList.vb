@@ -127,7 +127,7 @@ Namespace Diagnostics
         End Sub
 
         Friend Sub ReportInvalidArguments(name As String, type As Type, span As Span)
-            Me.ReportMessage($"Not member '{name}' found in <{type.Name}> with given arguments", span)
+            Me.ReportMessage($"No member '{name}' found in <{type.Name}> with given arguments", span)
         End Sub
 
         Friend Sub ReportDoesNotProduceAValue(member As MemberInfo, span As Span)
@@ -144,6 +144,10 @@ Namespace Diagnostics
 
         Friend Sub ReportStaticMemberAccessExpected(expression As MemberAccessListNode)
             Me.ReportMessage($"Static member access expected after type name.", expression.Span)
+        End Sub
+
+        Friend Sub ReportTypeIsNotCollection(type As Type, span As Span)
+            Me.ReportMessage($"Type <{type.Name}> is not a collection type.", span)
         End Sub
 
         Default Public ReadOnly Property Item(index As Integer) As ErrorObject Implements IReadOnlyList(Of ErrorObject).Item

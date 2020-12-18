@@ -192,7 +192,7 @@ Namespace Binding
                 expression.Arguments.Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray,
                 Array.Empty(Of BoundExpression)
             )
-            If expression.ArrayNode IsNot Nothing Then
+            If expression.ArrayNode IsNot Nothing AndAlso expression.FromToken Is Nothing Then
                 'TODO [implementation] -> Array initialisation
                 Throw New NotImplementedException
             Else
@@ -205,11 +205,57 @@ Namespace Binding
                     Return New BoundErrorExpression(expression)
                 End If
                 If expression.FromToken IsNot Nothing Then
-                    'TODO [implementation] -> From list / dict initialization
-                    Throw New NotImplementedException
+                    Dim add_methods As New Dictionary(Of Integer, MethodInfo)
+                    Dim collection_init As New List(Of Tuple(Of MethodInfo, BoundExpression()))
+                    If Not GetType(IEnumerable).IsAssignableFrom(type) Then
+                        Me.Diagnostics.ReportTypeIsNotCollection(type, expression.FromToken.Span)
+                        Return New BoundErrorExpression(expression)
+                    End If
+                    Dim arrayArgs As BoundArrayExpression = Me._BindArrayExpression(expression.ArrayNode)
+                    For Each item As BoundExpression In arrayArgs.Items
+                        If TypeOf item Is BoundArrayExpression Then
+                            Dim inner As BoundArrayExpression = item
+                            If Not Me._TryConcatAddCall(
+                                add_methods,
+                                inner.Items.ToArray,
+                                type,
+                                item.Syntax,
+                                collection_init
+                            ) Then Return New BoundErrorExpression(item.Syntax)
+                        Else
+                            If Not Me._TryConcatAddCall(
+                                add_methods,
+                                {item},
+                                type,
+                                item.Syntax,
+                                collection_init
+                            ) Then Return New BoundErrorExpression(item.Syntax)
+                        End If
+                    Next
+                    Return New BoundCollectionConstructorExpression(expression, type, ctor, args, collection_init)
                 End If
                 Return New BoundConstructorExpression(expression, type, ctor, args)
             End If
+        End Function
+
+        Private Function _TryConcatAddCall(
+                                  ByRef methods As Dictionary(Of Integer, MethodInfo),
+                                  items As BoundExpression(),
+                                  type As Type,
+                                  syntax As SyntaxNode,
+                                  ByRef collection As List(Of Tuple(Of MethodInfo, BoundExpression()))) As Boolean
+            If Not methods.ContainsKey(items.Count) Then
+                Dim candidates As MethodInfo() = type.GetMethods(BindingFlags.Instance Or BindingFlags.Public)
+                candidates = candidates.Where(Function(m) m.Name.ToLower = "add" And m.GetParameters.Count = items.Count).ToArray
+                Dim method As MethodInfo = Me._FindMatchingMember(candidates, items)
+                If method Is Nothing Then
+                    Me.Diagnostics.ReportInvalidArguments("Add", type, syntax.Span)
+                    Return False
+                End If
+                methods.Add(items.Count, method)
+            End If
+            collection.Add(New Tuple(Of MethodInfo, BoundExpression())(methods(items.Count), items))
+            Return True
         End Function
 
         Private Function _BindExpression(Of T)(expression As ExpressionNode) As BoundExpression
@@ -555,15 +601,6 @@ Namespace Binding
                 Dim arguments As BoundExpression() = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(Of Integer)(arg.Argument)).ToArray
                 Dim elementType As Type = source.BoundType.GetElementType
                 Return New BoundArrayAccessExpression(expression.Access.Items(index), source, arguments, elementType)
-            ElseIf TypeResolver.IsAssignableToGenericType(source.BoundType, GetType(IEnumerable(Of))) AndAlso expression.Access.Items(index).Items.Count = 1 Then
-                Dim argument As BoundExpression = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(Of Integer)(arg.Argument)).First
-                Dim elementType As Type = GetType(Object)
-                If source.BoundType.Name.StartsWith("IEnumerable`1") Then
-                    elementType = source.BoundType.GetGenericArguments.First
-                ElseIf source.BoundType.GetInterface("IEnumerable`1") IsNot Nothing Then
-                    elementType = source.BoundType.GetInterface("IEnumerable`1").GetGenericArguments.First
-                End If
-                Return New BoundEnumerableItemAccessExpression(expression.Access.Items(index), source, argument, elementType)
             ElseIf GetType(MulticastDelegate).IsAssignableFrom(source.BoundType) Then
                 Dim members As MemberInfo() = source.BoundType.GetMembers(BindingFlags.Public And BindingFlags.Instance).Where(Function(m) m.Name = "Invoke")
                 Dim arguments As BoundExpression() = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(arg.Argument)).ToArray
@@ -587,6 +624,16 @@ Namespace Binding
                             Return New BoundInstanceMethodInvokationExpression(expression.Access.Items(index), source, member, arguments)
                     End Select
                 End If
+            End If
+            If TypeResolver.IsAssignableToGenericType(source.BoundType, GetType(IEnumerable(Of))) AndAlso expression.Access.Items(index).Items.Count = 1 Then
+                Dim argument As BoundExpression = expression.Access.Items(index).Items.Select(Function(arg) Me._BindExpression(Of Integer)(arg.Argument)).First
+                Dim elementType As Type = GetType(Object)
+                If source.BoundType.Name.StartsWith("IEnumerable`1") Then
+                    elementType = source.BoundType.GetGenericArguments.First
+                ElseIf source.BoundType.GetInterface("IEnumerable`1") IsNot Nothing Then
+                    elementType = source.BoundType.GetInterface("IEnumerable`1").GetGenericArguments.First
+                End If
+                Return New BoundEnumerableItemAccessExpression(expression.Access.Items(index), source, argument, elementType)
             End If
             Me.Diagnostics.ReportDoesNotAcceptArguments(expression.Access.Span)
             Return New BoundErrorExpression(expression)

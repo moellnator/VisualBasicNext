@@ -26,6 +26,7 @@
         BoundClassMethodInvokationExpression
         BoundEnumerableItemAccessExpression
         BoundConstructorExpression
+        BoundCollectionConstructorExpression
     End Enum
 
 End Namespace

@@ -1,4 +1,5 @@
-﻿Imports VisualBasicNext.CodeAnalysis.Binding
+﻿Imports System.Reflection
+Imports VisualBasicNext.CodeAnalysis.Binding
 Imports VisualBasicNext.CodeAnalysis.Diagnostics
 Imports VisualBasicNext.CodeAnalysis.Symbols
 
@@ -119,9 +120,29 @@ Namespace Evaluating
                     Return Me._EvaluateEnumerableItemAccessExpression(expression)
                 Case BoundNodeKind.BoundConstructorExpression
                     Return Me._EvaluateConstructorExpression(expression)
+                Case BoundNodeKind.BoundCollectionConstructorExpression
+                    Return Me._EvaluateCollectionConstructorNode(expression)
                 Case Else
                     Throw New Exception($"Unknown expression in evaluator: '{expression.Kind.ToString}'.")
             End Select
+        End Function
+
+        Private Function _EvaluateCollectionConstructorNode(expression As BoundCollectionConstructorExpression) As Object
+            Try
+                Dim args As Object() = expression.Arguments.Select(Function(arg) Me._EvaluateExpression(arg)).ToArray
+                Dim params As Type() = expression.Ctor.GetParameters.Select(Function(p) p.ParameterType).ToArray
+                For i As Integer = 0 To args.Count - 1
+                    args(i) = CTypeDynamic(args(i), params(i))
+                Next
+                Dim retval As Object = expression.Ctor.Invoke(args)
+                For Each init As Tuple(Of MethodInfo, BoundExpression()) In expression.Init
+                    args = init.Item2.Select(Function(arg) Me._EvaluateExpression(arg)).ToArray
+                    init.Item1.Invoke(retval, args)
+                Next
+                Return retval
+            Catch ex As Exception
+                Throw New EvaluationException(ex, expression.Syntax.Span)
+            End Try
         End Function
 
         Private Function _EvaluateConstructorExpression(expression As BoundConstructorExpression) As Object

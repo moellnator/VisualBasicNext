@@ -75,6 +75,7 @@
     <Compile Include="Binding\BoundClassFieldGetExpression.vb" />
     <Compile Include="Binding\BoundClassMethodInvokationExpression.vb" />
     <Compile Include="Binding\BoundClassPropertyGetExpression.vb" />
+    <Compile Include="Binding\BoundCollectionConstructorExpression.vb" />
     <Compile Include="Binding\BoundConstant.vb" />
     <Compile Include="Binding\BoundConstructorExpression.vb" />
     <Compile Include="Binding\BoundEnumerableItemAccessExpression.vb" />
